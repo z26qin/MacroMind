@@ -117,6 +117,30 @@
     .hm-cell.selected-col { outline: 2px solid var(--active); outline-offset: -2px; }
     .heatmap-legend { margin-top: 14px; max-width: 320px; }
 
+    main.regime-full { grid-template-columns: 1fr; }
+    #regime-view { min-height: calc(100vh - 125px); }
+    .regime-top { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; align-items: start; }
+    .regime-quadrant-wrap, .regime-card {
+      border: 1px solid var(--line); border-radius: 8px;
+      background: var(--panel); padding: 16px; box-shadow: var(--shadow);
+    }
+    #regime-quadrant-svg { width: 100%; height: 340px; display: block; }
+    .regime-card .rg-list { margin: 6px 0 4px; padding-left: 18px; font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .ca-table { border: 1px solid var(--line); border-radius: 7px; overflow: hidden; margin-top: 6px; }
+    .ca-row { display: flex; justify-content: space-between; padding: 5px 9px; font-size: 12px; border-bottom: 1px solid var(--line); }
+    .ca-row:last-child { border-bottom: none; }
+    #regime-table {
+      margin-top: 18px; border: 1px solid var(--line); border-radius: 8px;
+      background: var(--panel); padding: 16px; box-shadow: var(--shadow);
+    }
+    .rg-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+    .rg-table th, .rg-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+    .rg-table th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    .rg-table tbody tr { cursor: pointer; }
+    .rg-table tbody tr:hover { background: rgba(127,127,127,0.08); }
+    .rg-table tbody tr.selected-row { box-shadow: inset 0 0 0 1px var(--active); }
+    @media (max-width: 900px) { .regime-top { grid-template-columns: 1fr; } }
+
     button {
       min-height: 34px;
       padding: 0 12px;
@@ -400,6 +424,7 @@
       <div class="view-tabs" aria-label="View">
         <button class="active" data-tab="map">Map</button>
         <button data-tab="heatmap">Heatmap</button>
+        <button data-tab="regime">Regime</button>
       </div>
       <div class="toggles" id="asset-toggles" aria-label="Asset class">
         <button class="active" data-view="composite">Composite</button>
@@ -430,6 +455,17 @@
             <div class="legend-labels"><span>Bearish -1</span><span>No data</span><span>Bullish +1</span></div>
           </div>
         </div>
+      </div>
+      <div id="regime-view" hidden>
+        <div class="regime-top">
+          <div class="regime-quadrant-wrap">
+            <div class="section-title">Narrative-gap map</div>
+            <svg id="regime-quadrant-svg" aria-label="Narrative gap quadrant"></svg>
+            <div class="meta">Below the dashed line = hard data ahead of narrative (repricing opportunity).</div>
+          </div>
+          <aside id="regime-card" class="regime-card"></aside>
+        </div>
+        <div id="regime-table"></div>
       </div>
     </section>
     <aside id="panel">
@@ -484,6 +520,7 @@
       get selectedView() { return selectedView; },
       get selectedCountry() { return selectedCountry; },
       get selectedTab() { return selectedTab; },
+      get regimeCountry() { return regimeSelected; },
       get universe() { return snapshot.universe || []; },
       resolveEconomyName,
       signalVerdict
@@ -705,11 +742,107 @@
       selectedTab = tab;
       document.querySelector("#map-view").hidden = tab !== "map";
       document.querySelector("#heatmap-view").hidden = tab !== "heatmap";
+      document.querySelector("#regime-view").hidden = tab !== "regime";
       document.querySelector("#asset-toggles").hidden = tab !== "map";
+      document.querySelector("#panel").hidden = tab === "regime";
+      document.querySelector("main").classList.toggle("regime-full", tab === "regime");
       document.querySelectorAll("button[data-tab]").forEach(b =>
         b.classList.toggle("active", b.dataset.tab === tab));
       if (tab === "map") draw();
       if (tab === "heatmap") drawHeatmap();
+      if (tab === "regime") renderRegime();
+    }
+
+    let regimeData = null;
+    let regimeSelected = null;
+
+    function renderRegime() {
+      if (regimeData) { drawRegimeViews(); return; }
+      d3.json("/api/regime").then(data => {
+        regimeData = data;
+        regimeSelected = (data.regime_universe || [])[0] || null;
+        drawRegimeViews();
+      }).catch(error => {
+        document.querySelector("#regime-view").innerHTML =
+          `<div class="meta">Regime data failed to load: ${escapeHtml(String(error))}</div>`;
+      });
+    }
+
+    function drawRegimeViews() {
+      drawRegimeQuadrant();
+      renderRegimeTable();
+      renderRegimeCard(regimeSelected);
+    }
+
+    function drawRegimeQuadrant() {
+      // populated in Task 6
+    }
+
+    function highlightRegime() {
+      d3.selectAll("#regime-quadrant-svg g.rg-dot circle")
+        .attr("stroke-width", d => d.country === regimeSelected ? 2.5 : 0.5);
+      document.querySelectorAll("#regime-table tr[data-country]").forEach(tr => {
+        tr.classList.toggle("selected-row", tr.dataset.country === regimeSelected);
+      });
+    }
+
+    function renderRegimeCard(country) {
+      const c = regimeData && regimeData.countries[country];
+      const card = document.querySelector("#regime-card");
+      if (!c) { card.innerHTML = `<div class="meta">Select a country.</div>`; return; }
+      const rowsHtml = obj => Object.entries(obj).map(([k, v]) =>
+        `<div class="ca-row"><span>${escapeHtml(k.replace(/_/g, " "))}</span>`
+        + `<span style="color:${color(v)}">${fmt(v)}</span></div>`).join("");
+      const channels = rowsHtml(c.cross_asset_confirmation);
+      const buckets = rowsHtml(c.buckets);
+      const list = arr => arr.map(s => `<li>${escapeHtml(s)}</li>`).join("");
+      card.innerHTML = `
+        <div class="eyebrow">Regime card</div>
+        <div class="panel-title">${escapeHtml(c.country)} ${verdictBadgeHtml(c.regime_score)}</div>
+        <div class="meta">Verdict: <strong>${escapeHtml(c.verdict)}</strong></div>
+        <div class="metric-grid">
+          <div class="metric"><label>Regime</label><strong>${fmt(c.regime_score)}</strong></div>
+          <div class="metric"><label>Narrative gap</label><strong>${fmt(c.narrative_gap)}</strong></div>
+          <div class="metric"><label>Confirmation</label><strong>${fmt(c.confirmation_score)}</strong></div>
+        </div>
+        <div class="section-title">Structural buckets</div>
+        <div class="ca-table">${buckets}</div>
+        <div class="section-title">Drivers</div><ul class="rg-list">${list(c.drivers)}</ul>
+        <div class="section-title">Best expressions</div><ul class="rg-list">${list(c.best_expressions)}</ul>
+        <div class="section-title">Left-tail risks</div><ul class="rg-list">${list(c.left_tail_risks)}</ul>
+        <div class="section-title">Cross-asset confirmation</div>
+        <div class="ca-table">${channels}</div>
+      `;
+    }
+
+    function renderRegimeTable() {
+      const rows = regimeData.regime_universe
+        .map(c => regimeData.countries[c])
+        .slice()
+        .sort((a, b) => b.narrative_gap - a.narrative_gap);
+      const body = rows.map(c => `
+        <tr data-country="${escapeHtml(c.country)}">
+          <td>${escapeHtml(c.country)}</td>
+          <td style="color:${color(c.regime_score)}">${fmt(c.regime_score)}</td>
+          <td style="color:${color(c.narrative_gap)}">${fmt(c.narrative_gap)}</td>
+          <td style="color:${color(c.confirmation_score)}">${fmt(c.confirmation_score)}</td>
+          <td>${escapeHtml(c.verdict)}</td>
+        </tr>`).join("");
+      document.querySelector("#regime-table").innerHTML = `
+        <div class="section-title">Regime ranking (sorted by narrative gap)</div>
+        <table class="rg-table">
+          <thead><tr><th>Country</th><th>Regime</th><th>Narrative gap</th><th>Confirmation</th><th>Verdict</th></tr></thead>
+          <tbody>${body}</tbody>
+        </table>`;
+      document.querySelectorAll("#regime-table tr[data-country]").forEach(tr => {
+        tr.addEventListener("click", () => {
+          regimeSelected = tr.dataset.country;
+          renderRegimeCard(regimeSelected);
+          highlightRegime();
+          document.querySelector("#regime-card").scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+      highlightRegime();
     }
 
     function updateColors() {
