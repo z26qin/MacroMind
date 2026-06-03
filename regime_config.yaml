@@ -1,0 +1,11 @@
+regime_weights:
+  policy: 0.30
+  liquidity: 0.20
+  foreign_access: 0.20
+  rating_momentum: 0.20
+  index_catalyst: 0.10
+
+verdict:
+  deteriorating_max: -0.10
+  repricing_gap: 0.30
+  active_min: 0.10

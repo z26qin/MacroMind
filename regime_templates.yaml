@@ -1,0 +1,24 @@
+Argentina:
+  drivers: ["Fiscal adjustment continuing", "IMF support improving external funding", "FX framework less distorted", "Reserve accumulation still fragile"]
+  best_expressions: ["Long sovereign USD bonds", "Long local banks / ADR basket", "Long energy exporters (YPF)", "Avoid unhedged local FX"]
+  left_tail_risks: ["FX gap widens", "IMF review delay", "Election shock", "Reserve target miss", "Social unrest"]
+Greece:
+  drivers: ["Fiscal credibility restored", "Bank balance sheets normalized", "Index reclassification catalyst", "Sovereign spread compression"]
+  best_expressions: ["Long Greek bank equities", "Long GGB sovereign vs Bund", "Long Greece equity ETF", "RV: Greece vs periphery"]
+  left_tail_risks: ["EU growth slowdown", "Political slippage", "Banking-sector wobble", "Tourism shock"]
+Turkey:
+  drivers: ["Return to orthodox monetary policy", "Real rates turning positive", "Reserves rebuilding", "Disinflation starting"]
+  best_expressions: ["Long TRY carry (hedged)", "Long Turkish banks", "Receive TRY rates as inflation falls", "Long equity ETF"]
+  left_tail_risks: ["Policy U-turn", "FX reserve adequacy", "Inflation re-acceleration", "Geopolitical shock"]
+Japan:
+  drivers: ["BoJ policy normalization", "Sustained wage growth", "Corporate governance reform", "Yen undervaluation"]
+  best_expressions: ["Long Japan banks", "Long Nikkei (FX-hedged)", "Pay JGB rates", "Long value vs growth"]
+  left_tail_risks: ["Global risk-off / yen surge", "BoJ delays normalization", "Wage momentum fades", "China demand shock"]
+China:
+  drivers: ["Property-sector drag", "Soft domestic confidence", "Deflationary pressure", "Stimulus underwhelming"]
+  best_expressions: ["Underweight China equities", "Long defensive HK names", "Short CNH (hedged)", "Avoid property beta"]
+  left_tail_risks: ["Large-scale stimulus surprise", "Policy bazooka", "Export rebound", "Valuation snapback"]
+Brazil:
+  drivers: ["High real rates", "Disinflation underway", "Fiscal uncertainty lingering", "Commodity support"]
+  best_expressions: ["Receive BRL rates", "Long Brazilian equities", "Long BRL carry (hedged)", "Long commodity exporters"]
+  left_tail_risks: ["Fiscal slippage", "Inflation surprise", "Commodity downturn", "Political noise"]
