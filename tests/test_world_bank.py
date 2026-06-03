@@ -67,3 +67,38 @@ def test_latest_and_baseline_single_point_consensus_equals_actual():
 
 def test_latest_and_baseline_empty_returns_none():
     assert wb.latest_and_baseline([]) is None
+
+
+def test_load_world_bank_macro_assembles_values_and_provenance():
+    # One fake response per live column, keyed by indicator code in the URL.
+    responses = {
+        "FP.CPI.TOTL.ZG": _payload([
+            _obs("USA", 2024, 2.9), _obs("USA", 2023, 4.1),
+            # EMU CPI entirely null -> missing for Euro Area
+            _obs("EMU", 2024, None),
+        ]),
+        "NY.GDP.MKTP.KD.ZG": _payload([
+            _obs("USA", 2023, 2.88), _obs("USA", 2022, 1.9),
+        ]),
+        "SL.UEM.TOTL.ZS": _payload([
+            _obs("USA", 2025, 4.2), _obs("USA", 2024, 4.0),
+        ]),
+    }
+
+    def fake_fetch(url):
+        for code, payload in responses.items():
+            if code in url:
+                return payload
+        raise AssertionError(f"unexpected url {url}")
+
+    macro, consensus, provenance = wb.load_world_bank_macro(
+        ("United States of America", "Euro Area"),
+        2018, 2026, baseline_window=3, fetch_json=fake_fetch,
+    )
+
+    assert macro["United States of America"]["inflation_yoy"] == 2.9
+    assert provenance["United States of America"]["inflation_yoy"] == "world_bank:2024"
+    assert provenance["United States of America"]["unemployment"] == "world_bank:2025"
+    # Euro Area CPI was all-null -> no live value, no provenance entry
+    assert "inflation_yoy" not in macro["Euro Area"]
+    assert "inflation_yoy" not in provenance["Euro Area"]

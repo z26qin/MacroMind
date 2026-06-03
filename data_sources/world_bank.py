@@ -87,3 +87,33 @@ def latest_and_baseline(
     prior = [value for _, value in history[1 : 1 + baseline_window]]
     consensus = sum(prior) / len(prior) if prior else actual
     return actual, consensus, actual_year
+
+
+def load_world_bank_macro(
+    economies: tuple[str, ...],
+    start_year: int,
+    end_year: int,
+    baseline_window: int = 3,
+    fetch_json: Callable[[str], list] = _default_fetch_json,
+) -> tuple[dict[str, dict[str, float]], dict[str, dict[str, float]], dict[str, dict[str, str]]]:
+    """Return (macro, consensus, provenance) for the LIVE columns only.
+
+    Each dict is keyed by economy then column. Economies/columns with no
+    available observation are simply absent (the caller falls back to mock).
+    """
+    macro: dict[str, dict[str, float]] = {economy: {} for economy in economies}
+    consensus: dict[str, dict[str, float]] = {economy: {} for economy in economies}
+    provenance: dict[str, dict[str, str]] = {economy: {} for economy in economies}
+
+    for column in LIVE_COLUMNS:
+        series = fetch_indicator(column, start_year, end_year, fetch_json=fetch_json)
+        for economy in economies:
+            result = latest_and_baseline(series.get(economy, []), baseline_window)
+            if result is None:
+                continue
+            actual, baseline, year = result
+            macro[economy][column] = actual
+            consensus[economy][column] = baseline
+            provenance[economy][column] = f"world_bank:{year}"
+
+    return macro, consensus, provenance
