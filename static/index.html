@@ -571,7 +571,7 @@
         <div class="asset ${selectedView === asset ? "highlight" : ""}">
           <div class="asset-head">
             <span>${assetLabels[asset]}</span>
-            <span>${fmt(item.final)}</span>
+            <span>${verdictBadgeHtml(item.final)} ${fmt(item.final)}</span>
           </div>
           <div class="bar-track">
             <div class="bar-zero"></div>
@@ -592,14 +592,14 @@
         <div class="panel-title">${escapeHtml(countryName)}</div>
         <div class="meta">Economy: ${escapeHtml(entry.country)}<br>As of: ${escapeHtml(snapshot.as_of || "Unknown")} · Methodology: ${escapeHtml(snapshot.methodology_version || "Unknown")}</div>
         <div class="selected-signal">
-          ${viewLabel(selectedView)} signal
+          ${viewLabel(selectedView)} signal ${verdictBadgeHtml(selectedValue)}
           <strong>${fmt(selectedValue)}</strong>
         </div>
         <div class="section-title">Composite</div>
         <div class="metric-grid ${selectedView === "composite" ? "highlight" : ""}">
           <div class="metric"><label>Deterministic</label><strong>${fmt(entry.composite.deterministic)}</strong></div>
           <div class="metric"><label>RAG</label><strong>${fmt(entry.composite.rag)}</strong></div>
-          <div class="metric"><label>Final</label><strong>${fmt(entry.composite.final)}</strong></div>
+          <div class="metric"><label>Final</label><strong>${fmt(entry.composite.final)}</strong> ${verdictBadgeHtml(entry.composite.final)}</div>
         </div>
         <div class="meta">Deterministic is the quantitative rule-based signal. RAG is the qualitative narrative overlay. Final is the blended signal.</div>
         <div class="section-title">Asset classes</div>
@@ -630,7 +630,7 @@
           tooltip.style.opacity = 1;
           tooltip.style.left = `${event.clientX}px`;
           tooltip.style.top = `${event.clientY}px`;
-          tooltip.innerHTML = `<strong>${escapeHtml(name)}</strong><br>${economyName ? `Economy: ${escapeHtml(economyName)}<br>${viewLabel(selectedView)}: ${fmt(value)}` : "No data"}`;
+          tooltip.innerHTML = `<strong>${escapeHtml(name)}</strong><br>${economyName ? `Economy: ${escapeHtml(economyName)}<br>${viewLabel(selectedView)}: ${verdictBadgeHtml(value)} ${fmt(value)}` : "No data"}`;
         })
         .on("mouseleave", () => { tooltip.style.opacity = 0; })
         .on("click", (event, d) => {
