@@ -30,3 +30,23 @@ def test_load_regime_templates_covers_universe():
     tpl = re_eng.load_regime_templates()
     for country in EXPECTED_UNIVERSE:
         assert {"drivers", "best_expressions", "left_tail_risks"} <= set(tpl[country])
+
+
+def test_compute_regime_scores_argentina():
+    cfg = re_eng.load_regime_config()
+    df = re_eng.load_regime_inputs()
+    scores = re_eng.compute_regime_scores(df, cfg)
+    arg = scores["Argentina"]
+    assert arg["regime_score"] == pytest.approx(0.655, abs=1e-4)
+    assert arg["narrative_gap"] == pytest.approx(0.605, abs=1e-4)
+    assert arg["verdict"] == "Repricing"
+    assert set(arg["buckets"]) == set(re_eng.STRUCTURAL_BUCKETS)
+    assert set(arg["cross_asset_confirmation"]) == set(re_eng.CROSS_ASSET_CHANNELS)
+
+
+def test_compute_regime_scores_china_deteriorating():
+    cfg = re_eng.load_regime_config()
+    df = re_eng.load_regime_inputs()
+    scores = re_eng.compute_regime_scores(df, cfg)
+    assert scores["China"]["verdict"] == "Deteriorating"
+    assert -1.0 <= scores["China"]["confirmation_score"] <= 1.0

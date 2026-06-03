@@ -95,3 +95,24 @@ def load_regime_inputs(path: Path = REGIME_DATA_PATH) -> pd.DataFrame:
     if df[numeric_columns].isna().any().any():
         raise ValueError(f"{path} contains missing values in required columns")
     return df.set_index("country").loc[list(REGIME_UNIVERSE)]
+
+
+def compute_regime_scores(df: pd.DataFrame, config: dict) -> dict:
+    weights = config["regime_weights"]
+    thresholds = config["verdict"]
+    results: dict[str, dict] = {}
+    for country, row in df.iterrows():
+        regime_score = clip_unit(sum(float(weights[b]) * float(row[b]) for b in STRUCTURAL_BUCKETS))
+        narrative_score = float(row["narrative_score"])
+        narrative_gap = regime_score - narrative_score
+        confirmation = sum(float(row[c]) for c in CROSS_ASSET_CHANNELS) / len(CROSS_ASSET_CHANNELS)
+        results[country] = {
+            "regime_score": round(regime_score, 4),
+            "narrative_score": round(narrative_score, 4),
+            "narrative_gap": round(narrative_gap, 4),
+            "confirmation_score": round(confirmation, 4),
+            "verdict": regime_verdict(regime_score, narrative_gap, thresholds),
+            "buckets": {b: round(float(row[b]), 4) for b in STRUCTURAL_BUCKETS},
+            "cross_asset_confirmation": {c: round(float(row[c]), 4) for c in CROSS_ASSET_CHANNELS},
+        }
+    return results
