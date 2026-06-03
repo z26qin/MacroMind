@@ -307,7 +307,13 @@ def explain_contributions(row: pd.Series, weights: dict[str, float]) -> tuple[li
     return positive, negative
 
 
-def build_snapshot(df: pd.DataFrame, config: dict, as_of: str | None = None) -> dict:
+def build_snapshot(
+    df: pd.DataFrame,
+    config: dict,
+    provenance: dict[str, dict[str, str]],
+    source: str = "mock",
+    as_of: str | None = None,
+) -> dict:
     weights = config["weights"]
     blend = config["signal_blend"]
     deterministic_weight = float(blend["deterministic_weight"])
@@ -316,6 +322,7 @@ def build_snapshot(df: pd.DataFrame, config: dict, as_of: str | None = None) -> 
     snapshot = {
         "as_of": as_of or date.today().isoformat(),
         "methodology_version": METHODOLOGY_VERSION,
+        "data_source": source,
         "universe": list(UNIVERSE),
         "economies": {},
     }
@@ -324,6 +331,7 @@ def build_snapshot(df: pd.DataFrame, config: dict, as_of: str | None = None) -> 
         entry = {
             "country": country,
             "iso3": row["iso3"],
+            "provenance": provenance[country],
             "signals": {},
             "composite": {},
         }
@@ -366,13 +374,17 @@ def build_snapshot(df: pd.DataFrame, config: dict, as_of: str | None = None) -> 
     return snapshot
 
 
-def generate_snapshot(path: Path = SNAPSHOT_PATH, as_of: str | None = None) -> dict:
+def generate_snapshot(
+    path: Path = SNAPSHOT_PATH,
+    as_of: str | None = None,
+    source: str = "mock",
+) -> dict:
     config = load_signal_config()
-    df = load_mock_data()
+    df, provenance = load_macro_inputs(source=source)
     df = add_surprises(df)
     df = add_ranked_features(df, config["weights"])
     df = compute_deterministic_signals(df, config["weights"])
-    snapshot = build_snapshot(df, config, as_of=as_of)
+    snapshot = build_snapshot(df, config, provenance, source=source, as_of=as_of)
     path.write_text(json.dumps(snapshot, indent=2), encoding="utf-8")
     return snapshot
 

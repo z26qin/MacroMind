@@ -1,6 +1,7 @@
 {
   "as_of": "2026-06-02",
   "methodology_version": "v0.1",
+  "data_source": "mock",
   "universe": [
     "United States of America",
     "Canada",
@@ -13,6 +14,13 @@
     "United States of America": {
       "country": "United States of America",
       "iso3": "USA",
+      "provenance": {
+        "gdp_growth": "mock",
+        "inflation_yoy": "mock",
+        "pmi": "mock",
+        "policy_rate": "mock",
+        "unemployment": "mock"
+      },
       "signals": {
         "fx": {
           "deterministic": 0.2,
@@ -186,6 +194,13 @@
     "Canada": {
       "country": "Canada",
       "iso3": "CAN",
+      "provenance": {
+        "gdp_growth": "mock",
+        "inflation_yoy": "mock",
+        "pmi": "mock",
+        "policy_rate": "mock",
+        "unemployment": "mock"
+      },
       "signals": {
         "fx": {
           "deterministic": 0.6,
@@ -353,6 +368,13 @@
     "China": {
       "country": "China",
       "iso3": "CHN",
+      "provenance": {
+        "gdp_growth": "mock",
+        "inflation_yoy": "mock",
+        "pmi": "mock",
+        "policy_rate": "mock",
+        "unemployment": "mock"
+      },
       "signals": {
         "fx": {
           "deterministic": -0.2,
@@ -520,6 +542,13 @@
     "Japan": {
       "country": "Japan",
       "iso3": "JPN",
+      "provenance": {
+        "gdp_growth": "mock",
+        "inflation_yoy": "mock",
+        "pmi": "mock",
+        "policy_rate": "mock",
+        "unemployment": "mock"
+      },
       "signals": {
         "fx": {
           "deterministic": -1.0,
@@ -693,6 +722,13 @@
     "Brazil": {
       "country": "Brazil",
       "iso3": "BRA",
+      "provenance": {
+        "gdp_growth": "mock",
+        "inflation_yoy": "mock",
+        "pmi": "mock",
+        "policy_rate": "mock",
+        "unemployment": "mock"
+      },
       "signals": {
         "fx": {
           "deterministic": 1.0,
@@ -866,6 +902,13 @@
     "Euro Area": {
       "country": "Euro Area",
       "iso3": "EUR",
+      "provenance": {
+        "gdp_growth": "mock",
+        "inflation_yoy": "mock",
+        "pmi": "mock",
+        "policy_rate": "mock",
+        "unemployment": "mock"
+      },
       "signals": {
         "fx": {
           "deterministic": -0.6,

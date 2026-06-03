@@ -19,9 +19,16 @@ def snapshot(tmp_path):
 
 
 def test_snapshot_has_stable_top_level_schema(snapshot):
-    assert set(snapshot) == {"as_of", "methodology_version", "universe", "economies"}
+    assert set(snapshot) == {
+        "as_of",
+        "methodology_version",
+        "data_source",
+        "universe",
+        "economies",
+    }
     assert snapshot["as_of"] == "2026-06-02"
     assert snapshot["methodology_version"] == "v0.1"
+    assert snapshot["data_source"] == "mock"
 
 
 def test_snapshot_contains_exactly_six_expected_economies(snapshot):
@@ -114,3 +121,12 @@ def test_load_macro_inputs_live_overlays_world_bank_values():
     assert provenance["Japan"]["inflation_yoy"] == "mock"
     # Frame is still complete (no NaNs) so downstream validation holds
     assert not df.isna().any().any()
+
+
+def test_each_economy_reports_provenance(snapshot):
+    for economy in snapshot["economies"].values():
+        provenance = economy["provenance"]
+        assert provenance["inflation_yoy"] == "mock"
+        assert set(provenance) >= {
+            "inflation_yoy", "gdp_growth", "unemployment", "policy_rate", "pmi",
+        }
