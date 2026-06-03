@@ -6,6 +6,7 @@ A runnable prototype macro dashboard for cross-asset signals across a small, exp
 
 - `main.py`: FastAPI backend
 - `signal_engine.py`: loads mock CSV inputs, applies YAML-configured signal formulas, and writes `snapshot.json`
+- `data_sources/world_bank.py`: live macro data adapter (World Bank API, no key); used when generation runs with `--source live`
 - `rag_signal.py`: hardcoded qualitative narrative signal interface
 - `real_data_adapter.py`: placeholder for future production data adapters
 - `static/index.html`: vanilla HTML/JS dashboard using D3 and topojson
@@ -73,7 +74,8 @@ Clicking one of those countries shows both the map country and the synthetic Eur
 
 ```bash
 pip install -r requirements.txt
-python signal_engine.py
+python signal_engine.py            # mock data (deterministic, offline)
+python signal_engine.py --source live   # live World Bank macro data
 uvicorn main:app --reload
 ```
 
@@ -91,7 +93,8 @@ pytest
 
 ## Current Limitations
 
-- Mock data only
+- Macro inputs (inflation, GDP growth, unemployment) can be sourced live from the World Bank API; market, consensus, real estate, and PMI remain mock. Each value's origin is recorded in `snapshot.json` under `provenance`.
+- Consensus for live macro columns is a naive baseline (mean of recent prior years), not true analyst consensus
 - No external APIs
 - RAG is hardcoded/stubbed
 - Country mapping depends on world-atlas country names
@@ -100,8 +103,8 @@ pytest
 ## TODO
 
 - Add yfinance adapter
-- Add FRED / OECD / World Bank macro data
-- Add BIS real estate data
+- Extend live coverage to policy rate and PMI (needs keyed/proprietary sources)
+- Add live market data (yfinance) and real estate (BIS)
 - Add real consensus data
 - Add real RAG pipeline with retrieval and citations
 - Add historical time series snapshots
