@@ -7,6 +7,7 @@ A runnable prototype macro dashboard for cross-asset signals across a small, exp
 - `main.py`: FastAPI backend
 - `signal_engine.py`: loads mock CSV inputs, applies YAML-configured signal formulas, and writes `snapshot.json`
 - `data_sources/world_bank.py`: live macro data adapter (World Bank API, no key); used when generation runs with `--source live`
+- `regime_engine.py`: deterministic macro **regime-detection** engine (regime score, narrative gap, cross-asset confirmation, templated expressions/risks) for a separate six-economy set; writes `regime_snapshot.json`, served at `/api/regime` and shown in the dashboard's Regime tab
 - `rag_signal.py`: hardcoded qualitative narrative signal interface
 - `real_data_adapter.py`: placeholder for future production data adapters
 - `static/index.html`: vanilla HTML/JS dashboard using D3 and topojson
@@ -76,6 +77,7 @@ Clicking one of those countries shows both the map country and the synthetic Eur
 pip install -r requirements.txt
 python signal_engine.py            # mock data (deterministic, offline)
 python signal_engine.py --source live   # live World Bank macro data
+python regime_engine.py            # rebuild regime_snapshot.json (regenerates on demand too)
 uvicorn main:app --reload
 ```
 
