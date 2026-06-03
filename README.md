@@ -1,0 +1,115 @@
+# Cross-Asset Macro Dashboard
+
+A runnable prototype macro dashboard for cross-asset signals across a small, explicit economy universe. The app uses mock data only, with a transparent deterministic signal engine and a hardcoded RAG/narrative signal stub.
+
+## Architecture
+
+- `main.py`: FastAPI backend
+- `signal_engine.py`: loads mock CSV inputs, applies YAML-configured signal formulas, and writes `snapshot.json`
+- `rag_signal.py`: hardcoded qualitative narrative signal interface
+- `real_data_adapter.py`: placeholder for future production data adapters
+- `static/index.html`: vanilla HTML/JS dashboard using D3 and topojson
+- `snapshot.json`: stable backend-to-frontend interface
+
+No database, frontend framework, external data API, embedding call, or LLM call is used.
+
+## Signal Methodology
+
+The deterministic signal is a rule-based quantitative score from macro, market, and consensus-surprise inputs. Mock inputs live in:
+
+- `data/mock_macro.csv`
+- `data/mock_consensus.csv`
+- `data/mock_market.csv`
+
+Formula weights live in `signal_config.yaml`.
+
+The engine computes surprises such as inflation, growth, unemployment, policy, and PMI surprises. Inputs are ranked cross-sectionally across the six economies, mapped to `[-1, +1]`, and combined into raw asset-class scores. Raw scores are ranked again cross-sectionally and mapped to `[-1, +1]`.
+
+```text
+signal = 2 * percentile_rank - 1
+final_signal = 0.75 * deterministic_signal + 0.25 * rag_signal
+```
+
+The RAG signal is a qualitative narrative overlay returned by:
+
+```python
+compute_rag_signal(country, asset_class)
+```
+
+For now, it uses hardcoded scores and local mock snippets in `documents/`. Composite signals are equal-weight means of FX, rates, equity, and real estate.
+
+## Universe
+
+The six-economy signal universe is:
+
+- United States of America
+- Canada
+- China
+- Japan
+- Brazil
+- Euro Area
+
+The map is global, but only these six economies have signals. Non-covered countries are visible as neutral no-data gray.
+
+## Euro Area
+
+Euro Area is a synthetic economy in the signal engine with `iso3 = "EUR"`. It is visualized by applying the same Euro Area signal to selected eurozone countries:
+
+- Germany
+- France
+- Italy
+- Spain
+- Netherlands
+- Belgium
+- Austria
+- Portugal
+- Greece
+- Finland
+- Ireland
+
+Clicking one of those countries shows both the map country and the synthetic Euro Area economy.
+
+## Run
+
+```bash
+pip install -r requirements.txt
+python signal_engine.py
+uvicorn main:app --reload
+```
+
+If your shell exposes Python as `python3`, use `python3 signal_engine.py`.
+
+Open:
+
+[http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+## Test
+
+```bash
+pytest
+```
+
+## Current Limitations
+
+- Mock data only
+- No external APIs
+- RAG is hardcoded/stubbed
+- Country mapping depends on world-atlas country names
+- No historical time series snapshots yet
+
+## TODO
+
+- Add yfinance adapter
+- Add FRED / OECD / World Bank macro data
+- Add BIS real estate data
+- Add real consensus data
+- Add real RAG pipeline with retrieval and citations
+- Add historical time series snapshots
+
+## Future Data Sources
+
+- FRED / OECD / World Bank / IMF for macro data
+- Bloomberg / Refinitiv / yfinance for market data
+- Consensus Economics / analyst surveys / economic calendar APIs for consensus
+- BIS Residential Property Price Index for real estate
+- News API / central bank speeches / company filings / broker notes for RAG

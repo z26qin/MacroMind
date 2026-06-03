@@ -1,0 +1,30 @@
+weights:
+  fx:
+    growth_surprise_rank: 0.30
+    policy_surprise_rank: 0.25
+    fx_carry_rank: 0.20
+    fx_3m_return_rank: 0.20
+    unemployment_surprise_rank: -0.05
+
+  rates:
+    inflation_surprise_rank: -0.35
+    growth_surprise_rank: -0.25
+    policy_surprise_rank: -0.20
+    unemployment_surprise_rank: 0.20
+
+  equity:
+    growth_surprise_rank: 0.30
+    pmi_surprise_rank: 0.25
+    equity_3m_return_rank: 0.25
+    equity_forward_pe_rank: -0.20
+
+  real_estate:
+    rate_3m_change_rank: -0.30
+    policy_surprise_rank: -0.25
+    reit_3m_return_rank: 0.20
+    house_price_yoy_rank: 0.15
+    unemployment_surprise_rank: -0.10
+
+signal_blend:
+  deterministic_weight: 0.75
+  rag_weight: 0.25

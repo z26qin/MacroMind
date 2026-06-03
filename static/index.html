@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cross-Asset Macro Dashboard</title>
+  <style>
+    :root {
+      --bg: #f7f8f5;
+      --panel: #ffffff;
+      --text: #20231f;
+      --muted: #6c746a;
+      --line: #d8ddd3;
+      --nodata: #d1d5d0;
+      --water: #e9efe7;
+      --active: #20231f;
+      --active-text: #ffffff;
+      --shadow: 0 18px 45px rgba(32, 35, 31, 0.12);
+      --positive: #3d8b5a;
+      --negative: #b94b4b;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111411;
+        --panel: #1a1f1a;
+        --text: #eef2ec;
+        --muted: #a5afa1;
+        --line: #30382f;
+        --nodata: #3f453d;
+        --water: #151a16;
+        --active: #eef2ec;
+        --active-text: #111411;
+        --shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
+        --positive: #62b47c;
+        --negative: #d36b6b;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 22px 28px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 720;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toggles {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    button {
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--panel);
+      color: var(--text);
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+    }
+
+    button.active {
+      background: var(--active);
+      color: var(--active-text);
+      border-color: var(--active);
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 390px;
+      gap: 18px;
+      padding: 18px 28px 28px;
+    }
+
+    .map-wrap {
+      min-height: calc(100vh - 125px);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--water);
+      overflow: hidden;
+      position: relative;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: calc(100vh - 125px);
+    }
+
+    .country {
+      stroke: var(--bg);
+      stroke-width: 0.45;
+      cursor: pointer;
+      transition: opacity 130ms ease;
+    }
+
+    .country:hover { opacity: 0.82; }
+    .country.selected { stroke: var(--text); stroke-width: 1.25; }
+
+    aside {
+      min-height: calc(100vh - 125px);
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .panel-title {
+      margin: 6px 0 4px;
+      font-size: 22px;
+      font-weight: 720;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .selected-signal {
+      margin: 14px 0 12px;
+      padding: 11px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      font-size: 13px;
+    }
+
+    .selected-signal strong {
+      float: right;
+      font-size: 18px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin: 12px 0 14px;
+    }
+
+    .metric {
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+    }
+
+    .metric label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .metric strong { font-size: 18px; }
+
+    .section-title {
+      margin: 16px 0 8px;
+      font-size: 13px;
+      font-weight: 720;
+    }
+
+    .highlight {
+      border-color: var(--active);
+      box-shadow: inset 0 0 0 1px var(--active);
+    }
+
+    .asset {
+      padding: 13px 10px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      margin-top: 10px;
+    }
+
+    .asset-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 680;
+    }
+
+    .bar-track {
+      height: 10px;
+      margin: 9px 0;
+      border-radius: 999px;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+    }
+
+    .bar-zero {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: var(--line);
+    }
+
+    .bar {
+      position: absolute;
+      top: 1px;
+      bottom: 1px;
+      border-radius: 999px;
+    }
+
+    .asset p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .driver-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .driver-list {
+      min-width: 0;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .driver-list strong {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--text);
+      font-size: 11px;
+    }
+
+    .driver-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .driver-item span:first-child {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .tooltip {
+      pointer-events: none;
+      position: fixed;
+      z-index: 10;
+      max-width: 260px;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--panel);
+      color: var(--text);
+      box-shadow: var(--shadow);
+      font-size: 12px;
+      line-height: 1.35;
+      opacity: 0;
+      transform: translate(10px, 10px);
+    }
+
+    .legend {
+      position: absolute;
+      left: 16px;
+      bottom: 16px;
+      width: min(280px, calc(100% - 32px));
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: color-mix(in srgb, var(--panel) 88%, transparent);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .legend-scale {
+      height: 10px;
+      margin-bottom: 6px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #b94b4b, #e6e5da, #3d8b5a);
+      border: 1px solid var(--line);
+    }
+
+    .legend-labels {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    @media (max-width: 900px) {
+      header { align-items: start; flex-direction: column; }
+      .toggles { justify-content: flex-start; }
+      main { grid-template-columns: 1fr; padding: 14px; }
+      .map-wrap, aside, svg { min-height: 520px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Cross-Asset Macro Dashboard</h1>
+      <div class="subtitle">Mock signals blend transparent ranked macro rules with a placeholder narrative interface.</div>
+    </div>
+    <div class="toggles" aria-label="Asset class">
+      <button class="active" data-view="composite">Composite</button>
+      <button data-view="fx">FX</button>
+      <button data-view="rates">Rates</button>
+      <button data-view="equity">Equity</button>
+      <button data-view="real_estate">Real estate</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="map-wrap">
+      <svg id="map" aria-label="World macro signal map"></svg>
+      <div class="legend">
+        <div class="legend-scale"></div>
+        <div class="legend-labels"><span>Bearish -1</span><span>No data</span><span>Bullish +1</span></div>
+      </div>
+    </section>
+    <aside id="panel">
+      <div class="eyebrow">Selected economy</div>
+      <div class="panel-title">Click a covered country</div>
+      <div class="meta">United States of America, Canada, China, Japan, Brazil, and selected Euro Area countries carry mock signals. Other countries are neutral no-data.</div>
+    </aside>
+  </main>
+
+  <div id="tooltip" class="tooltip"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+  <script>
+    const EURO_AREA_COUNTRIES = new Set([
+      "Germany",
+      "France",
+      "Italy",
+      "Spain",
+      "Netherlands",
+      "Belgium",
+      "Austria",
+      "Portugal",
+      "Greece",
+      "Finland",
+      "Ireland"
+    ]);
+
+    const assetLabels = {
+      fx: "FX",
+      rates: "Rates",
+      equity: "Equity",
+      real_estate: "Real estate"
+    };
+
+    let selectedView = "composite";
+    let selectedCountry = null;
+    let countries = [];
+    let snapshot = { economies: {} };
+    let economies = {};
+
+    const svg = d3.select("#map");
+    const panel = document.querySelector("#panel");
+    const tooltip = document.querySelector("#tooltip");
+    const color = d3.scaleLinear()
+      .domain([-1, 0, 1])
+      .range(["#b94b4b", "#e6e5da", "#3d8b5a"])
+      .clamp(true);
+
+    window.macroDashboardDebug = {
+      get selectedView() { return selectedView; },
+      get selectedCountry() { return selectedCountry; },
+      get universe() { return snapshot.universe || []; },
+      resolveEconomyName
+    };
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function resolveEconomyName(mapCountryName) {
+      if (EURO_AREA_COUNTRIES.has(mapCountryName)) return economies["Euro Area"] ? "Euro Area" : null;
+      return Object.prototype.hasOwnProperty.call(economies, mapCountryName) ? mapCountryName : null;
+    }
+
+    function signalValue(entry, view) {
+      if (!entry) return null;
+      return view === "composite" ? entry.composite.final : entry.signals[view].final;
+    }
+
+    function fmt(value) {
+      return value == null ? "No data" : d3.format("+.2f")(value);
+    }
+
+    function viewLabel(view) {
+      return view === "composite" ? "Composite" : assetLabels[view];
+    }
+
+    function barStyle(value) {
+      const pct = Math.abs(value) * 50;
+      const left = value >= 0 ? 50 : 50 - pct;
+      return `left:${left}%;width:${pct}%;background:${color(value)};`;
+    }
+
+    function renderDriverList(title, drivers) {
+      const rows = drivers.length
+        ? drivers.map(item => `
+          <div class="driver-item">
+            <span>${escapeHtml(item.feature)}</span>
+            <span>${fmt(item.contribution)}</span>
+          </div>
+        `).join("")
+        : `<div class="driver-item"><span>None</span><span>${fmt(0)}</span></div>`;
+
+      return `
+        <div class="driver-list">
+          <strong>${title}</strong>
+          ${rows}
+        </div>
+      `;
+    }
+
+    function renderPanel(countryName) {
+      const economyName = resolveEconomyName(countryName);
+      const entry = economyName ? economies[economyName] : null;
+
+      if (!entry) {
+        panel.innerHTML = `
+          <div class="eyebrow">Map country</div>
+          <div class="panel-title">${escapeHtml(countryName)}</div>
+          <div class="meta">No signal available.</div>
+        `;
+        return;
+      }
+
+      const selectedValue = signalValue(entry, selectedView);
+      const assets = Object.entries(entry.signals).map(([asset, item]) => `
+        <div class="asset ${selectedView === asset ? "highlight" : ""}">
+          <div class="asset-head">
+            <span>${assetLabels[asset]}</span>
+            <span>${fmt(item.final)}</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-zero"></div>
+            <div class="bar" style="${barStyle(item.final)}"></div>
+          </div>
+          <p>Final ${fmt(item.final)} · deterministic ${fmt(item.deterministic)} · RAG ${fmt(item.rag)}</p>
+          <p>${escapeHtml(item.driver)}</p>
+          <p>${escapeHtml(item.rag_summary)}</p>
+          <div class="driver-grid">
+            ${renderDriverList("Top positive", item.top_positive_drivers || [])}
+            ${renderDriverList("Top negative", item.top_negative_drivers || [])}
+          </div>
+        </div>
+      `).join("");
+
+      panel.innerHTML = `
+        <div class="eyebrow">Map country</div>
+        <div class="panel-title">${escapeHtml(countryName)}</div>
+        <div class="meta">Economy: ${escapeHtml(entry.country)}<br>As of: ${escapeHtml(snapshot.as_of || "Unknown")} · Methodology: ${escapeHtml(snapshot.methodology_version || "Unknown")}</div>
+        <div class="selected-signal">
+          ${viewLabel(selectedView)} signal
+          <strong>${fmt(selectedValue)}</strong>
+        </div>
+        <div class="section-title">Composite</div>
+        <div class="metric-grid ${selectedView === "composite" ? "highlight" : ""}">
+          <div class="metric"><label>Deterministic</label><strong>${fmt(entry.composite.deterministic)}</strong></div>
+          <div class="metric"><label>RAG</label><strong>${fmt(entry.composite.rag)}</strong></div>
+          <div class="metric"><label>Final</label><strong>${fmt(entry.composite.final)}</strong></div>
+        </div>
+        <div class="meta">Deterministic is the quantitative rule-based signal. RAG is the qualitative narrative overlay. Final is the blended signal.</div>
+        <div class="section-title">Asset classes</div>
+        ${assets}
+      `;
+    }
+
+    function draw() {
+      const node = svg.node();
+      const width = node.clientWidth;
+      const height = node.clientHeight;
+      svg.attr("viewBox", [0, 0, width, height]);
+
+      const projection = d3.geoNaturalEarth1().fitSize([width, height], { type: "FeatureCollection", features: countries });
+      const path = d3.geoPath(projection);
+
+      const selection = svg.selectAll("path.country")
+        .data(countries, d => d.properties.name);
+
+      selection.enter()
+        .append("path")
+        .attr("class", "country")
+        .on("mousemove", (event, d) => {
+          const name = d.properties.name;
+          const economyName = resolveEconomyName(name);
+          const entry = economyName ? economies[economyName] : null;
+          const value = signalValue(entry, selectedView);
+          tooltip.style.opacity = 1;
+          tooltip.style.left = `${event.clientX}px`;
+          tooltip.style.top = `${event.clientY}px`;
+          tooltip.innerHTML = `<strong>${escapeHtml(name)}</strong><br>${economyName ? `Economy: ${escapeHtml(economyName)}<br>${viewLabel(selectedView)}: ${fmt(value)}` : "No data"}`;
+        })
+        .on("mouseleave", () => { tooltip.style.opacity = 0; })
+        .on("click", (event, d) => {
+          selectedCountry = d.properties.name;
+          renderPanel(selectedCountry);
+          updateColors();
+        })
+        .merge(selection)
+        .attr("data-country", d => d.properties.name)
+        .attr("data-economy", d => resolveEconomyName(d.properties.name) || "")
+        .attr("data-covered", d => resolveEconomyName(d.properties.name) ? "true" : "false")
+        .attr("d", path);
+
+      selection.exit().remove();
+      updateColors();
+    }
+
+    function updateColors() {
+      const noData = getComputedStyle(document.documentElement).getPropertyValue("--nodata");
+      svg.selectAll("path.country")
+        .attr("fill", d => {
+          const economyName = resolveEconomyName(d.properties.name);
+          const entry = economyName ? economies[economyName] : null;
+          const value = signalValue(entry, selectedView);
+          return value == null ? noData : color(value);
+        })
+        .attr("data-signal", d => {
+          const economyName = resolveEconomyName(d.properties.name);
+          const entry = economyName ? economies[economyName] : null;
+          const value = signalValue(entry, selectedView);
+          return value == null ? "" : String(value);
+        })
+        .classed("selected", d => d.properties.name === selectedCountry);
+    }
+
+    document.querySelectorAll("button[data-view]").forEach(button => {
+      button.addEventListener("click", () => {
+        selectedView = button.dataset.view;
+        document.querySelectorAll("button[data-view]").forEach(item => item.classList.toggle("active", item === button));
+        updateColors();
+        if (selectedCountry) renderPanel(selectedCountry);
+      });
+    });
+
+    Promise.all([
+      d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"),
+      d3.json("/api/signals")
+    ]).then(([world, signalData]) => {
+      snapshot = signalData;
+      economies = snapshot.economies || {};
+      countries = topojson.feature(world, world.objects.countries).features;
+      draw();
+      window.addEventListener("resize", draw);
+    }).catch(error => {
+      panel.innerHTML = `<div class="eyebrow">Load error</div><div class="panel-title">Dashboard failed to load</div><div class="meta">${escapeHtml(error)}</div>`;
+    });
+  </script>
+</body>
+</html>
