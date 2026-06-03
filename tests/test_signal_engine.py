@@ -130,3 +130,8 @@ def test_each_economy_reports_provenance(snapshot):
         assert set(provenance) >= {
             "inflation_yoy", "gdp_growth", "unemployment", "policy_rate", "pmi",
         }
+
+
+def test_generate_snapshot_records_requested_source(tmp_path):
+    snap = generate_snapshot(tmp_path / "s.json", as_of="2026-06-02", source="mock")
+    assert snap["data_source"] == "mock"

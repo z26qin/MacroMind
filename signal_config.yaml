@@ -28,3 +28,9 @@ weights:
 signal_blend:
   deterministic_weight: 0.75
   rag_weight: 0.25
+
+data_source:
+  # "mock" uses bundled CSVs (deterministic, offline). "live" overlays
+  # World Bank macro data (inflation, GDP growth, unemployment) where available.
+  default_mode: mock
+  history_years: 8

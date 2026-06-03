@@ -390,5 +390,15 @@ def generate_snapshot(
 
 
 if __name__ == "__main__":
-    generate_snapshot()
-    print(f"Wrote {SNAPSHOT_PATH}")
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Generate the macro signal snapshot.")
+    parser.add_argument(
+        "--source",
+        choices=("mock", "live"),
+        default="mock",
+        help="Data source: 'mock' (bundled CSVs) or 'live' (World Bank API).",
+    )
+    args = parser.parse_args()
+    generate_snapshot(source=args.source)
+    print(f"Wrote {SNAPSHOT_PATH} (source={args.source})")
