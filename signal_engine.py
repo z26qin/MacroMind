@@ -19,12 +19,14 @@ import pandas as pd
 import yaml
 
 from rag_signal import compute_rag_signal
+from data_sources import world_bank as wb
 
 
 SNAPSHOT_PATH = Path("snapshot.json")
 CONFIG_PATH = Path("signal_config.yaml")
 DATA_DIR = Path("data")
 METHODOLOGY_VERSION = "v0.1"
+LIVE_HISTORY_YEARS = 8
 
 ASSET_CLASSES = ("fx", "rates", "equity", "real_estate")
 UNIVERSE = (
@@ -164,6 +166,55 @@ def load_mock_data(data_dir: Path = DATA_DIR) -> pd.DataFrame:
 
     df["iso3"] = [ISO3_BY_ECONOMY[economy] for economy in df.index]
     return df
+
+
+def load_macro_inputs(
+    source: str = "mock",
+    data_dir: Path = DATA_DIR,
+    fetch_json=None,
+) -> tuple[pd.DataFrame, dict[str, dict[str, str]]]:
+    """Return (joined input frame, provenance).
+
+    source="mock": the existing mock CSVs, every value tagged "mock".
+    source="live": overlay World Bank values onto the mock frame for the
+    live macro columns where available; everything else stays mock.
+    """
+    df = load_mock_data(data_dir)
+
+    tracked_columns = sorted(REQUIRED_MACRO_COLUMNS - {"economy"})
+    provenance = {
+        economy: {column: "mock" for column in tracked_columns}
+        for economy in df.index
+    }
+
+    if source == "mock":
+        return df, provenance
+    if source != "live":
+        raise ValueError(f"Unknown data source: {source!r} (expected 'mock' or 'live')")
+
+    from datetime import date
+
+    end_year = date.today().year
+    start_year = end_year - LIVE_HISTORY_YEARS
+    kwargs = {} if fetch_json is None else {"fetch_json": fetch_json}
+    macro, consensus, live_provenance = wb.load_world_bank_macro(
+        tuple(df.index), start_year, end_year, **kwargs
+    )
+
+    consensus_column = {
+        "inflation_yoy": "inflation_consensus",
+        "gdp_growth": "gdp_consensus",
+        "unemployment": "unemployment_consensus",
+    }
+    for economy in df.index:
+        for column, value in macro[economy].items():
+            df.loc[economy, column] = value
+            df.loc[economy, consensus_column[column]] = consensus[economy][column]
+            provenance[economy][column] = live_provenance[economy][column]
+
+    if df.isna().any().any():
+        raise ValueError("Macro inputs contain missing values after live overlay")
+    return df, provenance
 
 
 def add_surprises(df: pd.DataFrame) -> pd.DataFrame:

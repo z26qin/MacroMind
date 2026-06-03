@@ -76,3 +76,41 @@ def test_euro_area_is_synthetic_economy(snapshot):
     euro_area = snapshot["economies"]["Euro Area"]
     assert euro_area["country"] == "Euro Area"
     assert euro_area["iso3"] == "EUR"
+
+
+from data_sources import world_bank as wb
+import signal_engine as se
+
+
+def test_load_macro_inputs_mock_marks_all_provenance_mock():
+    df, provenance = se.load_macro_inputs(source="mock")
+    assert len(df) == 6
+    for economy in EXPECTED_UNIVERSE:
+        assert provenance[economy]["inflation_yoy"] == "mock"
+        assert provenance[economy]["policy_rate"] == "mock"
+
+
+def test_load_macro_inputs_live_overlays_world_bank_values():
+    def fake_fetch(url):
+        # Return one USA observation for whichever indicator is requested.
+        for code in wb.WB_INDICATOR_BY_COLUMN.values():
+            if code in url:
+                return [
+                    {"page": 1, "pages": 1, "per_page": 20000, "total": 2},
+                    [
+                        {"countryiso3code": "USA", "date": "2024", "value": 9.99},
+                        {"countryiso3code": "USA", "date": "2023", "value": 1.11},
+                    ],
+                ]
+        raise AssertionError(url)
+
+    df, provenance = se.load_macro_inputs(source="live", fetch_json=fake_fetch)
+    # USA live columns overlaid with the fake actual (9.99)
+    assert df.loc["United States of America", "inflation_yoy"] == 9.99
+    assert provenance["United States of America"]["inflation_yoy"] == "world_bank:2024"
+    # Non-live columns stay mock
+    assert provenance["United States of America"]["pmi"] == "mock"
+    # Economy with no live rows (e.g. Japan) falls back to mock for everything
+    assert provenance["Japan"]["inflation_yoy"] == "mock"
+    # Frame is still complete (no NaNs) so downstream validation holds
+    assert not df.isna().any().any()
