@@ -76,6 +76,47 @@
       gap: 8px;
     }
 
+    .view-tabs { display: flex; gap: 8px; }
+    .header-right { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+    [hidden] { display: none !important; }
+
+    .heatmap-wrap {
+      min-height: calc(100vh - 125px);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      overflow-x: auto;
+    }
+    .heatmap {
+      display: grid;
+      gap: 5px;
+      min-width: 540px;
+    }
+    .hm-cell {
+      padding: 11px 6px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      white-space: nowrap;
+      cursor: pointer;
+      font-variant-numeric: tabular-nums;
+    }
+    .hm-corner { background: transparent; }
+    .hm-colhead {
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; opacity: 0.7;
+    }
+    .hm-rowhead {
+      display: flex; align-items: center;
+      font-size: 12px; font-weight: 700; opacity: 0.85;
+    }
+    .hm-cell.selected-col { outline: 2px solid var(--active); outline-offset: -2px; }
+    .heatmap-legend { margin-top: 14px; max-width: 320px; }
+
     button {
       min-height: 34px;
       padding: 0 12px;
@@ -355,21 +396,40 @@
       <h1>Cross-Asset Macro Dashboard</h1>
       <div class="subtitle">Mock signals blend transparent ranked macro rules with a placeholder narrative interface.</div>
     </div>
-    <div class="toggles" aria-label="Asset class">
-      <button class="active" data-view="composite">Composite</button>
-      <button data-view="fx">FX</button>
-      <button data-view="rates">Rates</button>
-      <button data-view="equity">Equity</button>
-      <button data-view="real_estate">Real estate</button>
+    <div class="header-right">
+      <div class="view-tabs" aria-label="View">
+        <button class="active" data-tab="map">Map</button>
+        <button data-tab="heatmap">Heatmap</button>
+      </div>
+      <div class="toggles" id="asset-toggles" aria-label="Asset class">
+        <button class="active" data-view="composite">Composite</button>
+        <button data-view="fx">FX</button>
+        <button data-view="rates">Rates</button>
+        <button data-view="equity">Equity</button>
+        <button data-view="real_estate">Real estate</button>
+      </div>
     </div>
   </header>
 
   <main>
-    <section class="map-wrap">
-      <svg id="map" aria-label="World macro signal map"></svg>
-      <div class="legend">
-        <div class="legend-scale"></div>
-        <div class="legend-labels"><span>Bearish -1</span><span>No data</span><span>Bullish +1</span></div>
+    <section>
+      <div id="map-view">
+        <div class="map-wrap">
+          <svg id="map" aria-label="World macro signal map"></svg>
+          <div class="legend">
+            <div class="legend-scale"></div>
+            <div class="legend-labels"><span>Bearish -1</span><span>No data</span><span>Bullish +1</span></div>
+          </div>
+        </div>
+      </div>
+      <div id="heatmap-view" hidden>
+        <div class="heatmap-wrap">
+          <div id="heatmap" class="heatmap"></div>
+          <div class="legend heatmap-legend">
+            <div class="legend-scale"></div>
+            <div class="legend-labels"><span>Bearish -1</span><span>No data</span><span>Bullish +1</span></div>
+          </div>
+        </div>
       </div>
     </section>
     <aside id="panel">
@@ -406,6 +466,7 @@
     };
 
     let selectedView = "composite";
+    let selectedTab = "map";
     let selectedCountry = null;
     let countries = [];
     let snapshot = { economies: {} };
@@ -422,6 +483,7 @@
     window.macroDashboardDebug = {
       get selectedView() { return selectedView; },
       get selectedCountry() { return selectedCountry; },
+      get selectedTab() { return selectedTab; },
       get universe() { return snapshot.universe || []; },
       resolveEconomyName,
       signalVerdict
@@ -586,6 +648,21 @@
       updateColors();
     }
 
+    function drawHeatmap() {
+      // populated in Task 3
+    }
+
+    function setTab(tab) {
+      selectedTab = tab;
+      document.querySelector("#map-view").hidden = tab !== "map";
+      document.querySelector("#heatmap-view").hidden = tab !== "heatmap";
+      document.querySelector("#asset-toggles").hidden = tab !== "map";
+      document.querySelectorAll("button[data-tab]").forEach(b =>
+        b.classList.toggle("active", b.dataset.tab === tab));
+      if (tab === "map") draw();
+      if (tab === "heatmap") drawHeatmap();
+    }
+
     function updateColors() {
       const noData = getComputedStyle(document.documentElement).getPropertyValue("--nodata");
       svg.selectAll("path.country")
@@ -611,6 +688,10 @@
         updateColors();
         if (selectedCountry) renderPanel(selectedCountry);
       });
+    });
+
+    document.querySelectorAll("button[data-tab]").forEach(button => {
+      button.addEventListener("click", () => setTab(button.dataset.tab));
     });
 
     Promise.all([
