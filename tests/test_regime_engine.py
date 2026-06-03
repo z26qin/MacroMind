@@ -50,3 +50,30 @@ def test_compute_regime_scores_china_deteriorating():
     scores = re_eng.compute_regime_scores(df, cfg)
     assert scores["China"]["verdict"] == "Deteriorating"
     assert -1.0 <= scores["China"]["confirmation_score"] <= 1.0
+
+
+@pytest.fixture()
+def snapshot(tmp_path):
+    return re_eng.generate_regime_snapshot(tmp_path / "regime_snapshot.json", as_of="2026-06-03")
+
+
+def test_top_level_schema(snapshot):
+    assert set(snapshot) == {"as_of", "methodology_version", "regime_universe", "countries"}
+    assert snapshot["regime_universe"] == EXPECTED_UNIVERSE
+    assert list(snapshot["countries"]) == EXPECTED_UNIVERSE
+
+
+def test_narrative_gap_identity(snapshot):
+    for c in snapshot["countries"].values():
+        assert c["narrative_gap"] == pytest.approx(c["regime_score"] - c["narrative_score"], abs=1e-4)
+
+
+def test_templates_attached(snapshot):
+    for c in snapshot["countries"].values():
+        assert c["drivers"] and c["best_expressions"] and c["left_tail_risks"]
+
+
+def test_deterministic(tmp_path):
+    a = re_eng.generate_regime_snapshot(tmp_path / "a.json", as_of="2026-06-03")
+    b = re_eng.generate_regime_snapshot(tmp_path / "b.json", as_of="2026-06-03")
+    assert a == b

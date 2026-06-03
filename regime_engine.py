@@ -116,3 +116,35 @@ def compute_regime_scores(df: pd.DataFrame, config: dict) -> dict:
             "cross_asset_confirmation": {c: round(float(row[c]), 4) for c in CROSS_ASSET_CHANNELS},
         }
     return results
+
+
+def build_regime_snapshot(df: pd.DataFrame, config: dict, templates: dict, as_of: str | None = None) -> dict:
+    scores = compute_regime_scores(df, config)
+    countries: dict[str, dict] = {}
+    for country in df.index:
+        entry = {"country": country, **scores[country]}
+        tpl = templates[country]
+        entry["drivers"] = list(tpl["drivers"])
+        entry["best_expressions"] = list(tpl["best_expressions"])
+        entry["left_tail_risks"] = list(tpl["left_tail_risks"])
+        countries[country] = entry
+    return {
+        "as_of": as_of or date.today().isoformat(),
+        "methodology_version": METHODOLOGY_VERSION,
+        "regime_universe": list(REGIME_UNIVERSE),
+        "countries": countries,
+    }
+
+
+def generate_regime_snapshot(path: Path = REGIME_SNAPSHOT_PATH, as_of: str | None = None) -> dict:
+    config = load_regime_config()
+    templates = load_regime_templates()
+    df = load_regime_inputs()
+    snapshot = build_regime_snapshot(df, config, templates, as_of=as_of)
+    path.write_text(json.dumps(snapshot, indent=2), encoding="utf-8")
+    return snapshot
+
+
+if __name__ == "__main__":
+    generate_regime_snapshot()
+    print(f"Wrote {REGIME_SNAPSHOT_PATH}")
