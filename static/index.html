@@ -775,7 +775,42 @@
     }
 
     function drawRegimeQuadrant() {
-      // populated in Task 6
+      const svg = d3.select("#regime-quadrant-svg");
+      const node = svg.node();
+      const W = node.clientWidth || 460;
+      const H = node.clientHeight || 340;
+      const m = 36;
+      svg.attr("viewBox", [0, 0, W, H]).selectAll("*").remove();
+
+      const x = d3.scaleLinear().domain([-1, 1]).range([m, W - m]);
+      const y = d3.scaleLinear().domain([-1, 1]).range([H - m, m]);
+
+      // Opportunity zone: regime_score > narrative_score (below the y=x diagonal).
+      svg.append("path")
+        .attr("d", `M${x(-1)},${y(-1)} L${x(1)},${y(1)} L${x(1)},${y(-1)} Z`)
+        .attr("fill", "var(--positive)").attr("opacity", 0.12);
+      svg.append("line")
+        .attr("x1", x(-1)).attr("y1", y(-1)).attr("x2", x(1)).attr("y2", y(1))
+        .attr("stroke", "var(--line)").attr("stroke-dasharray", "4 4");
+      svg.append("line").attr("x1", x(-1)).attr("y1", y(0)).attr("x2", x(1)).attr("y2", y(0)).attr("stroke", "var(--line)");
+      svg.append("line").attr("x1", x(0)).attr("y1", y(-1)).attr("x2", x(0)).attr("y2", y(1)).attr("stroke", "var(--line)");
+
+      const countries = regimeData.regime_universe.map(c => regimeData.countries[c]);
+      const g = svg.selectAll("g.rg-dot").data(countries).enter().append("g")
+        .attr("class", "rg-dot").style("cursor", "pointer")
+        .attr("transform", d => `translate(${x(d.regime_score)},${y(d.narrative_score)})`)
+        .on("click", (event, d) => { regimeSelected = d.country; renderRegimeCard(d.country); highlightRegime(); });
+      g.append("circle").attr("r", 6).attr("fill", d => color(d.regime_score))
+        .attr("stroke", "var(--text)").attr("stroke-width", 0.5);
+      g.append("text").attr("x", 9).attr("dy", "0.32em").attr("font-size", 11)
+        .attr("fill", "var(--text)").text(d => d.country);
+
+      svg.append("text").attr("x", W - m).attr("y", H - 10).attr("text-anchor", "end")
+        .attr("font-size", 10).attr("fill", "var(--muted)").text("regime / data score →");
+      svg.append("text").attr("x", 8).attr("y", m - 12)
+        .attr("font-size", 10).attr("fill", "var(--muted)").text("↑ narrative re-rated");
+
+      highlightRegime();
     }
 
     function highlightRegime() {
