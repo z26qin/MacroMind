@@ -48,3 +48,22 @@ def test_fetch_indicator_raises_on_error_payload():
         assert False, "expected ValueError"
     except ValueError:
         pass
+
+
+def test_latest_and_baseline_uses_latest_actual_and_prior_mean():
+    history = [(2024, 2.9), (2023, 4.1), (2022, 8.0), (2021, 4.7)]
+    actual, consensus, year = wb.latest_and_baseline(history, baseline_window=3)
+    assert actual == 2.9
+    assert year == 2024
+    assert consensus == (4.1 + 8.0 + 4.7) / 3
+
+
+def test_latest_and_baseline_single_point_consensus_equals_actual():
+    actual, consensus, year = wb.latest_and_baseline([(2024, 2.9)])
+    assert actual == 2.9
+    assert consensus == 2.9
+    assert year == 2024
+
+
+def test_latest_and_baseline_empty_returns_none():
+    assert wb.latest_and_baseline([]) is None

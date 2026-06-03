@@ -68,3 +68,22 @@ def fetch_indicator(
     for economy in series:
         series[economy].sort(key=lambda pair: pair[0], reverse=True)
     return series
+
+
+def latest_and_baseline(
+    history: list[tuple[int, float]],
+    baseline_window: int = 3,
+) -> tuple[float, float, int] | None:
+    """From newest-first (year, value) pairs return (actual, consensus, year).
+
+    actual   = most recent observation
+    consensus = mean of up to ``baseline_window`` prior observations (naive forecast);
+                falls back to the actual value when no prior observations exist.
+    Returns None when there is no data.
+    """
+    if not history:
+        return None
+    actual_year, actual = history[0]
+    prior = [value for _, value in history[1 : 1 + baseline_window]]
+    consensus = sum(prior) / len(prior) if prior else actual
+    return actual, consensus, actual_year
