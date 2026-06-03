@@ -95,7 +95,7 @@ pytest
 
 - Macro inputs (inflation, GDP growth, unemployment) can be sourced live from the World Bank API; market, consensus, real estate, and PMI remain mock. Each value's origin is recorded in `snapshot.json` under `provenance`.
 - Consensus for live macro columns is a naive baseline (mean of recent prior years), not true analyst consensus
-- No external APIs
+- The only external API is the World Bank (live macro); market, consensus, and real estate have no live source yet
 - RAG is hardcoded/stubbed
 - Country mapping depends on world-atlas country names
 - No historical time series snapshots yet
