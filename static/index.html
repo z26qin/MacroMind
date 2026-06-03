@@ -648,8 +648,57 @@
       updateColors();
     }
 
+    const HEATMAP_ROWS = [
+      { key: "composite", label: "Composite" },
+      { key: "fx", label: "FX" },
+      { key: "rates", label: "Rates" },
+      { key: "equity", label: "Equity" },
+      { key: "real_estate", label: "Real estate" }
+    ];
+
+    function heatmapValue(entry, rowKey) {
+      if (!entry) return null;
+      return rowKey === "composite" ? entry.composite.final : entry.signals[rowKey].final;
+    }
+
+    function highlightHeatmapColumn(economy) {
+      document.querySelectorAll("#heatmap .hm-cell").forEach(cell => {
+        cell.classList.toggle("selected-col", !!economy && cell.dataset.economy === economy);
+      });
+    }
+
     function drawHeatmap() {
-      // populated in Task 3
+      const universe = snapshot.universe || [];
+      const grid = document.querySelector("#heatmap");
+      grid.style.gridTemplateColumns = `120px repeat(${universe.length}, minmax(64px, 1fr))`;
+
+      let html = `<div class="hm-corner"></div>`;
+      for (const economy of universe) {
+        const iso3 = economies[economy] ? economies[economy].iso3 : economy;
+        html += `<div class="hm-colhead" title="${escapeHtml(economy)}">${escapeHtml(iso3)}</div>`;
+      }
+      for (const row of HEATMAP_ROWS) {
+        html += `<div class="hm-rowhead">${escapeHtml(row.label)}</div>`;
+        for (const economy of universe) {
+          const value = heatmapValue(economies[economy], row.key);
+          const verdict = signalVerdict(value);
+          const bg = value == null ? "var(--nodata)" : color(value);
+          const text = value == null ? "&ndash;" : `${verdict.glyph} ${fmt(value)}`;
+          const title = `${economy} · ${row.label}: ${verdict.label}${value == null ? "" : " " + fmt(value)}`;
+          html += `<div class="hm-cell" data-economy="${escapeHtml(economy)}" data-asset="${row.key}"`
+            + ` style="background:${bg}" title="${escapeHtml(title)}">${text}</div>`;
+        }
+      }
+      grid.innerHTML = html;
+
+      grid.querySelectorAll(".hm-cell").forEach(cell => {
+        cell.addEventListener("click", () => {
+          selectedCountry = cell.dataset.economy;
+          renderPanel(selectedCountry);
+          highlightHeatmapColumn(selectedCountry);
+        });
+      });
+      highlightHeatmapColumn(selectedCountry);
     }
 
     function setTab(tab) {
