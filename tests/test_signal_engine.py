@@ -229,3 +229,22 @@ def test_load_macro_inputs_live_overlays_imf_consensus_and_marks_expected_change
     # the resulting feature is the expected change forecast(T+1) - actual(T)
     out = se.add_surprises(df, expected_change)
     assert out.loc[usa, "inflation_surprise"] == pytest.approx(2.0)   # 12 - 10
+
+
+def test_blend_signal_full_confidence_matches_legacy_weights():
+    # confidence 1.0 -> 0.75*det + 0.25*rag
+    assert se.blend_signal(0.8, 0.4, 1.0, 0.25) == pytest.approx(0.7)
+
+
+def test_blend_signal_zero_confidence_ignores_rag():
+    assert se.blend_signal(0.8, 0.4, 0.0, 0.25) == pytest.approx(0.8)
+
+
+def test_blend_signal_partial_confidence_scales_rag():
+    # effective_rag = 0.25*0.75 = 0.1875 -> 0.8125*0.8 + 0.1875*0.4
+    assert se.blend_signal(0.8, 0.4, 0.75, 0.25) == pytest.approx(0.725)
+
+
+def test_blend_signal_is_clipped():
+    assert se.blend_signal(1.0, 1.0, 1.0, 0.25) == 1.0
+    assert se.blend_signal(-1.0, -1.0, 1.0, 0.25) == -1.0

@@ -80,6 +80,25 @@ def clip_signal(value: float) -> float:
     return float(np.clip(value, -1.0, 1.0))
 
 
+def blend_signal(
+    deterministic: float,
+    rag_signal: float,
+    rag_confidence: float,
+    rag_weight: float,
+) -> float:
+    """Confidence-weighted convex blend of deterministic and RAG signals.
+
+    effective_rag = rag_weight * rag_confidence
+    final         = (1 - effective_rag) * deterministic + effective_rag * rag
+
+    At confidence 1 this reduces to deterministic_weight*det + rag_weight*rag
+    (since deterministic_weight == 1 - rag_weight); at confidence 0 the RAG view
+    is ignored and the deterministic signal passes through unchanged.
+    """
+    effective_rag = rag_weight * rag_confidence
+    return clip_signal((1.0 - effective_rag) * deterministic + effective_rag * rag_signal)
+
+
 def percentile_to_signal(series: pd.Series) -> pd.Series:
     """Map cross-sectional ranks to [-1, +1], including full endpoints."""
     if len(series) == 1:
@@ -374,7 +393,6 @@ def build_snapshot(
 ) -> dict:
     weights = config["weights"]
     blend = config["signal_blend"]
-    deterministic_weight = float(blend["deterministic_weight"])
     rag_weight = float(blend["rag_weight"])
 
     snapshot = {
@@ -403,7 +421,8 @@ def build_snapshot(
             deterministic = round(clip_signal(row[f"{asset_class}_deterministic_signal"]), 4)
             rag = compute_rag_signal(country, asset_class)
             rag_signal = round(clip_signal(rag["signal"]), 4)
-            final = round(clip_signal(deterministic_weight * deterministic + rag_weight * rag_signal), 4)
+            rag_confidence = float(rag["confidence"])
+            final = round(blend_signal(deterministic, rag_signal, rag_confidence, rag_weight), 4)
             top_positive, top_negative = explain_contributions(row, asset_weights)
 
             deterministic_values.append(deterministic)
@@ -416,7 +435,8 @@ def build_snapshot(
                 "final": final,
                 "driver": describe_driver(country, asset_class, row, asset_weights),
                 "rag_summary": rag["summary"],
-                "rag_confidence": round(float(rag["confidence"]), 4),
+                "rag_confidence": round(rag_confidence, 4),
+                "rag_effective_weight": round(rag_weight * rag_confidence, 4),
                 "rag_sources": rag["sources"],
                 "top_positive_drivers": top_positive,
                 "top_negative_drivers": top_negative,
