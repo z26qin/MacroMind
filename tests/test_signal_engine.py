@@ -248,3 +248,20 @@ def test_blend_signal_partial_confidence_scales_rag():
 def test_blend_signal_is_clipped():
     assert se.blend_signal(1.0, 1.0, 1.0, 0.25) == 1.0
     assert se.blend_signal(-1.0, -1.0, 1.0, 0.25) == -1.0
+
+
+def test_load_signal_config_rejects_blend_not_summing_to_one(tmp_path):
+    bad = tmp_path / "bad.yaml"
+    bad.write_text(
+        "weights:\n"
+        "  fx: {growth_surprise_rank: 1.0}\n"
+        "  rates: {inflation_surprise_rank: -1.0}\n"
+        "  equity: {growth_surprise_rank: 1.0}\n"
+        "  real_estate: {rate_3m_change_rank: -1.0}\n"
+        "signal_blend:\n"
+        "  deterministic_weight: 0.5\n"
+        "  rag_weight: 0.25\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="must sum to 1.0"):
+        se.load_signal_config(bad)

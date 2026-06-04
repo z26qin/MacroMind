@@ -140,6 +140,11 @@ def load_signal_config(path: Path = CONFIG_PATH) -> dict:
     for key in ("deterministic_weight", "rag_weight"):
         if not isinstance(blend.get(key), (int, float)):
             raise ValueError(f"Malformed signal config {path}: signal_blend.{key} must be numeric")
+    if abs(float(blend["deterministic_weight"]) + float(blend["rag_weight"]) - 1.0) > 1e-9:
+        raise ValueError(
+            f"Malformed signal config {path}: signal_blend deterministic_weight + "
+            f"rag_weight must sum to 1.0"
+        )
 
     return config
 
