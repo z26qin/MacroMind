@@ -217,13 +217,37 @@ def load_macro_inputs(
     return df, provenance
 
 
-def add_surprises(df: pd.DataFrame) -> pd.DataFrame:
+# (actual column, consensus column, surprise column)
+SURPRISE_SPECS = (
+    ("inflation_yoy", "inflation_consensus", "inflation_surprise"),
+    ("gdp_growth", "gdp_consensus", "growth_surprise"),
+    ("unemployment", "unemployment_consensus", "unemployment_surprise"),
+    ("policy_rate", "policy_rate_consensus", "policy_surprise"),
+    ("pmi", "pmi_consensus", "pmi_surprise"),
+)
+
+
+def add_surprises(
+    df: pd.DataFrame,
+    expected_change_columns: frozenset[str] = frozenset(),
+) -> pd.DataFrame:
+    """Compute per-feature surprises.
+
+    Default (mock mode): surprise = actual - consensus  (beat/miss vs the
+    period consensus; positive means the print ran hot).
+
+    For columns named in ``expected_change_columns`` (live IMF mode), the
+    consensus column holds the IMF next-year forecast, so the feature is the
+    forecast-implied expected change = consensus - actual (positive means the
+    series is expected to rise). The sign convention is identical either way
+    ("higher/hotter => positive"), so the configured weight signs are unchanged.
+    """
     out = df.copy()
-    out["inflation_surprise"] = out["inflation_yoy"] - out["inflation_consensus"]
-    out["growth_surprise"] = out["gdp_growth"] - out["gdp_consensus"]
-    out["unemployment_surprise"] = out["unemployment"] - out["unemployment_consensus"]
-    out["policy_surprise"] = out["policy_rate"] - out["policy_rate_consensus"]
-    out["pmi_surprise"] = out["pmi"] - out["pmi_consensus"]
+    for actual_col, consensus_col, surprise_col in SURPRISE_SPECS:
+        if surprise_col in expected_change_columns:
+            out[surprise_col] = out[consensus_col] - out[actual_col]
+        else:
+            out[surprise_col] = out[actual_col] - out[consensus_col]
     return out
 
 

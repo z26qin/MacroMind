@@ -135,3 +135,38 @@ def test_each_economy_reports_provenance(snapshot):
 def test_generate_snapshot_records_requested_source(tmp_path):
     snap = generate_snapshot(tmp_path / "s.json", as_of="2026-06-02", source="mock")
     assert snap["data_source"] == "mock"
+
+
+import pandas as pd
+
+
+def _surprise_frame():
+    return pd.DataFrame({
+        "inflation_yoy": [3.0], "inflation_consensus": [2.5],
+        "gdp_growth": [2.0], "gdp_consensus": [1.5],
+        "unemployment": [4.0], "unemployment_consensus": [4.5],
+        "policy_rate": [5.0], "policy_rate_consensus": [4.8],
+        "pmi": [51.0], "pmi_consensus": [50.0],
+    })
+
+
+def test_add_surprises_default_is_actual_minus_consensus():
+    out = se.add_surprises(_surprise_frame())
+    assert out["inflation_surprise"].iloc[0] == pytest.approx(0.5)    # 3.0 - 2.5
+    assert out["growth_surprise"].iloc[0] == pytest.approx(0.5)       # 2.0 - 1.5
+    assert out["unemployment_surprise"].iloc[0] == pytest.approx(-0.5)
+    assert out["policy_surprise"].iloc[0] == pytest.approx(0.2)
+
+
+def test_add_surprises_expected_change_flips_named_columns_only():
+    out = se.add_surprises(
+        _surprise_frame(),
+        expected_change_columns={"inflation_surprise", "growth_surprise", "unemployment_surprise"},
+    )
+    # forecast(consensus) - actual  => expected change
+    assert out["inflation_surprise"].iloc[0] == pytest.approx(-0.5)   # 2.5 - 3.0
+    assert out["growth_surprise"].iloc[0] == pytest.approx(-0.5)      # 1.5 - 2.0
+    assert out["unemployment_surprise"].iloc[0] == pytest.approx(0.5) # 4.5 - 4.0
+    # non-IMF columns stay beat/miss
+    assert out["policy_surprise"].iloc[0] == pytest.approx(0.2)       # 5.0 - 4.8
+    assert out["pmi_surprise"].iloc[0] == pytest.approx(1.0)          # 51 - 50
