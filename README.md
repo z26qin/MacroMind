@@ -30,8 +30,11 @@ The engine computes surprises such as inflation, growth, unemployment, policy, a
 
 ```text
 signal = 2 * percentile_rank - 1
-final_signal = 0.75 * deterministic_signal + 0.25 * rag_signal
+effective_rag_weight = rag_weight * rag_confidence          # rag_weight = 0.25
+final_signal = (1 - effective_rag_weight) * deterministic_signal + effective_rag_weight * rag_signal
 ```
+
+The RAG overlay is confidence-weighted: a full-confidence view uses the configured `rag_weight` (0.25), while a no-view / low-confidence cell collapses toward the deterministic signal. Each signal reports its `rag_effective_weight`.
 
 The RAG signal is a qualitative narrative overlay returned by:
 
