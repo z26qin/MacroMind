@@ -20,6 +20,7 @@ import yaml
 
 from rag_signal import compute_rag_signal
 from data_sources import world_bank as wb
+from data_sources import imf_weo
 
 
 SNAPSHOT_PATH = Path("snapshot.json")
@@ -172,12 +173,16 @@ def load_macro_inputs(
     source: str = "mock",
     data_dir: Path = DATA_DIR,
     fetch_json=None,
-) -> tuple[pd.DataFrame, dict[str, dict[str, str]]]:
-    """Return (joined input frame, provenance).
+    imf_fetch_json=None,
+) -> tuple[pd.DataFrame, dict[str, dict[str, str]], frozenset[str]]:
+    """Return (joined input frame, provenance, expected_change_columns).
 
-    source="mock": the existing mock CSVs, every value tagged "mock".
-    source="live": overlay World Bank values onto the mock frame for the
-    live macro columns where available; everything else stays mock.
+    source="mock": the existing mock CSVs, every value tagged "mock"; the
+    expected-change set is empty (surprises are classic beat/miss).
+    source="live": World Bank realized values overlay the mock actuals, and the
+    IMF WEO next-year forecast overlays the consensus for the three live macro
+    columns where every economy has data. Those columns are returned in
+    expected_change_columns so the surprise becomes forecast(T+1) - actual(T).
     """
     df = load_mock_data(data_dir)
 
@@ -188,33 +193,62 @@ def load_macro_inputs(
     }
 
     if source == "mock":
-        return df, provenance
+        return df, provenance, frozenset()
     if source != "live":
         raise ValueError(f"Unknown data source: {source!r} (expected 'mock' or 'live')")
 
-    from datetime import date
-
     end_year = date.today().year
     start_year = end_year - LIVE_HISTORY_YEARS
-    kwargs = {} if fetch_json is None else {"fetch_json": fetch_json}
-    macro, consensus, live_provenance = wb.load_world_bank_macro(
-        tuple(df.index), start_year, end_year, **kwargs
+    wb_kwargs = {} if fetch_json is None else {"fetch_json": fetch_json}
+    macro, _wb_consensus, live_provenance = wb.load_world_bank_macro(
+        tuple(df.index), start_year, end_year, **wb_kwargs
     )
+
+    # Overlay World Bank realized actuals (consensus is replaced by IMF below).
+    for economy in df.index:
+        for column, value in macro[economy].items():
+            df.loc[economy, column] = value
+            provenance[economy][column] = live_provenance[economy][column]
+
+    imf_kwargs = {} if imf_fetch_json is None else {"fetch_json": imf_fetch_json}
+    forecasts = imf_weo.load_imf_forecasts(tuple(df.index), **imf_kwargs)
 
     consensus_column = {
         "inflation_yoy": "inflation_consensus",
         "gdp_growth": "gdp_consensus",
         "unemployment": "unemployment_consensus",
     }
-    for economy in df.index:
-        for column, value in macro[economy].items():
-            df.loc[economy, column] = value
-            df.loc[economy, consensus_column[column]] = consensus[economy][column]
-            provenance[economy][column] = live_provenance[economy][column]
+    surprise_column = {
+        "inflation_yoy": "inflation_surprise",
+        "gdp_growth": "growth_surprise",
+        "unemployment": "unemployment_surprise",
+    }
+
+    # All-or-nothing per column: only treat a column as IMF-backed expected
+    # change when every economy has a World Bank actual year T and an IMF
+    # forecast for T+1. Otherwise leave the mock consensus untouched.
+    expected_change: set[str] = set()
+    for macro_col, cons_col in consensus_column.items():
+        resolved: dict[str, tuple[float, int]] = {}
+        for economy in df.index:
+            prov = provenance[economy][macro_col]
+            if not prov.startswith("world_bank:"):
+                break
+            actual_year = int(prov.split(":")[1])
+            forecast = forecasts.get(economy, {}).get(macro_col, {}).get(actual_year + 1)
+            if forecast is None:
+                break
+            resolved[economy] = (forecast, actual_year + 1)
+        if len(resolved) != len(df.index):
+            continue  # not fully IMF-backed -> keep mock consensus for this column
+        for economy, (forecast, forecast_year) in resolved.items():
+            df.loc[economy, cons_col] = forecast
+            provenance[economy][cons_col] = f"imf_weo:{forecast_year}"
+        expected_change.add(surprise_column[macro_col])
 
     if df.isna().any().any():
         raise ValueError("Macro inputs contain missing values after live overlay")
-    return df, provenance
+    return df, provenance, frozenset(expected_change)
 
 
 # (actual column, consensus column, surprise column)
@@ -404,8 +438,8 @@ def generate_snapshot(
     source: str = "mock",
 ) -> dict:
     config = load_signal_config()
-    df, provenance = load_macro_inputs(source=source)
-    df = add_surprises(df)
+    df, provenance, expected_change_columns = load_macro_inputs(source=source)
+    df = add_surprises(df, expected_change_columns)
     df = add_ranked_features(df, config["weights"])
     df = compute_deterministic_signals(df, config["weights"])
     snapshot = build_snapshot(df, config, provenance, source=source, as_of=as_of)

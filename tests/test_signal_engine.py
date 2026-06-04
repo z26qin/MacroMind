@@ -90,7 +90,7 @@ import signal_engine as se
 
 
 def test_load_macro_inputs_mock_marks_all_provenance_mock():
-    df, provenance = se.load_macro_inputs(source="mock")
+    df, provenance, _expected_change = se.load_macro_inputs(source="mock")
     assert len(df) == 6
     for economy in EXPECTED_UNIVERSE:
         assert provenance[economy]["inflation_yoy"] == "mock"
@@ -111,7 +111,14 @@ def test_load_macro_inputs_live_overlays_world_bank_values():
                 ]
         raise AssertionError(url)
 
-    df, provenance = se.load_macro_inputs(source="live", fetch_json=fake_fetch)
+    def fake_imf(url):
+        # Empty IMF series for every indicator -> no network, columns fall back.
+        indicator = url.rsplit("/", 1)[-1]
+        return {"values": {indicator: {}}}
+
+    df, provenance, _expected_change = se.load_macro_inputs(
+        source="live", fetch_json=fake_fetch, imf_fetch_json=fake_imf
+    )
     # USA live columns overlaid with the fake actual (9.99)
     assert df.loc["United States of America", "inflation_yoy"] == 9.99
     assert provenance["United States of America"]["inflation_yoy"] == "world_bank:2024"
@@ -170,3 +177,55 @@ def test_add_surprises_expected_change_flips_named_columns_only():
     # non-IMF columns stay beat/miss
     assert out["policy_surprise"].iloc[0] == pytest.approx(0.2)       # 5.0 - 4.8
     assert out["pmi_surprise"].iloc[0] == pytest.approx(1.0)          # 51 - 50
+
+
+from data_sources import world_bank as wb_mod
+from data_sources import imf_weo as imf_mod
+
+
+def _wb_fake_all_six(url):
+    """World Bank fake: actual(2024)=10.0, prior(2023)=9.0 for all six economies."""
+    for code in wb_mod.WB_INDICATOR_BY_COLUMN.values():
+        if code in url:
+            rows = []
+            for iso in wb_mod.WB_CODE_BY_ECONOMY.values():
+                rows.append({"countryiso3code": iso, "date": "2024", "value": 10.0})
+                rows.append({"countryiso3code": iso, "date": "2023", "value": 9.0})
+            return [{"page": 1, "pages": 1, "per_page": 20000, "total": len(rows)}, rows]
+    raise AssertionError(url)
+
+
+def _imf_fake_all_six(url):
+    """IMF fake: forecast(2025)=12.0 for every economy/indicator."""
+    for ind in imf_mod.IMF_INDICATOR_BY_COLUMN.values():
+        if url.endswith("/" + ind):
+            by_code = {code: {"2024": 8.0, "2025": 12.0}
+                       for code in imf_mod.IMF_CODE_BY_ECONOMY.values()}
+            return {"values": {ind: by_code}}
+    raise AssertionError(url)
+
+
+def test_load_macro_inputs_mock_returns_empty_expected_change():
+    df, provenance, expected_change = se.load_macro_inputs(source="mock")
+    assert expected_change == frozenset()
+    assert len(df) == 6
+
+
+def test_load_macro_inputs_live_overlays_imf_consensus_and_marks_expected_change():
+    df, provenance, expected_change = se.load_macro_inputs(
+        source="live", fetch_json=_wb_fake_all_six, imf_fetch_json=_imf_fake_all_six,
+    )
+    assert expected_change == frozenset(
+        {"inflation_surprise", "growth_surprise", "unemployment_surprise"}
+    )
+    usa = "United States of America"
+    # consensus column holds the REAL IMF forecast (2025), not a naive baseline
+    assert df.loc[usa, "inflation_consensus"] == 12.0
+    assert df.loc[usa, "gdp_consensus"] == 12.0
+    # actual still from World Bank
+    assert df.loc[usa, "inflation_yoy"] == 10.0
+    assert provenance[usa]["inflation_yoy"] == "world_bank:2024"
+    assert provenance[usa]["inflation_consensus"] == "imf_weo:2025"
+    # the resulting feature is the expected change forecast(T+1) - actual(T)
+    out = se.add_surprises(df, expected_change)
+    assert out.loc[usa, "inflation_surprise"] == pytest.approx(2.0)   # 12 - 10
