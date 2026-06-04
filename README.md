@@ -7,6 +7,7 @@ A runnable prototype macro dashboard for cross-asset signals across a small, exp
 - `main.py`: FastAPI backend
 - `signal_engine.py`: loads mock CSV inputs, applies YAML-configured signal formulas, and writes `snapshot.json`
 - `data_sources/world_bank.py`: live macro data adapter (World Bank API, no key); used when generation runs with `--source live`
+- `data_sources/imf_weo.py`: IMF World Economic Outlook forecast adapter (DataMapper API, no key); supplies the live "consensus" so the live surprise becomes a forward expected-change
 - `regime_engine.py`: deterministic macro **regime-detection** engine (regime score, narrative gap, cross-asset confirmation, templated expressions/risks) for a separate six-economy set; writes `regime_snapshot.json`, served at `/api/regime` and shown in the dashboard's Regime tab
 - `rag_signal.py`: hardcoded qualitative narrative signal interface
 - `real_data_adapter.py`: placeholder for future production data adapters
@@ -96,7 +97,7 @@ pytest
 ## Current Limitations
 
 - Macro inputs (inflation, GDP growth, unemployment) can be sourced live from the World Bank API; market, consensus, real estate, and PMI remain mock. Each value's origin is recorded in `snapshot.json` under `provenance`.
-- Consensus for live macro columns is a naive baseline (mean of recent prior years), not true analyst consensus
+- Consensus for live macro columns (inflation, GDP growth, unemployment) is the IMF WEO **next-year forecast**; the live "surprise" is the forecast-implied expected change, `forecast(T+1) - actual(T)`. It is an institutional forecast, not an intra-period analyst-consensus print. A column only switches to this expected-change mode when every economy has both a World Bank actual and an IMF forecast (all-or-nothing); otherwise it stays mock beat/miss. `policy_rate` and `pmi` have no live source, so their surprises always stay mock beat/miss.
 - The only external API is the World Bank (live macro); market, consensus, and real estate have no live source yet
 - RAG is hardcoded/stubbed
 - Country mapping depends on world-atlas country names
@@ -107,7 +108,6 @@ pytest
 - Add yfinance adapter
 - Extend live coverage to policy rate and PMI (needs keyed/proprietary sources)
 - Add live market data (yfinance) and real estate (BIS)
-- Add real consensus data
 - Add real RAG pipeline with retrieval and citations
 - Add historical time series snapshots
 
