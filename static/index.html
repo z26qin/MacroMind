@@ -144,6 +144,14 @@
     .pill-warn { fill: var(--warn); }
     .pill-mut { fill: var(--muted); }
     .flow-pill-text { font-size: 13px; font-weight: 720; fill: #fff; }
+
+    .sparkline { display: block; width: 100%; height: 44px; min-height: 0; margin: 4px 0 2px; }
+    .sparkline polyline { fill: none; stroke-width: 1.6; }
+    .spark-pos { stroke: var(--positive); }
+    .spark-neg { stroke: var(--negative); }
+    .sparkline circle.spark-pos { fill: var(--positive); }
+    .sparkline circle.spark-neg { fill: var(--negative); }
+    .spark-zero { stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 3; }
     .verdict-key { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 12px; font-size: 12.5px; }
     .verdict-key span { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
     .verdict-key i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
@@ -685,6 +693,7 @@
     let countries = [];
     let snapshot = { economies: {} };
     let economies = {};
+    let historyData = {};
 
     const svg = d3.select("#map");
     const panel = document.querySelector("#panel");
@@ -777,6 +786,31 @@
       `;
     }
 
+    function sparkline(series) {
+      if (!series || series.length < 2) return "";
+      const w = 220, h = 44, pad = 4, n = series.length;
+      const x = i => pad + (i * (w - 2 * pad)) / (n - 1);
+      const y = v => pad + (1 - (Math.max(-1, Math.min(1, v)) + 1) / 2) * (h - 2 * pad);
+      const points = series.map((d, i) => `${x(i).toFixed(1)},${y(d.value).toFixed(1)}`).join(" ");
+      const last = series[n - 1].value;
+      const cls = last >= 0 ? "spark-pos" : "spark-neg";
+      const zeroY = y(0).toFixed(1);
+      return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-label="history sparkline">`
+        + `<line class="spark-zero" x1="${pad}" y1="${zeroY}" x2="${w - pad}" y2="${zeroY}"></line>`
+        + `<polyline class="${cls}" points="${points}"></polyline>`
+        + `<circle class="${cls}" cx="${x(n - 1).toFixed(1)}" cy="${y(last).toFixed(1)}" r="2.4"></circle>`
+        + `</svg>`;
+    }
+
+    function historyBlock(economyName, view) {
+      const series = (historyData[economyName] || {})[view] || [];
+      if (series.length < 2) return "";
+      const first = series[0], last = series[series.length - 1];
+      return `<div class="section-title">History · ${escapeHtml(String(series.length))} snapshots</div>`
+        + sparkline(series)
+        + `<div class="meta">${viewLabel(view)} final: ${fmt(first.value)} (${escapeHtml(first.date)}) &rarr; ${fmt(last.value)} (${escapeHtml(last.date)})</div>`;
+    }
+
     function renderPanel(countryName) {
       const economyName = resolveEconomyName(countryName);
       const entry = economyName ? economies[economyName] : null;
@@ -819,6 +853,7 @@
           ${viewLabel(selectedView)} signal ${verdictBadgeHtml(selectedValue)}
           <strong>${fmt(selectedValue)}</strong>
         </div>
+        ${historyBlock(economyName, selectedView)}
         <div class="section-title">Composite</div>
         <div class="metric-grid ${selectedView === "composite" ? "highlight" : ""}">
           <div class="metric"><label>Deterministic</label><strong>${fmt(entry.composite.deterministic)}</strong></div>
@@ -1116,6 +1151,11 @@
     }).catch(error => {
       panel.innerHTML = `<div class="eyebrow">Load error</div><div class="panel-title">Dashboard failed to load</div><div class="meta">${escapeHtml(error)}</div>`;
     });
+
+    d3.json("/api/history").then(data => {
+      historyData = (data && data.history) || {};
+      if (selectedCountry) renderPanel(selectedCountry);
+    }).catch(() => { /* history is optional; dashboard works without it */ });
   </script>
 </body>
 </html>
