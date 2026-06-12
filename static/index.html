@@ -314,6 +314,18 @@
       line-height: 1.45;
     }
 
+    .asset p.driver-reason {
+      margin-top: 8px;
+      color: var(--text);
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+
+    .driver-reason strong {
+      font-weight: 720;
+      color: var(--text);
+    }
+
     .driver-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -535,6 +547,15 @@
         .replaceAll("'", "&#039;");
     }
 
+    // Escape the driver sentence, then bold the key phrase after "led by"
+    // (e.g. "led by <strong>policy surprise</strong>") so it's easy to spot.
+    function formatReason(value) {
+      return escapeHtml(value).replace(
+        /led by (.+?)( and | with |,|\.|$)/i,
+        (match, phrase, tail) => `led by <strong>${phrase}</strong>${tail}`
+      );
+    }
+
     function resolveEconomyName(mapCountryName) {
       if (EURO_AREA_COUNTRIES.has(mapCountryName)) return economies["Euro Area"] ? "Euro Area" : null;
       return Object.prototype.hasOwnProperty.call(economies, mapCountryName) ? mapCountryName : null;
@@ -615,7 +636,7 @@
             <div class="bar" style="${barStyle(item.final)}"></div>
           </div>
           <p>Final ${fmt(item.final)} · deterministic ${fmt(item.deterministic)} · RAG ${fmt(item.rag)}</p>
-          <p>${escapeHtml(item.driver)}</p>
+          <p class="driver-reason">${formatReason(item.driver)}</p>
           <p>${escapeHtml(item.rag_summary)}</p>
           <div class="driver-grid">
             ${renderDriverList("Top positive", item.top_positive_drivers || [])}
