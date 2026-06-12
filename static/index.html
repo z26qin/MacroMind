@@ -852,10 +852,15 @@
       const channels = rowsHtml(c.cross_asset_confirmation);
       const buckets = rowsHtml(c.buckets);
       const list = arr => arr.map(s => `<li>${escapeHtml(s)}</li>`).join("");
+      const gate = regimeData.confirmation_min;
+      const unconfirmedHint = c.verdict === "Unconfirmed" && gate != null
+        ? `<div class="meta">Cross-asset confirmation ${fmt(c.confirmation_score)} is below the ${fmt(gate)} gate &mdash; setup not corroborated by markets.</div>`
+        : "";
       card.innerHTML = `
         <div class="eyebrow">Regime card</div>
         <div class="panel-title">${escapeHtml(c.country)} ${verdictBadgeHtml(c.regime_score)}</div>
         <div class="meta">Verdict: <strong>${escapeHtml(c.verdict)}</strong></div>
+        ${unconfirmedHint}
         <div class="metric-grid">
           <div class="metric"><label>Regime</label><strong>${fmt(c.regime_score)}</strong></div>
           <div class="metric"><label>Narrative gap</label><strong>${fmt(c.narrative_gap)}</strong></div>
