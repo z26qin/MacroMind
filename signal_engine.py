@@ -21,6 +21,7 @@ import yaml
 from rag_signal import compute_rag_signal
 from data_sources import world_bank as wb
 from data_sources import imf_weo
+from data_sources import market
 
 
 SNAPSHOT_PATH = Path("snapshot.json")
@@ -275,6 +276,44 @@ def load_macro_inputs(
     return df, provenance, frozenset(expected_change)
 
 
+MARKET_LIVE_COLUMNS = ("fx_3m_return", "equity_3m_return")
+
+
+def overlay_market_inputs(
+    df: pd.DataFrame,
+    provenance: dict[str, dict[str, str]],
+    source: str = "mock",
+    fetch_json=None,
+) -> pd.DataFrame:
+    """Overlay live Yahoo 3-month FX and equity returns onto the frame.
+
+    Mock mode is a no-op (the bundled CSV values stand). In live mode each
+    market column is overlaid all-or-nothing: only when every economy resolves
+    a value does the column go live (else it keeps its mock value). Provenance
+    for overlaid cells is recorded as ``yahoo:<YYYY-MM>``. Mutates df/provenance
+    and returns df.
+    """
+    if source != "live":
+        return df
+
+    kwargs = {} if fetch_json is None else {"fetch_json": fetch_json}
+    returns = market.load_market_returns(tuple(df.index), **kwargs)
+
+    for column in MARKET_LIVE_COLUMNS:
+        resolved: dict[str, tuple[float, str]] = {}
+        for economy in df.index:
+            value = returns.get(economy, {}).get(column)
+            if value is None:
+                break
+            resolved[economy] = value
+        if len(resolved) != len(df.index):
+            continue  # not fully live -> keep mock for this column
+        for economy, (return_pct, asof) in resolved.items():
+            df.loc[economy, column] = return_pct
+            provenance[economy][column] = f"yahoo:{asof}"
+    return df
+
+
 # (actual column, consensus column, surprise column)
 SURPRISE_SPECS = (
     ("inflation_yoy", "inflation_consensus", "inflation_surprise"),
@@ -464,6 +503,7 @@ def generate_snapshot(
 ) -> dict:
     config = load_signal_config()
     df, provenance, expected_change_columns = load_macro_inputs(source=source)
+    df = overlay_market_inputs(df, provenance, source=source)
     df = add_surprises(df, expected_change_columns)
     df = add_ranked_features(df, config["weights"])
     df = compute_deterministic_signals(df, config["weights"])

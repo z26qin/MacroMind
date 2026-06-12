@@ -250,6 +250,42 @@ def test_blend_signal_is_clipped():
     assert se.blend_signal(-1.0, -1.0, 1.0, 0.25) == -1.0
 
 
+from data_sources import market as market_mod
+
+
+def _market_chart(closes):
+    ts = [1704067200, 1706745600, 1709251200, 1711929600]  # Jan-Apr 2024 UTC
+    return {"chart": {"result": [{
+        "timestamp": ts,
+        "indicators": {"adjclose": [{"adjclose": closes}], "quote": [{"close": closes}]},
+    }], "error": None}}
+
+
+def _market_fake_all(url):
+    # FX pairs (".=X") -> +5% ; equity ETFs -> +10%
+    return _market_chart([1.00, 1.02, 1.04, 1.05]) if "=X" in url else _market_chart([100.0, 105.0, 108.0, 110.0])
+
+
+def test_overlay_market_inputs_mock_is_noop():
+    df, provenance, _ec = se.load_macro_inputs(source="mock")
+    before = df["equity_3m_return"].tolist()
+    se.overlay_market_inputs(df, provenance, source="mock")
+    assert df["equity_3m_return"].tolist() == before
+    assert "equity_3m_return" not in provenance["United States of America"]
+
+
+def test_overlay_market_inputs_live_overlays_fx_and_equity():
+    df, provenance, _ec = se.load_macro_inputs(source="mock")
+    se.overlay_market_inputs(df, provenance, source="live", fetch_json=_market_fake_all)
+    usa = "United States of America"
+    assert df.loc[usa, "equity_3m_return"] == 10.0
+    assert df.loc[usa, "fx_3m_return"] == 0.0            # numeraire
+    assert df.loc["Canada", "fx_3m_return"] == 5.0
+    assert df.loc["Euro Area", "equity_3m_return"] == 10.0
+    assert provenance[usa]["equity_3m_return"] == "yahoo:2024-04"
+    assert provenance[usa]["fx_3m_return"] == "yahoo:2024-04"
+
+
 def test_load_signal_config_rejects_blend_not_summing_to_one(tmp_path):
     bad = tmp_path / "bad.yaml"
     bad.write_text(
