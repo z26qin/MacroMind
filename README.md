@@ -9,6 +9,7 @@ A runnable prototype macro dashboard for cross-asset signals across a small, exp
 - `data_sources/world_bank.py`: live macro data adapter (World Bank API, no key); used when generation runs with `--source live`
 - `data_sources/imf_weo.py`: IMF World Economic Outlook forecast adapter (DataMapper API, no key); supplies the live "consensus" so the live surprise becomes a forward expected-change
 - `data_sources/market.py`: live market-return adapter (Yahoo Finance chart API, no key); sources `equity_3m_return` and `fx_3m_return` in `--source live`
+- `history.py`: builds a per-economy signal time series by reading every committed version of `snapshot.json` from git history; served at `/api/history` and drawn as a sparkline in the detail panel (requires running inside a git checkout)
 - `regime_engine.py`: deterministic macro **regime-detection** engine (regime score, narrative gap, cross-asset confirmation, templated expressions/risks) for a separate six-economy set; writes `regime_snapshot.json`, served at `/api/regime` and shown in the dashboard's Regime tab. Verdict ladder: Deteriorating / Repricing / Early / Priced in / Neutral, where the activation verdicts (Repricing, Early) additionally require cross-asset `confirmation_score >= confirmation_min` (config: `regime_config.yaml`) — otherwise the verdict is **Unconfirmed**
 - `rag_signal.py`: hardcoded qualitative narrative signal interface
 - `real_data_adapter.py`: placeholder for future production data adapters
@@ -112,7 +113,6 @@ pytest
 - Extend live coverage to policy rate and PMI (needs keyed/proprietary sources)
 - Extend live market data to carry, rates/curve, forward P/E, REIT, and real estate (BIS)
 - Add real RAG pipeline with retrieval and citations
-- Add historical time series snapshots
 
 ## Future Data Sources
 
