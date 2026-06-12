@@ -314,6 +314,28 @@ def overlay_market_inputs(
     return df
 
 
+def overlay_fx_carry(
+    df: pd.DataFrame,
+    provenance: dict[str, dict[str, str]],
+    source: str = "mock",
+) -> pd.DataFrame:
+    """In live mode, derive fx_carry as the policy-rate differential vs the US.
+
+    Carry = local short rate - USD short rate (positive = the currency
+    out-yields USD; the US is the numeraire at 0.0). Mock mode is a no-op so
+    the bundled snapshot is unchanged. Provenance is ``derived:policy_rate_diff``.
+    This is *live-ready*: once policy_rate has a live source the carry becomes
+    genuinely live with no further change.
+    """
+    if source != "live":
+        return df
+    us_rate = float(df.loc[UNIVERSE[0], "policy_rate"])  # United States of America
+    for economy in df.index:
+        df.loc[economy, "fx_carry"] = float(df.loc[economy, "policy_rate"]) - us_rate
+        provenance[economy]["fx_carry"] = "derived:policy_rate_diff"
+    return df
+
+
 # (actual column, consensus column, surprise column)
 SURPRISE_SPECS = (
     ("inflation_yoy", "inflation_consensus", "inflation_surprise"),
@@ -504,6 +526,7 @@ def generate_snapshot(
     config = load_signal_config()
     df, provenance, expected_change_columns = load_macro_inputs(source=source)
     df = overlay_market_inputs(df, provenance, source=source)
+    df = overlay_fx_carry(df, provenance, source=source)
     df = add_surprises(df, expected_change_columns)
     df = add_ranked_features(df, config["weights"])
     df = compute_deterministic_signals(df, config["weights"])

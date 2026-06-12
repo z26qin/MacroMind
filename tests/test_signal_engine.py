@@ -286,6 +286,27 @@ def test_overlay_market_inputs_live_overlays_fx_and_equity():
     assert provenance[usa]["fx_3m_return"] == "yahoo:2024-04"
 
 
+def test_overlay_fx_carry_mock_is_noop():
+    df, provenance, _ec = se.load_macro_inputs(source="mock")
+    before = df["fx_carry"].tolist()
+    se.overlay_fx_carry(df, provenance, source="mock")
+    assert df["fx_carry"].tolist() == before
+    assert "fx_carry" not in provenance["United States of America"]
+
+
+def test_overlay_fx_carry_live_derives_from_policy_rate_diff():
+    df, provenance, _ec = se.load_macro_inputs(source="mock")
+    df.loc["United States of America", "policy_rate"] = 5.0
+    df.loc["Brazil", "policy_rate"] = 11.0
+    df.loc["Japan", "policy_rate"] = 0.5
+    se.overlay_fx_carry(df, provenance, source="live")
+    assert df.loc["United States of America", "fx_carry"] == 0.0   # numeraire
+    assert df.loc["Brazil", "fx_carry"] == 6.0                     # 11.0 - 5.0
+    assert df.loc["Japan", "fx_carry"] == -4.5                     # 0.5 - 5.0
+    assert provenance["Brazil"]["fx_carry"] == "derived:policy_rate_diff"
+    assert provenance["United States of America"]["fx_carry"] == "derived:policy_rate_diff"
+
+
 def test_load_signal_config_rejects_blend_not_summing_to_one(tmp_path):
     bad = tmp_path / "bad.yaml"
     bad.write_text(

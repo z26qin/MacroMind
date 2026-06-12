@@ -101,17 +101,17 @@ pytest
 
 ## Current Limitations
 
-- Live mode sources macro (inflation, GDP growth, unemployment) from the World Bank, consensus from IMF WEO, and the `equity_3m_return` / `fx_3m_return` market columns from Yahoo Finance. The remaining market columns (`fx_carry`, `rate_3m_change`, `curve_slope_2s10s`, `equity_forward_pe`, `reit_3m_return`, `house_price_yoy`), policy rate, and PMI remain mock. Each value's origin is recorded in `snapshot.json` under `provenance`.
+- Live mode sources macro (inflation, GDP growth, unemployment) from the World Bank, consensus from IMF WEO, and the `equity_3m_return` / `fx_3m_return` market columns from Yahoo Finance. `fx_carry` is **derived** in live mode as the policy-rate differential vs the US (carry = local short rate − USD short rate); since policy rates are still mock, this is *live-ready* rather than live — it becomes genuinely live once policy rates get a source. The remaining market columns (`rate_3m_change`, `curve_slope_2s10s`, `equity_forward_pe`, `reit_3m_return`, `house_price_yoy`), policy rate, and PMI remain mock. Each value's origin is recorded in `snapshot.json` under `provenance`.
 - Consensus for live macro columns (inflation, GDP growth, unemployment) is the IMF WEO **next-year forecast**; the live "surprise" is the forecast-implied expected change, `forecast(T+1) - actual(T)`. It is an institutional forecast, not an intra-period analyst-consensus print. A column only switches to this expected-change mode when every economy has both a World Bank actual and an IMF forecast (all-or-nothing); otherwise it stays mock beat/miss. `policy_rate` and `pmi` have no live source, so their surprises always stay mock beat/miss.
-- The only external API is the World Bank (live macro); market, consensus, and real estate have no live source yet
+- Live external sources are the World Bank (macro), IMF WEO (consensus), and Yahoo Finance (FX/equity returns); policy rate, PMI, and real estate have no live source yet
 - RAG is hardcoded/stubbed
 - Country mapping depends on world-atlas country names
-- No historical time series snapshots yet
 
 ## TODO
 
 - Extend live coverage to policy rate and PMI (needs keyed/proprietary sources)
-- Extend live market data to carry, rates/curve, forward P/E, REIT, and real estate (BIS)
+- Extend live market data to rates/curve, forward P/E, REIT, and real estate (BIS)
+- Source live policy rates (would also make `fx_carry` genuinely live)
 - Add real RAG pipeline with retrieval and citations
 
 ## Future Data Sources
