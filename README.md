@@ -8,6 +8,7 @@ A runnable prototype macro dashboard for cross-asset signals across a small, exp
 - `signal_engine.py`: loads mock CSV inputs, applies YAML-configured signal formulas, and writes `snapshot.json`
 - `data_sources/world_bank.py`: live macro data adapter (World Bank API, no key); used when generation runs with `--source live`
 - `data_sources/imf_weo.py`: IMF World Economic Outlook forecast adapter (DataMapper API, no key); supplies the live "consensus" so the live surprise becomes a forward expected-change
+- `data_sources/market.py`: live market-return adapter (Yahoo Finance chart API, no key); sources `equity_3m_return` and `fx_3m_return` in `--source live`
 - `regime_engine.py`: deterministic macro **regime-detection** engine (regime score, narrative gap, cross-asset confirmation, templated expressions/risks) for a separate six-economy set; writes `regime_snapshot.json`, served at `/api/regime` and shown in the dashboard's Regime tab
 - `rag_signal.py`: hardcoded qualitative narrative signal interface
 - `real_data_adapter.py`: placeholder for future production data adapters
@@ -99,7 +100,7 @@ pytest
 
 ## Current Limitations
 
-- Macro inputs (inflation, GDP growth, unemployment) can be sourced live from the World Bank API; market, consensus, real estate, and PMI remain mock. Each value's origin is recorded in `snapshot.json` under `provenance`.
+- Live mode sources macro (inflation, GDP growth, unemployment) from the World Bank, consensus from IMF WEO, and the `equity_3m_return` / `fx_3m_return` market columns from Yahoo Finance. The remaining market columns (`fx_carry`, `rate_3m_change`, `curve_slope_2s10s`, `equity_forward_pe`, `reit_3m_return`, `house_price_yoy`), policy rate, and PMI remain mock. Each value's origin is recorded in `snapshot.json` under `provenance`.
 - Consensus for live macro columns (inflation, GDP growth, unemployment) is the IMF WEO **next-year forecast**; the live "surprise" is the forecast-implied expected change, `forecast(T+1) - actual(T)`. It is an institutional forecast, not an intra-period analyst-consensus print. A column only switches to this expected-change mode when every economy has both a World Bank actual and an IMF forecast (all-or-nothing); otherwise it stays mock beat/miss. `policy_rate` and `pmi` have no live source, so their surprises always stay mock beat/miss.
 - The only external API is the World Bank (live macro); market, consensus, and real estate have no live source yet
 - RAG is hardcoded/stubbed
@@ -108,9 +109,8 @@ pytest
 
 ## TODO
 
-- Add yfinance adapter
 - Extend live coverage to policy rate and PMI (needs keyed/proprietary sources)
-- Add live market data (yfinance) and real estate (BIS)
+- Extend live market data to carry, rates/curve, forward P/E, REIT, and real estate (BIS)
 - Add real RAG pipeline with retrieval and citations
 - Add historical time series snapshots
 
