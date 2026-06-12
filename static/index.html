@@ -18,6 +18,7 @@
       --shadow: 0 18px 45px rgba(32, 35, 31, 0.12);
       --positive: #3d8b5a;
       --negative: #b94b4b;
+      --warn: #b07d1a;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -34,6 +35,7 @@
         --shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
         --positive: #62b47c;
         --negative: #d36b6b;
+        --warn: #d6a743;
       }
     }
 
@@ -118,6 +120,39 @@
     .heatmap-legend { margin-top: 14px; max-width: 320px; }
 
     main.regime-full { grid-template-columns: 1fr; }
+
+    /* ---- Guide tab ---- */
+    .guide { max-width: 980px; }
+    .guide h2 { font-size: 19px; margin: 2px 0 4px; }
+    .guide .lede { color: var(--muted); font-size: 13.5px; line-height: 1.55; margin: 0 0 18px; max-width: 70ch; }
+    .guide-section { margin-top: 26px; }
+    .guide-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    @media (max-width: 820px) { .guide-inputs { grid-template-columns: 1fr; } }
+    .guide-input { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; background: var(--panel); }
+    .guide-input .gi-name { font-weight: 680; font-size: 13px; }
+    .guide-input .gi-name code { font-size: 12px; background: var(--bg); padding: 1px 5px; border-radius: 5px; }
+    .guide-input .gi-desc { color: var(--muted); font-size: 12.5px; line-height: 1.5; margin-top: 5px; }
+    .guide-flow { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); padding: 10px; }
+    .flow-box { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
+    .flow-cond { fill: var(--text); font-size: 13px; font-weight: 600; }
+    .flow-sub { fill: var(--muted); font-size: 11px; }
+    .flow-edge { stroke: var(--line); stroke-width: 1.5; fill: none; }
+    .flow-edge-label { fill: var(--muted); font-size: 11px; font-weight: 600; }
+    .flow-pill { stroke: none; }
+    .pill-neg { fill: var(--negative); }
+    .pill-pos { fill: var(--positive); }
+    .pill-warn { fill: var(--warn); }
+    .pill-mut { fill: var(--muted); }
+    .flow-pill-text { font-size: 13px; font-weight: 720; fill: #fff; }
+    .verdict-key { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 12px; font-size: 12.5px; }
+    .verdict-key span { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
+    .verdict-key i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+    table.guide-examples { border-collapse: collapse; width: 100%; margin-top: 10px; font-size: 12.5px; }
+    table.guide-examples th, table.guide-examples td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); }
+    table.guide-examples th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+    table.guide-examples td.num { font-variant-numeric: tabular-nums; }
+    .guide-note { border-left: 3px solid var(--line); padding: 6px 0 6px 14px; margin-top: 16px; color: var(--muted); font-size: 12.5px; line-height: 1.55; }
+    .guide-note strong { color: var(--text); }
     #regime-view { min-height: calc(100vh - 125px); }
     .regime-top { display: grid; grid-template-columns: 1.4fr 1fr; gap: 18px; align-items: start; }
     .regime-quadrant-wrap, .regime-card {
@@ -437,6 +472,7 @@
         <button class="active" data-tab="map">Map</button>
         <button data-tab="heatmap">Heatmap</button>
         <button data-tab="regime">Regime</button>
+        <button data-tab="guide">Guide</button>
       </div>
       <div class="toggles" id="asset-toggles" aria-label="Asset class">
         <button class="active" data-view="composite">Composite</button>
@@ -478,6 +514,136 @@
           <aside id="regime-card" class="regime-card"></aside>
         </div>
         <div id="regime-table"></div>
+      </div>
+      <div id="guide-view" class="guide" hidden>
+        <h2>How to read the Regime verdict</h2>
+        <p class="lede">Each country in the Regime tab gets one <strong>verdict</strong>. It is decided by a fixed ladder of rules
+          evaluated top to bottom &mdash; the first rule that matches wins. Three numbers feed it.</p>
+
+        <div class="guide-section">
+          <div class="guide-inputs">
+            <div class="guide-input">
+              <div class="gi-name"><code>regime_score</code> &mdash; fundamentals</div>
+              <div class="gi-desc">Weighted blend of five structural buckets (policy, liquidity, foreign access, rating momentum, index catalyst), clipped to [&minus;1, +1]. How strong the underlying setup is.</div>
+            </div>
+            <div class="guide-input">
+              <div class="gi-name"><code>narrative_gap</code> &mdash; the opportunity</div>
+              <div class="gi-desc"><code>regime_score</code> minus what's already priced in (the consensus narrative). How far the hard setup runs ahead of the market story &mdash; the size of the edge.</div>
+            </div>
+            <div class="guide-input">
+              <div class="gi-name"><code>confirmation</code> &mdash; corroboration</div>
+              <div class="gi-desc">Average of seven cross-asset channels (equity, sovereign credit, FX, CDS, ETF flows, local banks, rates). Whether markets are actually backing the call.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="section-title">The verdict ladder</div>
+          <svg class="guide-flow" viewBox="0 0 820 540" role="img" aria-label="Regime verdict decision flowchart">
+            <defs>
+              <marker id="flow-arrow" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto" markerUnits="strokeUnits">
+                <path d="M0,0 L7,3 L0,6 Z" fill="var(--muted)"></path>
+              </marker>
+            </defs>
+
+            <!-- D1 -->
+            <rect class="flow-box" x="30" y="24" width="300" height="54" rx="9"></rect>
+            <text class="flow-cond" x="180" y="47" text-anchor="middle">regime_score &#8804; &minus;0.10 ?</text>
+            <text class="flow-sub" x="180" y="64" text-anchor="middle">fundamentals are bad</text>
+            <line class="flow-edge" x1="330" y1="51" x2="424" y2="51" marker-end="url(#flow-arrow)"></line>
+            <text class="flow-edge-label" x="372" y="44" text-anchor="middle">yes</text>
+            <rect class="flow-pill pill-neg" x="430" y="33" width="220" height="36" rx="18"></rect>
+            <text class="flow-pill-text" x="540" y="56" text-anchor="middle">Deteriorating</text>
+            <line class="flow-edge" x1="180" y1="78" x2="180" y2="134" marker-end="url(#flow-arrow)"></line>
+            <text class="flow-edge-label" x="190" y="110">no</text>
+
+            <!-- D2 -->
+            <rect class="flow-box" x="30" y="138" width="300" height="54" rx="9"></rect>
+            <text class="flow-cond" x="180" y="161" text-anchor="middle">narrative_gap &#8805; 0.30 ?</text>
+            <text class="flow-sub" x="180" y="178" text-anchor="middle">big, still-unpriced mispricing</text>
+            <line class="flow-edge" x1="330" y1="165" x2="396" y2="165" marker-end="url(#flow-arrow)"></line>
+            <text class="flow-edge-label" x="362" y="158" text-anchor="middle">yes</text>
+            <rect class="flow-box" x="400" y="138" width="150" height="54" rx="9"></rect>
+            <text class="flow-cond" x="475" y="170" text-anchor="middle" style="font-size:12px">confirmation &#8805; 0.25 ?</text>
+            <line class="flow-edge" x1="550" y1="165" x2="575" y2="165"></line>
+            <line class="flow-edge" x1="575" y1="142" x2="575" y2="188"></line>
+            <line class="flow-edge" x1="575" y1="142" x2="600" y2="142" marker-end="url(#flow-arrow)"></line>
+            <line class="flow-edge" x1="575" y1="188" x2="600" y2="188" marker-end="url(#flow-arrow)"></line>
+            <text class="flow-edge-label" x="588" y="136">yes</text>
+            <text class="flow-edge-label" x="588" y="200">no</text>
+            <rect class="flow-pill pill-pos" x="606" y="124" width="190" height="34" rx="17"></rect>
+            <text class="flow-pill-text" x="701" y="146" text-anchor="middle">Repricing</text>
+            <rect class="flow-pill pill-warn" x="606" y="172" width="190" height="34" rx="17"></rect>
+            <text class="flow-pill-text" x="701" y="194" text-anchor="middle">Unconfirmed</text>
+            <line class="flow-edge" x1="180" y1="192" x2="180" y2="248" marker-end="url(#flow-arrow)"></line>
+            <text class="flow-edge-label" x="190" y="224">no</text>
+
+            <!-- D3 -->
+            <rect class="flow-box" x="30" y="252" width="300" height="66" rx="9"></rect>
+            <text class="flow-cond" x="180" y="274" text-anchor="middle">regime_score &#8805; 0.10  and</text>
+            <text class="flow-cond" x="180" y="291" text-anchor="middle">narrative_gap &#8805; 0.10 ?</text>
+            <text class="flow-sub" x="180" y="308" text-anchor="middle">good fundamentals, edge still open</text>
+            <line class="flow-edge" x1="330" y1="285" x2="396" y2="285" marker-end="url(#flow-arrow)"></line>
+            <text class="flow-edge-label" x="362" y="278" text-anchor="middle">yes</text>
+            <rect class="flow-box" x="400" y="258" width="150" height="54" rx="9"></rect>
+            <text class="flow-cond" x="475" y="290" text-anchor="middle" style="font-size:12px">confirmation &#8805; 0.25 ?</text>
+            <line class="flow-edge" x1="550" y1="285" x2="575" y2="285"></line>
+            <line class="flow-edge" x1="575" y1="262" x2="575" y2="308"></line>
+            <line class="flow-edge" x1="575" y1="262" x2="600" y2="262" marker-end="url(#flow-arrow)"></line>
+            <line class="flow-edge" x1="575" y1="308" x2="600" y2="308" marker-end="url(#flow-arrow)"></line>
+            <text class="flow-edge-label" x="588" y="256">yes</text>
+            <text class="flow-edge-label" x="588" y="320">no</text>
+            <rect class="flow-pill pill-pos" x="606" y="244" width="190" height="34" rx="17"></rect>
+            <text class="flow-pill-text" x="701" y="266" text-anchor="middle">Early</text>
+            <rect class="flow-pill pill-warn" x="606" y="292" width="190" height="34" rx="17"></rect>
+            <text class="flow-pill-text" x="701" y="314" text-anchor="middle">Unconfirmed</text>
+            <line class="flow-edge" x1="180" y1="318" x2="180" y2="374" marker-end="url(#flow-arrow)"></line>
+            <text class="flow-edge-label" x="190" y="350">no</text>
+
+            <!-- D4 -->
+            <rect class="flow-box" x="30" y="378" width="300" height="54" rx="9"></rect>
+            <text class="flow-cond" x="180" y="401" text-anchor="middle">regime_score &#8805; 0.10 ?</text>
+            <text class="flow-sub" x="180" y="418" text-anchor="middle">fundamentals ok, but already priced</text>
+            <line class="flow-edge" x1="330" y1="405" x2="424" y2="405" marker-end="url(#flow-arrow)"></line>
+            <text class="flow-edge-label" x="372" y="398" text-anchor="middle">yes</text>
+            <rect class="flow-pill pill-mut" x="430" y="387" width="220" height="36" rx="18"></rect>
+            <text class="flow-pill-text" x="540" y="410" text-anchor="middle">Priced in</text>
+            <line class="flow-edge" x1="180" y1="432" x2="180" y2="474" marker-end="url(#flow-arrow)"></line>
+            <text class="flow-edge-label" x="190" y="456">no</text>
+
+            <!-- Neutral -->
+            <rect class="flow-pill pill-mut" x="95" y="478" width="170" height="36" rx="18"></rect>
+            <text class="flow-pill-text" x="180" y="501" text-anchor="middle">Neutral</text>
+          </svg>
+
+          <div class="verdict-key">
+            <span><i style="background:var(--positive)"></i> Repricing / Early &mdash; act now</span>
+            <span><i style="background:var(--warn)"></i> Unconfirmed &mdash; setup good, markets not corroborating</span>
+            <span><i style="background:var(--negative)"></i> Deteriorating &mdash; fundamentals breaking down</span>
+            <span><i style="background:var(--muted)"></i> Priced in / Neutral &mdash; no edge</span>
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="section-title">Worked examples (current mock data)</div>
+          <table class="guide-examples">
+            <thead><tr><th>Country</th><th>regime</th><th>gap</th><th>conf</th><th>Rule that fires</th><th>Verdict</th></tr></thead>
+            <tbody>
+              <tr><td>China</td><td class="num">&minus;0.31</td><td class="num">&minus;0.16</td><td class="num">&minus;0.29</td><td>score &#8804; &minus;0.10</td><td><strong>Deteriorating</strong></td></tr>
+              <tr><td>Argentina</td><td class="num">+0.66</td><td class="num">+0.61</td><td class="num">+0.46</td><td>gap &#8805; 0.30, confirmed</td><td><strong>Repricing</strong></td></tr>
+              <tr><td>Greece</td><td class="num">+0.66</td><td class="num">+0.16</td><td class="num">+0.51</td><td>score &amp; gap &#8805; 0.10, confirmed</td><td><strong>Early</strong></td></tr>
+              <tr><td>Turkey</td><td class="num">+0.27</td><td class="num">+0.17</td><td class="num">+0.23</td><td>qualifies for Early, but conf &lt; 0.25</td><td><strong>Unconfirmed</strong></td></tr>
+              <tr><td>Japan</td><td class="num">+0.34</td><td class="num">&minus;0.11</td><td class="num">+0.23</td><td>gap &lt; 0.10 &rarr; falls through</td><td><strong>Priced in</strong></td></tr>
+              <tr><td>Brazil</td><td class="num">+0.25</td><td class="num">+0.00</td><td class="num">+0.26</td><td>gap &lt; 0.10 &rarr; falls through</td><td><strong>Priced in</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="guide-note">
+          <strong>Two asymmetries worth remembering.</strong> Deteriorating is checked first, so weak fundamentals win even over a large gap.
+          And Priced in / Neutral are never gated &mdash; confirmation only matters when the verdict is telling you to act (Early / Repricing).
+          All thresholds live in <code>regime_config.yaml</code>.
+        </div>
       </div>
     </section>
     <aside id="panel">
@@ -764,9 +930,10 @@
       document.querySelector("#map-view").hidden = tab !== "map";
       document.querySelector("#heatmap-view").hidden = tab !== "heatmap";
       document.querySelector("#regime-view").hidden = tab !== "regime";
+      document.querySelector("#guide-view").hidden = tab !== "guide";
       document.querySelector("#asset-toggles").hidden = tab !== "map";
-      document.querySelector("#panel").hidden = tab === "regime";
-      document.querySelector("main").classList.toggle("regime-full", tab === "regime");
+      document.querySelector("#panel").hidden = tab === "regime" || tab === "guide";
+      document.querySelector("main").classList.toggle("regime-full", tab === "regime" || tab === "guide");
       document.querySelectorAll("button[data-tab]").forEach(b =>
         b.classList.toggle("active", b.dataset.tab === tab));
       if (tab === "map") draw();
