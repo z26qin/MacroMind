@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-06-03",
+  "as_of": "2026-06-12",
   "methodology_version": "v0.1",
   "regime_universe": [
     "Argentina",
@@ -9,6 +9,7 @@
     "China",
     "Brazil"
   ],
+  "confirmation_min": 0.25,
   "countries": {
     "Argentina": {
       "country": "Argentina",
@@ -101,7 +102,7 @@
       "narrative_score": 0.1,
       "narrative_gap": 0.17,
       "confirmation_score": 0.2286,
-      "verdict": "Early",
+      "verdict": "Unconfirmed",
       "buckets": {
         "policy": 0.3,
         "liquidity": 0.2,
