@@ -30,14 +30,26 @@ def clip_unit(value: float) -> float:
     return float(max(-1.0, min(1.0, value)))
 
 
-def regime_verdict(regime_score: float, narrative_gap: float, thresholds: dict) -> str:
+def regime_verdict(
+    regime_score: float,
+    narrative_gap: float,
+    confirmation: float,
+    thresholds: dict,
+) -> str:
+    """Verdict ladder, with the activation verdicts gated on cross-asset confirmation.
+
+    "Repricing" and "Early" additionally require confirmation >= confirmation_min;
+    when the setup qualifies but markets don't corroborate it, the verdict is
+    "Unconfirmed". Non-activation verdicts are never gated.
+    """
     if regime_score <= thresholds["deteriorating_max"]:
         return "Deteriorating"
+    confirmed = confirmation >= thresholds["confirmation_min"]
     if narrative_gap >= thresholds["repricing_gap"]:
-        return "Repricing"
+        return "Repricing" if confirmed else "Unconfirmed"
     active = thresholds["active_min"]
     if regime_score >= active and narrative_gap >= active:
-        return "Early"
+        return "Early" if confirmed else "Unconfirmed"
     if regime_score >= active:
         return "Priced in"
     return "Neutral"
@@ -58,7 +70,7 @@ def load_regime_config(path: Path = REGIME_CONFIG_PATH) -> dict:
             raise ValueError(f"Malformed regime config {path}: weight {bucket} must be numeric")
     if not isinstance(verdict, dict):
         raise ValueError(f"Malformed regime config {path}: missing verdict thresholds")
-    for key in ("deteriorating_max", "repricing_gap", "active_min"):
+    for key in ("deteriorating_max", "repricing_gap", "active_min", "confirmation_min"):
         if not isinstance(verdict.get(key), (int, float)):
             raise ValueError(f"Malformed regime config {path}: verdict.{key} must be numeric")
     return config
@@ -111,7 +123,7 @@ def compute_regime_scores(df: pd.DataFrame, config: dict) -> dict:
             "narrative_score": round(narrative_score, 4),
             "narrative_gap": round(narrative_gap, 4),
             "confirmation_score": round(confirmation, 4),
-            "verdict": regime_verdict(regime_score, narrative_gap, thresholds),
+            "verdict": regime_verdict(regime_score, narrative_gap, confirmation, thresholds),
             "buckets": {b: round(float(row[b]), 4) for b in STRUCTURAL_BUCKETS},
             "cross_asset_confirmation": {c: round(float(row[c]), 4) for c in CROSS_ASSET_CHANNELS},
         }

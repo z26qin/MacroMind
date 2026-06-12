@@ -9,3 +9,4 @@ verdict:
   deteriorating_max: -0.10
   repricing_gap: 0.30
   active_min: 0.10
+  confirmation_min: 0.25

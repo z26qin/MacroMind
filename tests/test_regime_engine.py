@@ -5,13 +5,52 @@ import regime_engine as re_eng
 EXPECTED_UNIVERSE = ["Argentina", "Greece", "Turkey", "Japan", "China", "Brazil"]
 
 
-def test_regime_verdict_ladder():
-    th = {"deteriorating_max": -0.10, "repricing_gap": 0.30, "active_min": 0.10}
-    assert re_eng.regime_verdict(-0.5, 0.0, th) == "Deteriorating"
-    assert re_eng.regime_verdict(0.6, 0.4, th) == "Repricing"
-    assert re_eng.regime_verdict(0.5, 0.15, th) == "Early"
-    assert re_eng.regime_verdict(0.5, 0.0, th) == "Priced in"
-    assert re_eng.regime_verdict(0.05, 0.0, th) == "Neutral"
+TH = {"deteriorating_max": -0.10, "repricing_gap": 0.30, "active_min": 0.10, "confirmation_min": 0.25}
+
+
+def test_regime_verdict_ladder_with_confirmation():
+    assert re_eng.regime_verdict(-0.5, 0.0, 1.0, TH) == "Deteriorating"
+    assert re_eng.regime_verdict(0.6, 0.4, 1.0, TH) == "Repricing"
+    assert re_eng.regime_verdict(0.5, 0.15, 1.0, TH) == "Early"
+    assert re_eng.regime_verdict(0.5, 0.0, 1.0, TH) == "Priced in"
+    assert re_eng.regime_verdict(0.05, 0.0, 1.0, TH) == "Neutral"
+
+
+def test_low_confirmation_downgrades_activation_verdicts_only():
+    weak = 0.10  # below the 0.25 gate
+    assert re_eng.regime_verdict(0.6, 0.4, weak, TH) == "Unconfirmed"   # was Repricing
+    assert re_eng.regime_verdict(0.5, 0.15, weak, TH) == "Unconfirmed"  # was Early
+    # Non-activation verdicts are not gated
+    assert re_eng.regime_verdict(-0.5, 0.0, weak, TH) == "Deteriorating"
+    assert re_eng.regime_verdict(0.5, 0.0, weak, TH) == "Priced in"
+    assert re_eng.regime_verdict(0.05, 0.0, weak, TH) == "Neutral"
+    # Boundary: exactly at the gate counts as confirmed
+    assert re_eng.regime_verdict(0.6, 0.4, 0.25, TH) == "Repricing"
+
+
+def test_turkey_is_unconfirmed_with_mock_data():
+    cfg = re_eng.load_regime_config()
+    df = re_eng.load_regime_inputs()
+    scores = re_eng.compute_regime_scores(df, cfg)
+    assert scores["Turkey"]["verdict"] == "Unconfirmed"
+    assert scores["Turkey"]["confirmation_score"] == pytest.approx(0.2286, abs=1e-4)
+    # The other five verdicts are unchanged by the gate
+    assert scores["Argentina"]["verdict"] == "Repricing"
+    assert scores["Greece"]["verdict"] == "Early"
+    assert scores["Japan"]["verdict"] == "Priced in"
+    assert scores["China"]["verdict"] == "Deteriorating"
+    assert scores["Brazil"]["verdict"] == "Priced in"
+
+
+def test_load_regime_config_requires_confirmation_min(tmp_path):
+    bad = tmp_path / "bad.yaml"
+    bad.write_text(
+        "regime_weights: {policy: 0.3, liquidity: 0.2, foreign_access: 0.2, rating_momentum: 0.2, index_catalyst: 0.1}\n"
+        "verdict: {deteriorating_max: -0.1, repricing_gap: 0.3, active_min: 0.1}\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="confirmation_min"):
+        re_eng.load_regime_config(bad)
 
 
 def test_load_regime_inputs_has_six_countries():
