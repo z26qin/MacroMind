@@ -144,6 +144,7 @@ def build_regime_snapshot(df: pd.DataFrame, config: dict, templates: dict, as_of
         "as_of": as_of or date.today().isoformat(),
         "methodology_version": METHODOLOGY_VERSION,
         "regime_universe": list(REGIME_UNIVERSE),
+        "confirmation_min": float(config["verdict"]["confirmation_min"]),
         "countries": countries,
     }
 

@@ -97,9 +97,16 @@ def snapshot(tmp_path):
 
 
 def test_top_level_schema(snapshot):
-    assert set(snapshot) == {"as_of", "methodology_version", "regime_universe", "countries"}
+    assert set(snapshot) == {
+        "as_of",
+        "methodology_version",
+        "regime_universe",
+        "confirmation_min",
+        "countries",
+    }
     assert snapshot["regime_universe"] == EXPECTED_UNIVERSE
     assert list(snapshot["countries"]) == EXPECTED_UNIVERSE
+    assert snapshot["confirmation_min"] == pytest.approx(0.25)
 
 
 def test_narrative_gap_identity(snapshot):
