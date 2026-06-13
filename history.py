@@ -63,6 +63,19 @@ def _default_run(args: list[str]) -> str:
     return subprocess.run(args, capture_output=True, text=True, check=True).stdout
 
 
+# Walking git history costs one subprocess per committed snapshot, so the result
+# is memoized on the current HEAD sha: the daily CI commit moves HEAD, which is
+# exactly when the series changes, so the cache invalidates precisely on new data.
+_HISTORY_CACHE: dict[tuple[str, str], dict] = {}
+
+
+def _head_sha(run: Callable[[list[str]], str]) -> str | None:
+    try:
+        return run(["git", "rev-parse", "HEAD"]).strip()
+    except Exception:
+        return None
+
+
 def load_snapshots_from_git(
     path: str = "snapshot.json",
     run: Callable[[list[str]], str] = _default_run,
@@ -86,7 +99,15 @@ def compute_history(
     snapshot_path: str = "snapshot.json",
     run: Callable[[list[str]], str] = _default_run,
 ) -> dict:
-    return build_history(load_snapshots_from_git(snapshot_path, run=run))
+    head = _head_sha(run)
+    if head is not None:
+        cached = _HISTORY_CACHE.get((snapshot_path, head))
+        if cached is not None:
+            return cached
+    result = build_history(load_snapshots_from_git(snapshot_path, run=run))
+    if head is not None:
+        _HISTORY_CACHE[(snapshot_path, head)] = result
+    return result
 
 
 if __name__ == "__main__":

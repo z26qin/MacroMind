@@ -70,9 +70,49 @@ def test_load_snapshots_from_git_skips_unparseable_blobs():
 
 def test_compute_history_wires_git_and_build():
     def fake_run(args):
+        if args[:3] == ["git", "rev-parse", "HEAD"]:
+            return "headsha\n"
         if args[:2] == ["git", "log"]:
             return "aaa\n"
         return '{"as_of": "2026-06-02", "economies": {"Brazil": {"composite": {"final": 0.2}, "signals": {}}}}'
 
+    history._HISTORY_CACHE.clear()
     out = history.compute_history("snapshot.json", run=fake_run)
     assert out["history"]["Brazil"]["composite"] == [{"date": "2026-06-02", "value": 0.2}]
+
+
+def test_compute_history_caches_on_head_sha():
+    log_calls = []
+
+    def fake_run(args):
+        if args[:3] == ["git", "rev-parse", "HEAD"]:
+            return "headsha1\n"
+        if args[:2] == ["git", "log"]:
+            log_calls.append(args)
+            return "aaa\n"
+        return '{"as_of": "2026-06-02", "economies": {"Brazil": {"composite": {"final": 0.2}, "signals": {}}}}'
+
+    history._HISTORY_CACHE.clear()
+    out1 = history.compute_history("snapshot.json", run=fake_run)
+    out2 = history.compute_history("snapshot.json", run=fake_run)
+    assert out1 == out2
+    assert len(log_calls) == 1  # second call served from cache, no git walk
+
+
+def test_compute_history_busts_cache_when_head_changes():
+    head = ["sha1"]
+    log_calls = []
+
+    def fake_run(args):
+        if args[:3] == ["git", "rev-parse", "HEAD"]:
+            return head[0]
+        if args[:2] == ["git", "log"]:
+            log_calls.append(args)
+            return "aaa\n"
+        return '{"as_of": "2026-06-02", "economies": {}}'
+
+    history._HISTORY_CACHE.clear()
+    history.compute_history("snapshot.json", run=fake_run)
+    head[0] = "sha2"  # a new snapshot commit landed
+    history.compute_history("snapshot.json", run=fake_run)
+    assert len(log_calls) == 2  # cache busted, git re-walked
