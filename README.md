@@ -1,6 +1,6 @@
 # Cross-Asset Macro Dashboard
 
-A runnable prototype macro dashboard for cross-asset signals across a small, explicit economy universe. The app uses mock data only, with a transparent deterministic signal engine and a hardcoded RAG/narrative signal stub.
+A runnable prototype macro dashboard for cross-asset signals across a small, explicit economy universe, built on a transparent deterministic signal engine and a hardcoded RAG/narrative signal stub. The signal engine runs in two modes: a fully offline mock-data mode (the default) and a live mode that pulls macro, consensus, and market data from public no-key APIs (World Bank, IMF WEO, Yahoo Finance). The committed `snapshot.json` is a live build — see [Run](#run) and [Current Limitations](#current-limitations) for what is live vs. still mock.
 
 ## Architecture
 
@@ -16,7 +16,7 @@ A runnable prototype macro dashboard for cross-asset signals across a small, exp
 - `static/index.html`: vanilla HTML/JS dashboard using D3 and topojson
 - `snapshot.json`: stable backend-to-frontend interface
 
-No database, frontend framework, external data API, embedding call, or LLM call is used.
+No database, frontend framework, embedding call, or LLM call is used. The only external calls are the optional live-mode data APIs noted above; mock mode is fully offline.
 
 ## Signal Methodology
 
