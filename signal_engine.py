@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 from datetime import date
 from pathlib import Path
+from typing import Callable, Iterable, TypeVar
 
 import numpy as np
 import pandas as pd
@@ -76,6 +77,21 @@ REQUIRED_MARKET_COLUMNS = {
     "house_price_yoy",
 }
 
+# Single source of truth for the (actual, consensus, surprise) column triples.
+# add_surprises consumes all of these; the live overlay derives its consensus
+# and surprise column maps from the LIVE_MACRO_COLUMNS subset below.
+SURPRISE_SPECS = (
+    ("inflation_yoy", "inflation_consensus", "inflation_surprise"),
+    ("gdp_growth", "gdp_consensus", "growth_surprise"),
+    ("unemployment", "unemployment_consensus", "unemployment_surprise"),
+    ("policy_rate", "policy_rate_consensus", "policy_surprise"),
+    ("pmi", "pmi_consensus", "pmi_surprise"),
+)
+
+# The macro columns that have a live World Bank actual and an IMF WEO forecast,
+# i.e. the ones eligible for the expected-change consensus overlay.
+LIVE_MACRO_COLUMNS = ("inflation_yoy", "gdp_growth", "unemployment")
+
 
 def clip_signal(value: float) -> float:
     return float(np.clip(value, -1.0, 1.0))
@@ -107,6 +123,28 @@ def percentile_to_signal(series: pd.Series) -> pd.Series:
 
     pct = (series.rank(method="average") - 1.0) / (len(series) - 1.0)
     return (2.0 * pct - 1.0).clip(-1.0, 1.0)
+
+
+_T = TypeVar("_T")
+
+
+def resolve_all_or_none(
+    economies: Iterable[str],
+    resolve: Callable[[str], _T | None],
+) -> dict[str, _T] | None:
+    """Resolve a value for every economy, or return None if any is missing.
+
+    Encodes the live-overlay rule that a column goes live only when every
+    economy has data: one ``None`` short-circuits and falls the whole column
+    back to mock.
+    """
+    resolved: dict[str, _T] = {}
+    for economy in economies:
+        value = resolve(economy)
+        if value is None:
+            return None
+        resolved[economy] = value
+    return resolved
 
 
 def load_signal_config(path: Path = CONFIG_PATH) -> dict:
@@ -237,43 +275,48 @@ def load_macro_inputs(
 
     imf_kwargs = {} if imf_fetch_json is None else {"fetch_json": imf_fetch_json}
     forecasts = imf_weo.load_imf_forecasts(tuple(df.index), **imf_kwargs)
+    expected_change = _apply_imf_expected_change(df, provenance, forecasts)
 
-    consensus_column = {
-        "inflation_yoy": "inflation_consensus",
-        "gdp_growth": "gdp_consensus",
-        "unemployment": "unemployment_consensus",
-    }
-    surprise_column = {
-        "inflation_yoy": "inflation_surprise",
-        "gdp_growth": "growth_surprise",
-        "unemployment": "unemployment_surprise",
-    }
+    if df.isna().any().any():
+        raise ValueError("Macro inputs contain missing values after live overlay")
+    return df, provenance, frozenset(expected_change)
 
-    # All-or-nothing per column: only treat a column as IMF-backed expected
-    # change when every economy has a World Bank actual year T and an IMF
-    # forecast for T+1. Otherwise leave the mock consensus untouched.
+
+def _apply_imf_expected_change(
+    df: pd.DataFrame,
+    provenance: dict[str, dict[str, str]],
+    forecasts: dict[str, dict[str, dict[int, float]]],
+) -> set[str]:
+    """Overlay IMF next-year forecasts as the consensus, all-or-nothing per column.
+
+    A live macro column switches to expected-change mode only when every economy
+    has a World Bank actual (year T) and an IMF forecast for T+1; then its
+    consensus cell is replaced with that forecast and its surprise column is
+    added to the returned set. Mutates df and provenance.
+    """
+    consensus_column = {a: c for a, c, _ in SURPRISE_SPECS if a in LIVE_MACRO_COLUMNS}
+    surprise_column = {a: s for a, _, s in SURPRISE_SPECS if a in LIVE_MACRO_COLUMNS}
+
+    def imf_forecast(economy: str, macro_col: str) -> tuple[float, int] | None:
+        prov = provenance[economy][macro_col]
+        if not prov.startswith("world_bank:"):
+            return None
+        forecast_year = int(prov.split(":")[1]) + 1
+        forecast = forecasts.get(economy, {}).get(macro_col, {}).get(forecast_year)
+        return None if forecast is None else (forecast, forecast_year)
+
     expected_change: set[str] = set()
     for macro_col, cons_col in consensus_column.items():
-        resolved: dict[str, tuple[float, int]] = {}
-        for economy in df.index:
-            prov = provenance[economy][macro_col]
-            if not prov.startswith("world_bank:"):
-                break
-            actual_year = int(prov.split(":")[1])
-            forecast = forecasts.get(economy, {}).get(macro_col, {}).get(actual_year + 1)
-            if forecast is None:
-                break
-            resolved[economy] = (forecast, actual_year + 1)
-        if len(resolved) != len(df.index):
+        resolved = resolve_all_or_none(
+            df.index, lambda economy, col=macro_col: imf_forecast(economy, col)
+        )
+        if resolved is None:
             continue  # not fully IMF-backed -> keep mock consensus for this column
         for economy, (forecast, forecast_year) in resolved.items():
             df.loc[economy, cons_col] = forecast
             provenance[economy][cons_col] = f"imf_weo:{forecast_year}"
         expected_change.add(surprise_column[macro_col])
-
-    if df.isna().any().any():
-        raise ValueError("Macro inputs contain missing values after live overlay")
-    return df, provenance, frozenset(expected_change)
+    return expected_change
 
 
 MARKET_LIVE_COLUMNS = ("fx_3m_return", "equity_3m_return")
@@ -300,13 +343,10 @@ def overlay_market_inputs(
     returns = market.load_market_returns(tuple(df.index), **kwargs)
 
     for column in MARKET_LIVE_COLUMNS:
-        resolved: dict[str, tuple[float, str]] = {}
-        for economy in df.index:
-            value = returns.get(economy, {}).get(column)
-            if value is None:
-                break
-            resolved[economy] = value
-        if len(resolved) != len(df.index):
+        resolved = resolve_all_or_none(
+            df.index, lambda economy, col=column: returns.get(economy, {}).get(col)
+        )
+        if resolved is None:
             continue  # not fully live -> keep mock for this column
         for economy, (return_pct, asof) in resolved.items():
             df.loc[economy, column] = return_pct
@@ -334,16 +374,6 @@ def overlay_fx_carry(
         df.loc[economy, "fx_carry"] = float(df.loc[economy, "policy_rate"]) - us_rate
         provenance[economy]["fx_carry"] = "derived:policy_rate_diff"
     return df
-
-
-# (actual column, consensus column, surprise column)
-SURPRISE_SPECS = (
-    ("inflation_yoy", "inflation_consensus", "inflation_surprise"),
-    ("gdp_growth", "gdp_consensus", "growth_surprise"),
-    ("unemployment", "unemployment_consensus", "unemployment_surprise"),
-    ("policy_rate", "policy_rate_consensus", "policy_surprise"),
-    ("pmi", "pmi_consensus", "pmi_surprise"),
-)
 
 
 def add_surprises(
