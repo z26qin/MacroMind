@@ -480,6 +480,79 @@ def explain_contributions(row: pd.Series, weights: dict[str, float]) -> tuple[li
     return positive, negative
 
 
+def _narrative_state(rag_signal: float, deterministic: float) -> str:
+    """Whether the RAG narrative agrees with the deterministic call.
+
+    Asymmetric by design: callers only ever let "disagrees" lower conviction;
+    "agrees" never raises it, because the RAG overlay is still a hardcoded stub
+    and must not be allowed to inflate confidence.
+    """
+    if rag_signal == 0 or deterministic == 0:
+        return "no_view"
+    return "agrees" if (rag_signal > 0) == (deterministic > 0) else "disagrees"
+
+
+def _conviction_band(net_lean: float, top_driver_share: float, narrative: str) -> str:
+    """Roll breadth + narrative agreement into a high/medium/low band."""
+    if net_lean >= 0.60 and top_driver_share <= 0.50:
+        base = "high"
+    elif net_lean < 0.20 or top_driver_share > 0.60:
+        base = "low"
+    else:
+        base = "medium"
+    if narrative == "disagrees":
+        base = {"high": "medium", "medium": "low", "low": "low"}[base]
+    return base
+
+
+def compute_conviction(
+    row: pd.Series,
+    asset_weights: dict[str, float],
+    deterministic: float,
+    rag_signal: float,
+    final: float,
+) -> dict:
+    """Driver-breadth + narrative-agreement conviction for one asset signal.
+
+    Breadth and narrative both reference the deterministic call direction.
+    ``net_lean`` is in [-1, 1]; negative means the drivers point against the
+    call, i.e. it survives only on the cross-sectional ranking. Breadth is
+    computed over the full weight set, not the truncated driver lists stored
+    in the snapshot.
+    """
+    narrative = _narrative_state(rag_signal, deterministic)
+    contributions = {
+        feature: float(row[feature]) * float(weight)
+        for feature, weight in asset_weights.items()
+    }
+    gross = sum(abs(c) for c in contributions.values())
+
+    if deterministic == 0 or abs(final) < 0.10 or gross == 0:
+        return {
+            "band": "na",
+            "net_lean": 0.0,
+            "top_driver_share": 0.0,
+            "top_driver": None,
+            "narrative": narrative,
+        }
+
+    call_dir = 1.0 if deterministic > 0 else -1.0
+    aligned = sum(abs(c) for c in contributions.values() if c * call_dir > 0)
+    opposing = sum(abs(c) for c in contributions.values() if c * call_dir < 0)
+    net_lean = (aligned - opposing) / gross
+
+    top_feature = max(contributions, key=lambda f: abs(contributions[f]))
+    top_driver_share = abs(contributions[top_feature]) / gross
+
+    return {
+        "band": _conviction_band(net_lean, top_driver_share, narrative),
+        "net_lean": round(net_lean, 4),
+        "top_driver_share": round(top_driver_share, 4),
+        "top_driver": top_feature.replace("_rank", ""),
+        "narrative": narrative,
+    }
+
+
 def build_snapshot(
     df: pd.DataFrame,
     config: dict,

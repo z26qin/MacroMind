@@ -338,3 +338,97 @@ def test_load_signal_config_rejects_blend_not_summing_to_one(tmp_path):
     )
     with pytest.raises(ValueError, match="must sum to 1.0"):
         se.load_signal_config(bad)
+
+
+import pandas as pd
+
+from signal_engine import compute_conviction, _conviction_band, _narrative_state
+
+
+def _row(**features):
+    return pd.Series(features)
+
+
+def test_narrative_state_no_view_when_rag_zero():
+    assert _narrative_state(0.0, 1.0) == "no_view"
+    assert _narrative_state(0.0, -1.0) == "no_view"
+
+
+def test_narrative_state_agrees_on_same_sign():
+    assert _narrative_state(0.4, 1.0) == "agrees"
+    assert _narrative_state(-0.4, -1.0) == "agrees"
+
+
+def test_narrative_state_disagrees_on_opposite_sign():
+    assert _narrative_state(0.4, -1.0) == "disagrees"
+    assert _narrative_state(-0.4, 1.0) == "disagrees"
+
+
+def test_band_high_requires_broad_and_unconcentrated():
+    assert _conviction_band(0.7, 0.4, "no_view") == "high"
+
+
+def test_band_low_when_concentrated_even_if_broad():
+    assert _conviction_band(0.9, 0.7, "no_view") == "low"
+
+
+def test_band_disagree_drops_one_level():
+    assert _conviction_band(0.7, 0.4, "disagrees") == "medium"
+    assert _conviction_band(0.4, 0.4, "disagrees") == "low"
+
+
+def test_band_agree_never_raises():
+    assert _conviction_band(0.4, 0.4, "agrees") == "medium"
+    assert _conviction_band(0.1, 0.4, "agrees") == "low"
+
+
+def test_conviction_all_aligned_is_high():
+    c = compute_conviction(_row(a_rank=1.0, b_rank=1.0),
+                           {"a_rank": 0.5, "b_rank": 0.5}, 1.0, 0.0, 0.8)
+    assert c["net_lean"] == 1.0
+    assert c["top_driver_share"] == 0.5
+    assert c["band"] == "high"
+    assert c["narrative"] == "no_view"
+
+
+def test_conviction_negative_net_lean_when_drivers_oppose_call():
+    # contribs a=-0.5, b=+0.1; deterministic call is +1 (cross-sectional)
+    c = compute_conviction(_row(a_rank=-1.0, b_rank=0.2),
+                           {"a_rank": 0.5, "b_rank": 0.5}, 1.0, 0.0, 0.5)
+    assert c["net_lean"] < 0
+    assert c["band"] == "low"
+
+
+def test_conviction_dominant_driver_is_low():
+    c = compute_conviction(_row(a_rank=1.0, b_rank=0.05),
+                           {"a_rank": 1.0, "b_rank": 1.0}, 1.0, 0.0, 0.5)
+    assert c["top_driver_share"] > 0.60
+    assert c["band"] == "low"
+    assert c["top_driver"] == "a"
+
+
+def test_conviction_disagree_drops_band():
+    c = compute_conviction(_row(a_rank=1.0, b_rank=1.0),
+                           {"a_rank": 0.5, "b_rank": 0.5}, 1.0, -0.3, 0.5)
+    assert c["narrative"] == "disagrees"
+    assert c["band"] == "medium"
+
+
+def test_conviction_agree_does_not_raise_low():
+    c = compute_conviction(_row(a_rank=1.0, b_rank=0.05),
+                           {"a_rank": 1.0, "b_rank": 1.0}, 1.0, 0.5, 0.5)
+    assert c["narrative"] == "agrees"
+    assert c["band"] == "low"
+
+
+def test_conviction_neutral_final_is_na():
+    c = compute_conviction(_row(a_rank=1.0, b_rank=1.0),
+                           {"a_rank": 0.5, "b_rank": 0.5}, 0.05, 0.0, 0.05)
+    assert c["band"] == "na"
+    assert c["top_driver"] is None
+
+
+def test_conviction_zero_gross_is_na():
+    c = compute_conviction(_row(a_rank=0.0, b_rank=0.0),
+                           {"a_rank": 0.5, "b_rank": 0.5}, 0.5, 0.0, 0.5)
+    assert c["band"] == "na"
