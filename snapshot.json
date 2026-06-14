@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-06-13",
+  "as_of": "2026-06-14",
   "methodology_version": "v0.1",
   "data_source": "live",
   "universe": [
@@ -45,9 +45,9 @@
             },
             {
               "feature": "fx_3m_return_rank",
-              "value": 0.6,
+              "value": 0.2,
               "weight": 0.2,
-              "contribution": 0.12
+              "contribution": 0.04
             }
           ],
           "top_negative_drivers": [
@@ -69,7 +69,14 @@
               "weight": -0.05,
               "contribution": -0.01
             }
-          ]
+          ],
+          "conviction": {
+            "band": "medium",
+            "net_lean": 0.4667,
+            "top_driver_share": 0.4167,
+            "top_driver": "policy_surprise",
+            "narrative": "no_view"
+          }
         },
         "rates": {
           "deterministic": 1.0,
@@ -100,7 +107,14 @@
               "contribution": 0.15
             }
           ],
-          "top_negative_drivers": []
+          "top_negative_drivers": [],
+          "conviction": {
+            "band": "high",
+            "net_lean": 1.0,
+            "top_driver_share": 0.473,
+            "top_driver": "inflation_surprise",
+            "narrative": "no_view"
+          }
         },
         "equity": {
           "deterministic": -0.2,
@@ -140,7 +154,14 @@
               "weight": 0.25,
               "contribution": -0.15
             }
-          ]
+          ],
+          "conviction": {
+            "band": "low",
+            "net_lean": 0.1379,
+            "top_driver_share": 0.3448,
+            "top_driver": "equity_forward_pe",
+            "narrative": "disagrees"
+          }
         },
         "real_estate": {
           "deterministic": 0.2,
@@ -184,7 +205,14 @@
               "weight": -0.1,
               "contribution": -0.02
             }
-          ]
+          ],
+          "conviction": {
+            "band": "medium",
+            "net_lean": 0.2609,
+            "top_driver_share": 0.5435,
+            "top_driver": "policy_surprise",
+            "narrative": "no_view"
+          }
         }
       },
       "composite": {
@@ -245,7 +273,14 @@
               "weight": 0.2,
               "contribution": -0.2
             }
-          ]
+          ],
+          "conviction": {
+            "band": "medium",
+            "net_lean": 0.3333,
+            "top_driver_share": 0.4167,
+            "top_driver": "policy_surprise",
+            "narrative": "no_view"
+          }
         },
         "rates": {
           "deterministic": -0.2,
@@ -283,7 +318,14 @@
               "weight": -0.25,
               "contribution": -0.05
             }
-          ]
+          ],
+          "conviction": {
+            "band": "medium",
+            "net_lean": 0.3636,
+            "top_driver_share": 0.3182,
+            "top_driver": "inflation_surprise",
+            "narrative": "no_view"
+          }
         },
         "equity": {
           "deterministic": 0.6,
@@ -321,7 +363,14 @@
               "weight": 0.25,
               "contribution": -0.05
             }
-          ]
+          ],
+          "conviction": {
+            "band": "high",
+            "net_lean": 0.7368,
+            "top_driver_share": 0.3947,
+            "top_driver": "pmi_surprise",
+            "narrative": "no_view"
+          }
         },
         "real_estate": {
           "deterministic": -0.2,
@@ -367,7 +416,14 @@
               "weight": -0.25,
               "contribution": -0.25
             }
-          ]
+          ],
+          "conviction": {
+            "band": "low",
+            "net_lean": 0.1,
+            "top_driver_share": 0.3,
+            "top_driver": "rate_3m_change",
+            "narrative": "agrees"
+          }
         }
       },
       "composite": {
@@ -428,7 +484,14 @@
               "weight": 0.3,
               "contribution": -0.06
             }
-          ]
+          ],
+          "conviction": {
+            "band": "medium",
+            "net_lean": 0.2857,
+            "top_driver_share": 0.3571,
+            "top_driver": "fx_3m_return",
+            "narrative": "no_view"
+          }
         },
         "rates": {
           "deterministic": 0.6,
@@ -466,7 +529,14 @@
               "weight": -0.35,
               "contribution": -0.07
             }
-          ]
+          ],
+          "conviction": {
+            "band": "high",
+            "net_lean": 0.6111,
+            "top_driver_share": 0.3333,
+            "top_driver": "unemployment_surprise",
+            "narrative": "no_view"
+          }
         },
         "equity": {
           "deterministic": -0.6,
@@ -506,7 +576,14 @@
               "weight": 0.3,
               "contribution": -0.06
             }
-          ]
+          ],
+          "conviction": {
+            "band": "high",
+            "net_lean": 0.7826,
+            "top_driver_share": 0.4348,
+            "top_driver": "equity_forward_pe",
+            "narrative": "agrees"
+          }
         },
         "real_estate": {
           "deterministic": -1.0,
@@ -550,7 +627,14 @@
               "weight": -0.1,
               "contribution": -0.06
             }
-          ]
+          ],
+          "conviction": {
+            "band": "medium",
+            "net_lean": 0.4194,
+            "top_driver_share": 0.3226,
+            "top_driver": "reit_3m_return",
+            "narrative": "no_view"
+          }
         }
       },
       "composite": {
@@ -576,9 +660,9 @@
       },
       "signals": {
         "fx": {
-          "deterministic": 0.2,
+          "deterministic": 0.4,
           "rag": -0.2,
-          "final": 0.14,
+          "final": 0.31,
           "driver": "Positive FX signal led by growth surprise and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "Qualitative tone is cautious due to policy normalization uncertainty.",
           "rag_confidence": 0.6,
@@ -595,9 +679,9 @@
             },
             {
               "feature": "fx_3m_return_rank",
-              "value": 0.2,
+              "value": 0.6,
               "weight": 0.2,
-              "contribution": 0.04
+              "contribution": 0.12
             },
             {
               "feature": "unemployment_surprise_rank",
@@ -619,7 +703,14 @@
               "weight": 0.25,
               "contribution": -0.05
             }
-          ]
+          ],
+          "conviction": {
+            "band": "low",
+            "net_lean": 0.2647,
+            "top_driver_share": 0.4412,
+            "top_driver": "growth_surprise",
+            "narrative": "disagrees"
+          }
         },
         "rates": {
           "deterministic": -1.0,
@@ -657,7 +748,14 @@
               "weight": 0.2,
               "contribution": -0.04
             }
-          ]
+          ],
+          "conviction": {
+            "band": "medium",
+            "net_lean": 0.8824,
+            "top_driver_share": 0.5147,
+            "top_driver": "inflation_surprise",
+            "narrative": "no_view"
+          }
         },
         "equity": {
           "deterministic": 1.0,
@@ -695,7 +793,14 @@
               "weight": -0.2,
               "contribution": -0.04
             }
-          ]
+          ],
+          "conviction": {
+            "band": "high",
+            "net_lean": 0.8919,
+            "top_driver_share": 0.4054,
+            "top_driver": "growth_surprise",
+            "narrative": "no_view"
+          }
         },
         "real_estate": {
           "deterministic": -0.6,
@@ -739,13 +844,20 @@
               "weight": 0.2,
               "contribution": -0.12
             }
-          ]
+          ],
+          "conviction": {
+            "band": "medium",
+            "net_lean": 0.35,
+            "top_driver_share": 0.375,
+            "top_driver": "house_price_yoy",
+            "narrative": "no_view"
+          }
         }
       },
       "composite": {
-        "deterministic": -0.1,
+        "deterministic": -0.05,
         "rag": -0.05,
-        "final": -0.1019
+        "final": -0.0594
       }
     },
     "Brazil": {
@@ -797,18 +909,25 @@
               "contribution": -0.3
             },
             {
+              "feature": "fx_3m_return_rank",
+              "value": -0.6,
+              "weight": 0.2,
+              "contribution": -0.12
+            },
+            {
               "feature": "unemployment_surprise_rank",
               "value": 1.0,
               "weight": -0.05,
               "contribution": -0.05
-            },
-            {
-              "feature": "fx_3m_return_rank",
-              "value": -0.2,
-              "weight": 0.2,
-              "contribution": -0.04
             }
-          ]
+          ],
+          "conviction": {
+            "band": "low",
+            "net_lean": 0.1463,
+            "top_driver_share": 0.3659,
+            "top_driver": "growth_surprise",
+            "narrative": "disagrees"
+          }
         },
         "rates": {
           "deterministic": 0.2,
@@ -846,7 +965,14 @@
               "weight": -0.2,
               "contribution": -0.12
             }
-          ]
+          ],
+          "conviction": {
+            "band": "low",
+            "net_lean": 0.1538,
+            "top_driver_share": 0.3205,
+            "top_driver": "growth_surprise",
+            "narrative": "no_view"
+          }
         },
         "equity": {
           "deterministic": -1.0,
@@ -877,7 +1003,14 @@
               "weight": -0.2,
               "contribution": -0.12
             }
-          ]
+          ],
+          "conviction": {
+            "band": "high",
+            "net_lean": 1.0,
+            "top_driver_share": 0.4167,
+            "top_driver": "growth_surprise",
+            "narrative": "no_view"
+          }
         },
         "real_estate": {
           "deterministic": 1.0,
@@ -921,7 +1054,14 @@
               "weight": -0.1,
               "contribution": -0.1
             }
-          ]
+          ],
+          "conviction": {
+            "band": "medium",
+            "net_lean": 0.3421,
+            "top_driver_share": 0.3947,
+            "top_driver": "rate_3m_change",
+            "narrative": "no_view"
+          }
         }
       },
       "composite": {
@@ -947,9 +1087,9 @@
       },
       "signals": {
         "fx": {
-          "deterministic": 0.6,
+          "deterministic": 0.4,
           "rag": 0.0,
-          "final": 0.5475,
+          "final": 0.365,
           "driver": "Positive FX signal led by growth surprise and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "No strong mock qualitative narrative is assigned for this economy and asset class.",
           "rag_confidence": 0.35,
@@ -977,18 +1117,25 @@
           ],
           "top_negative_drivers": [
             {
-              "feature": "fx_3m_return_rank",
-              "value": -0.6,
-              "weight": 0.2,
-              "contribution": -0.12
-            },
-            {
               "feature": "fx_carry_rank",
               "value": -0.2,
               "weight": 0.2,
               "contribution": -0.04
+            },
+            {
+              "feature": "fx_3m_return_rank",
+              "value": -0.2,
+              "weight": 0.2,
+              "contribution": -0.04
             }
-          ]
+          ],
+          "conviction": {
+            "band": "medium",
+            "net_lean": 0.5294,
+            "top_driver_share": 0.5294,
+            "top_driver": "growth_surprise",
+            "narrative": "no_view"
+          }
         },
         "rates": {
           "deterministic": -0.6,
@@ -1026,7 +1173,14 @@
               "weight": -0.2,
               "contribution": -0.04
             }
-          ]
+          ],
+          "conviction": {
+            "band": "high",
+            "net_lean": 0.6316,
+            "top_driver_share": 0.3947,
+            "top_driver": "growth_surprise",
+            "narrative": "no_view"
+          }
         },
         "equity": {
           "deterministic": 0.2,
@@ -1066,7 +1220,14 @@
               "weight": 0.25,
               "contribution": -0.25
             }
-          ]
+          ],
+          "conviction": {
+            "band": "low",
+            "net_lean": 0.3056,
+            "top_driver_share": 0.3472,
+            "top_driver": "pmi_surprise",
+            "narrative": "disagrees"
+          }
         },
         "real_estate": {
           "deterministic": 0.6,
@@ -1110,13 +1271,20 @@
               "weight": 0.15,
               "contribution": -0.03
             }
-          ]
+          ],
+          "conviction": {
+            "band": "medium",
+            "net_lean": 0.3333,
+            "top_driver_share": 0.5,
+            "top_driver": "rate_3m_change",
+            "narrative": "no_view"
+          }
         }
       },
       "composite": {
-        "deterministic": 0.2,
+        "deterministic": 0.15,
         "rag": -0.05,
-        "final": 0.1706
+        "final": 0.125
       }
     }
   }
