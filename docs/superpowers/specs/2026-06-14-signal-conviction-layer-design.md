@@ -72,13 +72,15 @@ Narrative adjustment (asymmetric):
 - `"disagrees"` → drop one band (High→Medium, Medium→Low, Low→Low)
 - `"agrees"` or `"no_view"` → no change
 
-### Worked validation (committed snapshot, USA)
+### Worked example (illustrative, from a live USA snapshot)
+
+This is a hand-trace of the math, **not** a test fixture — live values drift and mock data differs (see "Testing" for why automated checks use synthetic inputs instead).
 
 - **FX** `deterministic −1.0`: A = 0.44 (policy .25 + growth .18 + unemp .01), O = 0.24 (carry .12 + momentum .12), G = 0.68 → `net_lean = 0.29`, `top_driver_share = 0.37`. Base = Medium; narrative `no_view` → **Medium**.
 - **Rates** `deterministic +1.0`: all drivers support, O = 0 → `net_lean = 1.0`, `top_driver_share = 0.50`. Base = High; narrative `no_view` → **High**.
 - **Equity** `deterministic −0.20`, `rag +0.30`: drivers lean against the bearish call (`net_lean` low/negative) → base ≤ Medium; narrative `disagrees` → drop → **Low**.
 
-Matches the treatments shown in brainstorming (Medium / High / Low).
+This is the High / Medium / Low spread shown in brainstorming. Note the **breadth must be computed over the full weight set**, not the `top_positive_drivers` / `top_negative_drivers` stored in the snapshot — those are truncated to 3+3 by `explain_contributions`, which would bias the metric for assets with more drivers on one side.
 
 ## Snapshot schema
 
@@ -104,11 +106,14 @@ Each entry in `economies[name].signals[asset]` gains:
 
 **Detail panel, per asset block — reorganized so conviction is the first read:**
 
-1. Line 1 (headline): `FX  ▼ Bearish −0.91   ◐ Medium conviction`
-2. Line 2 (breakdown, plain words): `3 of 5 drivers support · leans on policy (37%) · no narrative view`
-   - "support" count from aligned vs opposing driver counts; `net_lean` sub-50%/negative phrased as e.g. "drivers lean against the call" for Low.
-   - narrative clause: `narrative agrees` / `narrative disagrees (+0.30 vs −0.20)` / `no narrative view`
-3. **Demoted to a collapsible/secondary line:** the existing `Final … · deterministic … · RAG …` text and the top-positive/top-negative contribution lists.
+1. Line 1 (headline): `FX  ▼ Bearish −0.91   ◐ Medium conviction` (verdict = filled chip, conviction = outlined chip, visually distinct).
+2. Line 2 (breakdown, plain words, weight-aware — no raw counts, since the metric is weight-aware not count-based):
+   - breadth phrase from `net_lean`: `≥0.60` → "drivers broadly support"; `0.20–0.60` → "drivers mixed"; `<0.20` (incl. negative) → "drivers lean against the call".
+   - concentration clause, only when `top_driver_share > 0.50`: `· leans on policy (37%)`.
+   - narrative clause: `· narrative agrees` / `· narrative disagrees` / `· no narrative view`.
+3. **Demoted into a `<details>` disclosure** (`<summary>Show math</summary>`): the existing `Final … · deterministic … · RAG …` text and the top-positive/top-negative contribution lists. `rag_summary` and the `driver` sentence stay visible.
+
+When `band == "na"`, no conviction chip and no breakdown line (the asset is Neutral; there's no call to qualify).
 
 **Map / heatmap hover tooltip:** add one line under the existing value: `Conviction: ◐ Medium`. Tooltip uses the selected view's signal; Composite view shows no conviction line (no composite band).
 
@@ -116,13 +121,13 @@ Each entry in `economies[name].signals[asset]` gains:
 
 ## Testing
 
-`tests/test_signal_engine.py` (extend):
+`tests/test_signal_engine.py` (extend). Correctness is proven by **synthetic-input unit tests** on `compute_conviction` (fully deterministic, independent of which data source ran) plus **invariant tests** on a mock-generated snapshot. We deliberately do **not** pin exact bands to real economies — mock and live produce different values and live drifts.
 
-- **Breadth:** all-aligned → `net_lean ≈ 1`; split → `net_lean ≈ 0`; opposing-majority → `net_lean < 0`; single dominant driver → high `top_driver_share`; no drivers → `"na"`.
-- **Narrative:** `rag == 0` → `no_view`; same sign → `agrees`; opposite sign → `disagrees`.
-- **Band rollup:** each base branch; `disagrees` drops a band; `agrees`/`no_view` no change; Neutral (`|final| < 0.10`) → `"na"`.
-- **Schema:** every asset signal in a generated snapshot carries a well-formed `conviction` block; composite carries none.
-- **Regression on committed snapshot:** US FX/Rates/Equity bands = Medium/High/Low.
+- **Breadth (synthetic rows):** all-aligned → `net_lean ≈ 1`, band High; split → `net_lean ≈ 0`; opposing-majority → `net_lean < 0`, band Low; single dominant driver (`top_driver_share > 0.60`) → Low; zero gross → `"na"`.
+- **Narrative (synthetic):** `rag == 0` → `no_view`; same sign as deterministic → `agrees`; opposite sign → `disagrees`.
+- **Band rollup (synthetic):** each base branch hit; `disagrees` drops a band; `agrees`/`no_view` leave it unchanged (assert agreement does NOT raise a Low to Medium); Neutral (`|final| < 0.10`) → `"na"`.
+- **Schema (mock snapshot):** every asset signal carries a `conviction` block with `band ∈ {high,medium,low,na}`, `narrative ∈ {agrees,disagrees,no_view}`, `net_lean ∈ [−1,1]`, `top_driver_share ∈ [0,1]`; composite carries none.
+- **Methodology invariants (mock snapshot):** for every signal, `narrative == "disagrees"` ⇒ `band != "high"`; `band == "na"` ⇒ (`abs(final) < 0.10` or `deterministic == 0`).
 
 Frontend is verified manually via the dashboard (panel chip + tooltip line) per the project's existing practice; no JS test harness exists.
 
