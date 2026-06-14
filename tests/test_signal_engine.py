@@ -432,3 +432,13 @@ def test_conviction_zero_gross_is_na():
     c = compute_conviction(_row(a_rank=0.0, b_rank=0.0),
                            {"a_rank": 0.5, "b_rank": 0.5}, 0.5, 0.0, 0.5)
     assert c["band"] == "na"
+
+
+def test_conviction_neutral_threshold_boundary():
+    weights = {"a_rank": 0.5, "b_rank": 0.5}
+    # final exactly at the neutral band is NOT na (the boundary is strict <)
+    at = compute_conviction(_row(a_rank=1.0, b_rank=1.0), weights, 1.0, 0.0, 0.10)
+    assert at["band"] != "na"
+    # just inside the neutral band IS na
+    inside = compute_conviction(_row(a_rank=1.0, b_rank=1.0), weights, 1.0, 0.0, 0.09)
+    assert inside["band"] == "na"

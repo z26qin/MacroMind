@@ -500,9 +500,17 @@ def _conviction_band(net_lean: float, top_driver_share: float, narrative: str) -
         base = "low"
     else:
         base = "medium"
+    # Asymmetric: a "disagrees" view downgrades, but "agrees"/"no_view" never
+    # upgrade — the RAG overlay is a stub and must not inflate conviction.
     if narrative == "disagrees":
         base = {"high": "medium", "medium": "low", "low": "low"}[base]
     return base
+
+
+# Signals with |value| below this read as "Neutral" (matches the dashboard
+# verdict threshold); a Neutral call has no direction to qualify, so conviction
+# is reported as band "na".
+_NEUTRAL_BAND = 0.10
 
 
 def compute_conviction(
@@ -527,7 +535,7 @@ def compute_conviction(
     }
     gross = sum(abs(c) for c in contributions.values())
 
-    if deterministic == 0 or abs(final) < 0.10 or gross == 0:
+    if deterministic == 0 or abs(final) < _NEUTRAL_BAND or gross == 0:
         return {
             "band": "na",
             "net_lean": 0.0,
@@ -548,7 +556,7 @@ def compute_conviction(
         "band": _conviction_band(net_lean, top_driver_share, narrative),
         "net_lean": round(net_lean, 4),
         "top_driver_share": round(top_driver_share, 4),
-        "top_driver": top_feature.replace("_rank", ""),
+        "top_driver": top_feature.removesuffix("_rank"),
         "narrative": narrative,
     }
 
