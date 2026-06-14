@@ -601,6 +601,9 @@ def build_snapshot(
             rag_confidence = float(rag["confidence"])
             final = round(blend_signal(deterministic, rag_signal, rag_confidence, rag_weight), 4)
             top_positive, top_negative = explain_contributions(row, asset_weights)
+            conviction = compute_conviction(
+                row, asset_weights, deterministic, rag_signal, final
+            )
 
             deterministic_values.append(deterministic)
             rag_values.append(rag_signal)
@@ -617,6 +620,7 @@ def build_snapshot(
                 "rag_sources": rag["sources"],
                 "top_positive_drivers": top_positive,
                 "top_negative_drivers": top_negative,
+                "conviction": conviction,
             }
 
         entry["composite"] = {

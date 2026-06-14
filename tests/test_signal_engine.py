@@ -442,3 +442,30 @@ def test_conviction_neutral_threshold_boundary():
     # just inside the neutral band IS na
     inside = compute_conviction(_row(a_rank=1.0, b_rank=1.0), weights, 1.0, 0.0, 0.09)
     assert inside["band"] == "na"
+
+
+def test_each_asset_signal_has_conviction_block(snapshot):
+    valid_bands = {"high", "medium", "low", "na"}
+    valid_narratives = {"agrees", "disagrees", "no_view"}
+    for economy in snapshot["economies"].values():
+        for signal in economy["signals"].values():
+            conviction = signal["conviction"]
+            assert conviction["band"] in valid_bands
+            assert conviction["narrative"] in valid_narratives
+            assert -1.0 <= conviction["net_lean"] <= 1.0
+            assert 0.0 <= conviction["top_driver_share"] <= 1.0
+
+
+def test_composite_has_no_conviction(snapshot):
+    for economy in snapshot["economies"].values():
+        assert "conviction" not in economy["composite"]
+
+
+def test_conviction_methodology_invariants(snapshot):
+    for economy in snapshot["economies"].values():
+        for signal in economy["signals"].values():
+            conviction = signal["conviction"]
+            if conviction["narrative"] == "disagrees":
+                assert conviction["band"] != "high"
+            if conviction["band"] == "na":
+                assert abs(signal["final"]) < 0.10 or signal["deterministic"] == 0
