@@ -50,6 +50,7 @@ def test_each_asset_signal_has_required_fields(snapshot):
         "final",
         "driver",
         "rag_summary",
+        "conviction",
     }
     for economy in snapshot["economies"].values():
         for signal in economy["signals"].values():
@@ -450,6 +451,7 @@ def test_each_asset_signal_has_conviction_block(snapshot):
     for economy in snapshot["economies"].values():
         for signal in economy["signals"].values():
             conviction = signal["conviction"]
+            assert "top_driver" in conviction  # None when band is "na"
             assert conviction["band"] in valid_bands
             assert conviction["narrative"] in valid_narratives
             assert -1.0 <= conviction["net_lean"] <= 1.0
@@ -468,4 +470,6 @@ def test_conviction_methodology_invariants(snapshot):
             if conviction["narrative"] == "disagrees":
                 assert conviction["band"] != "high"
             if conviction["band"] == "na":
+                # (the third "na" trigger, gross == 0, isn't observable from
+                # snapshot keys and never occurs with real data)
                 assert abs(signal["final"]) < 0.10 or signal["deterministic"] == 0
