@@ -879,19 +879,23 @@
         <div class="asset ${selectedView === asset ? "highlight" : ""}">
           <div class="asset-head">
             <span>${assetLabels[asset]}</span>
-            <span>${verdictBadgeHtml(item.final)} ${fmt(item.final)}</span>
+            <span>${verdictBadgeHtml(item.final)} ${fmt(item.final)} ${convictionBadgeHtml(item.conviction)}</span>
           </div>
           <div class="bar-track">
             <div class="bar-zero"></div>
             <div class="bar" style="${barStyle(item.final)}"></div>
           </div>
-          <p>Final ${fmt(item.final)} · deterministic ${fmt(item.deterministic)} · RAG ${fmt(item.rag)}</p>
+          ${convictionLine(item.conviction)}
           <p class="driver-reason">${formatReason(item.driver)}</p>
           <p>${escapeHtml(item.rag_summary)}</p>
-          <div class="driver-grid">
-            ${renderDriverList("Top positive", item.top_positive_drivers || [])}
-            ${renderDriverList("Top negative", item.top_negative_drivers || [])}
-          </div>
+          <details>
+            <summary>Show math</summary>
+            <p>Final ${fmt(item.final)} · deterministic ${fmt(item.deterministic)} · RAG ${fmt(item.rag)}</p>
+            <div class="driver-grid">
+              ${renderDriverList("Top positive", item.top_positive_drivers || [])}
+              ${renderDriverList("Top negative", item.top_negative_drivers || [])}
+            </div>
+          </details>
         </div>
       `).join("");
 
