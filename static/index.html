@@ -796,6 +796,9 @@
       else if (nl >= 0.20) breadth = "drivers mixed";
       else breadth = "drivers lean against the call";
       let concentration = "";
+      // 0.50 is the display threshold for the "leans on" note; it is distinct
+      // from the 0.60 top_driver_share cutoff that drives the Low band in
+      // signal_engine._conviction_band. Keep them independent on purpose.
       if (conviction.top_driver_share > 0.50 && conviction.top_driver) {
         const pct = Math.round(conviction.top_driver_share * 100);
         concentration = ` · leans on ${escapeHtml(conviction.top_driver)} (${pct}%)`;
