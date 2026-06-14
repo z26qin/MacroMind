@@ -943,7 +943,10 @@
           tooltip.style.opacity = 1;
           tooltip.style.left = `${event.clientX}px`;
           tooltip.style.top = `${event.clientY}px`;
-          tooltip.innerHTML = `<strong>${escapeHtml(name)}</strong><br>${economyName ? `Economy: ${escapeHtml(economyName)}<br>${viewLabel(selectedView)}: ${verdictBadgeHtml(value)} ${fmt(value)}` : "No data"}`;
+          const conviction = (entry && selectedView !== "composite")
+            ? entry.signals[selectedView].conviction : null;
+          const convBadge = convictionBadgeHtml(conviction);
+          tooltip.innerHTML = `<strong>${escapeHtml(name)}</strong><br>${economyName ? `Economy: ${escapeHtml(economyName)}<br>${viewLabel(selectedView)}: ${verdictBadgeHtml(value)} ${fmt(value)}${convBadge ? "<br>" + convBadge : ""}` : "No data"}`;
         })
         .on("mouseleave", () => { tooltip.style.opacity = 0; })
         .on("click", (event, d) => {
@@ -997,7 +1000,11 @@
           const verdict = signalVerdict(value);
           const bg = value == null ? "var(--nodata)" : color(value);
           const text = value == null ? "&ndash;" : `${verdict.glyph} ${fmt(value)}`;
-          const title = `${economy} · ${row.label}: ${verdict.label}${value == null ? "" : " " + fmt(value)}`;
+          const conviction = (row.key !== "composite" && economies[economy])
+            ? economies[economy].signals[row.key].conviction : null;
+          const convText = (conviction && conviction.band !== "na" && convictionMeta[conviction.band])
+            ? ` · ${convictionMeta[conviction.band].label}` : "";
+          const title = `${economy} · ${row.label}: ${verdict.label}${value == null ? "" : " " + fmt(value)}${convText}`;
           html += `<div class="hm-cell" data-economy="${escapeHtml(economy)}" data-asset="${row.key}"`
             + ` style="background:${bg}" title="${escapeHtml(title)}">${text}</div>`;
         }
