@@ -46,6 +46,15 @@ compute_rag_signal(country, asset_class)
 
 For now, it uses hardcoded scores and local mock snippets in `documents/`. Composite signals are equal-weight means of FX, rates, equity, and real estate.
 
+### Conviction
+
+Each asset signal also carries a deterministic **conviction** read (`signals.<asset>.conviction` in `snapshot.json`) answering "how trustworthy is this call":
+
+- **Breadth** — `net_lean ∈ [−1, +1]`, the weight-aligned agreement of the drivers with the deterministic call direction (negative = the drivers point against the call, which then rests purely on the cross-sectional ranking), plus `top_driver_share` (concentration on a single driver).
+- **Narrative agreement** — whether the RAG overlay agrees with the deterministic call. Asymmetric: disagreement lowers the band, agreement never raises it (the RAG overlay is a stub).
+
+These roll up to a `band` of `high` / `medium` / `low`, or `na` for a Neutral signal. The dashboard shows the band as a chip in the detail panel (with the raw math behind a "Show math" disclosure) and in the map/heatmap hover. Composite signals carry no conviction in this version.
+
 ## Universe
 
 The six-economy signal universe is:
