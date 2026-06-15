@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-06-13",
+  "as_of": "2026-06-15",
   "methodology_version": "v0.1",
   "data_source": "live",
   "universe": [
@@ -45,9 +45,9 @@
             },
             {
               "feature": "fx_3m_return_rank",
-              "value": 0.6,
+              "value": 0.2,
               "weight": 0.2,
-              "contribution": 0.12
+              "contribution": 0.04
             }
           ],
           "top_negative_drivers": [
@@ -103,10 +103,10 @@
           "top_negative_drivers": []
         },
         "equity": {
-          "deterministic": -0.2,
+          "deterministic": 0.2,
           "rag": 0.3,
-          "final": -0.1063,
-          "driver": "Negative equity signal led by equity forward pe, combining growth, PMI, momentum, and valuation ranks.",
+          "final": 0.2188,
+          "driver": "Positive equity signal led by equity forward pe, combining growth, PMI, momentum, and valuation ranks.",
           "rag_summary": "News tone is mildly positive due to resilient AI capex and earnings strength.",
           "rag_confidence": 0.75,
           "rag_effective_weight": 0.1875,
@@ -122,9 +122,9 @@
             },
             {
               "feature": "equity_3m_return_rank",
-              "value": 0.2,
+              "value": 0.6,
               "weight": 0.25,
-              "contribution": 0.05
+              "contribution": 0.15
             }
           ],
           "top_negative_drivers": [
@@ -188,9 +188,9 @@
         }
       },
       "composite": {
-        "deterministic": 0.0,
+        "deterministic": 0.1,
         "rag": 0.075,
-        "final": 0.019
+        "final": 0.1003
       }
     },
     "Canada": {
@@ -576,9 +576,9 @@
       },
       "signals": {
         "fx": {
-          "deterministic": 0.2,
+          "deterministic": 0.6,
           "rag": -0.2,
-          "final": 0.14,
+          "final": 0.48,
           "driver": "Positive FX signal led by growth surprise and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "Qualitative tone is cautious due to policy normalization uncertainty.",
           "rag_confidence": 0.6,
@@ -595,9 +595,9 @@
             },
             {
               "feature": "fx_3m_return_rank",
-              "value": 0.2,
+              "value": 0.6,
               "weight": 0.2,
-              "contribution": 0.04
+              "contribution": 0.12
             },
             {
               "feature": "unemployment_surprise_rank",
@@ -683,9 +683,9 @@
             },
             {
               "feature": "equity_3m_return_rank",
-              "value": 0.6,
+              "value": 1.0,
               "weight": 0.25,
-              "contribution": 0.15
+              "contribution": 0.25
             }
           ],
           "top_negative_drivers": [
@@ -743,9 +743,9 @@
         }
       },
       "composite": {
-        "deterministic": -0.1,
+        "deterministic": 0.0,
         "rag": -0.05,
-        "final": -0.1019
+        "final": -0.0169
       }
     },
     "Brazil": {
@@ -947,9 +947,9 @@
       },
       "signals": {
         "fx": {
-          "deterministic": 0.6,
+          "deterministic": 0.2,
           "rag": 0.0,
-          "final": 0.5475,
+          "final": 0.1825,
           "driver": "Positive FX signal led by growth surprise and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "No strong mock qualitative narrative is assigned for this economy and asset class.",
           "rag_confidence": 0.35,
@@ -1029,10 +1029,10 @@
           ]
         },
         "equity": {
-          "deterministic": 0.2,
+          "deterministic": -0.2,
           "rag": -0.2,
-          "final": 0.135,
-          "driver": "Positive equity signal led by pmi surprise, combining growth, PMI, momentum, and valuation ranks.",
+          "final": -0.2,
+          "driver": "Negative equity signal led by pmi surprise, combining growth, PMI, momentum, and valuation ranks.",
           "rag_summary": "Narrative is cautious due to weak manufacturing data and subdued earnings tone.",
           "rag_confidence": 0.65,
           "rag_effective_weight": 0.1625,
@@ -1041,16 +1041,16 @@
           ],
           "top_positive_drivers": [
             {
-              "feature": "equity_3m_return_rank",
-              "value": 1.0,
-              "weight": 0.25,
-              "contribution": 0.25
-            },
-            {
               "feature": "growth_surprise_rank",
               "value": 0.6,
               "weight": 0.3,
               "contribution": 0.18
+            },
+            {
+              "feature": "equity_3m_return_rank",
+              "value": 0.2,
+              "weight": 0.25,
+              "contribution": 0.05
             },
             {
               "feature": "equity_forward_pe_rank",
@@ -1114,9 +1114,9 @@
         }
       },
       "composite": {
-        "deterministic": 0.2,
+        "deterministic": 0.0,
         "rag": -0.05,
-        "final": 0.1706
+        "final": -0.0044
       }
     }
   }
