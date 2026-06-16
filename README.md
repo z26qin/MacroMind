@@ -1,6 +1,6 @@
 # Cross-Asset Macro Dashboard
 
-A runnable prototype macro dashboard for cross-asset signals across a small, explicit economy universe, built on a transparent deterministic signal engine and a hardcoded RAG/narrative signal stub. The signal engine runs in two modes: a fully offline mock-data mode (the default) and a live mode that pulls macro, consensus, and market data from public no-key APIs (World Bank, IMF WEO, Yahoo Finance). The committed `snapshot.json` is a live build — see [Run](#run) and [Current Limitations](#current-limitations) for what is live vs. still mock.
+A runnable prototype macro dashboard for cross-asset signals across a small, explicit economy universe, built on a transparent deterministic signal engine and a hardcoded RAG/narrative signal stub. The signal engine runs in two modes: a fully offline mock-data mode (the default) and a live mode that pulls macro, consensus, market, and news-flow data from public no-key APIs (World Bank, IMF WEO, Yahoo Finance, GDELT). The committed `snapshot.json` is a live build — see [Run](#run) and [Current Limitations](#current-limitations) for what is live vs. still mock.
 
 ## Architecture
 
@@ -9,6 +9,7 @@ A runnable prototype macro dashboard for cross-asset signals across a small, exp
 - `data_sources/world_bank.py`: live macro data adapter (World Bank API, no key); used when generation runs with `--source live`
 - `data_sources/imf_weo.py`: IMF World Economic Outlook forecast adapter (DataMapper API, no key); supplies the live "consensus" so the live surprise becomes a forward expected-change
 - `data_sources/market.py`: live market-return adapter (Yahoo Finance chart API, no key); sources `equity_3m_return` and `fx_3m_return` in `--source live`
+- `data_sources/gdelt.py`: GDELT DOC 2.0 news-flow adapter (no key); builds an explainable `news_pressure` input from stress article flow minus constructive/relief article flow
 - `history.py`: builds a per-economy signal time series by reading every committed version of `snapshot.json` from git history; served at `/api/history` and drawn as a sparkline in the detail panel (requires running inside a git checkout)
 - `regime_engine.py`: deterministic macro **regime-detection** engine (regime score, narrative gap, cross-asset confirmation, templated expressions/risks) for a separate six-economy set; writes `regime_snapshot.json`, served at `/api/regime` and shown in the dashboard's Regime tab. Verdict ladder: Deteriorating / Repricing / Early / Priced in / Neutral, where the activation verdicts (Repricing, Early) additionally require cross-asset `confirmation_score >= confirmation_min` (config: `regime_config.yaml`) — otherwise the verdict is **Unconfirmed**
 - `rag_signal.py`: hardcoded qualitative narrative signal interface
@@ -25,10 +26,11 @@ The deterministic signal is a rule-based quantitative score from macro, market, 
 - `data/mock_macro.csv`
 - `data/mock_consensus.csv`
 - `data/mock_market.csv`
+- `data/mock_news.csv`
 
 Formula weights live in `signal_config.yaml`.
 
-The engine computes surprises such as inflation, growth, unemployment, policy, and PMI surprises. Inputs are ranked cross-sectionally across the six economies, mapped to `[-1, +1]`, and combined into raw asset-class scores. Raw scores are ranked again cross-sectionally and mapped to `[-1, +1]`.
+The engine computes surprises such as inflation, growth, unemployment, policy, and PMI surprises. It also computes a `news_pressure` input from GDELT article flow: stress terms such as inflation/recession/policy uncertainty/protests minus relief terms such as soft landing/disinflation/rate cuts/reform, scaled by total article flow. Inputs are ranked cross-sectionally across the six economies, mapped to `[-1, +1]`, and combined into raw asset-class scores. Raw scores are ranked again cross-sectionally and mapped to `[-1, +1]`.
 
 ```text
 signal = 2 * percentile_rank - 1
@@ -110,9 +112,9 @@ pytest
 
 ## Current Limitations
 
-- Live mode sources macro (inflation, GDP growth, unemployment) from the World Bank, consensus from IMF WEO, and the `equity_3m_return` / `fx_3m_return` market columns from Yahoo Finance. `fx_carry` is **derived** in live mode as the policy-rate differential vs the US (carry = local short rate − USD short rate); since policy rates are still mock, this is *live-ready* rather than live — it becomes genuinely live once policy rates get a source. The remaining market columns (`rate_3m_change`, `curve_slope_2s10s`, `equity_forward_pe`, `reit_3m_return`, `house_price_yoy`), policy rate, and PMI remain mock. Each value's origin is recorded in `snapshot.json` under `provenance`.
+- Live mode sources macro (inflation, GDP growth, unemployment) from the World Bank, consensus from IMF WEO, the `equity_3m_return` / `fx_3m_return` market columns from Yahoo Finance, and `news_pressure` from GDELT. `fx_carry` is **derived** in live mode as the policy-rate differential vs the US (carry = local short rate − USD short rate); since policy rates are still mock, this is *live-ready* rather than live — it becomes genuinely live once policy rates get a source. The remaining market columns (`rate_3m_change`, `curve_slope_2s10s`, `equity_forward_pe`, `reit_3m_return`, `house_price_yoy`), policy rate, and PMI remain mock. Each value's origin is recorded in `snapshot.json` under `provenance`.
 - Consensus for live macro columns (inflation, GDP growth, unemployment) is the IMF WEO **next-year forecast**; the live "surprise" is the forecast-implied expected change, `forecast(T+1) - actual(T)`. It is an institutional forecast, not an intra-period analyst-consensus print. A column only switches to this expected-change mode when every economy has both a World Bank actual and an IMF forecast (all-or-nothing); otherwise it stays mock beat/miss. `policy_rate` and `pmi` have no live source, so their surprises always stay mock beat/miss.
-- Live external sources are the World Bank (macro), IMF WEO (consensus), and Yahoo Finance (FX/equity returns); policy rate, PMI, and real estate have no live source yet
+- Live external sources are the World Bank (macro), IMF WEO (consensus), Yahoo Finance (FX/equity returns), and GDELT (news pressure); policy rate, PMI, and real estate have no live source yet
 - RAG is hardcoded/stubbed
 - Country mapping depends on world-atlas country names
 

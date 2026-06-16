@@ -95,7 +95,11 @@ def test_load_macro_inputs_mock_marks_all_provenance_mock():
     assert len(df) == 6
     for economy in EXPECTED_UNIVERSE:
         assert provenance[economy]["inflation_yoy"] == "mock"
+        assert provenance[economy]["inflation_consensus"] == "mock"
         assert provenance[economy]["policy_rate"] == "mock"
+        assert provenance[economy]["policy_rate_consensus"] == "mock"
+        assert provenance[economy]["equity_3m_return"] == "mock"
+        assert provenance[economy]["news_pressure"] == "mock"
 
 
 def test_load_macro_inputs_live_overlays_world_bank_values():
@@ -136,7 +140,12 @@ def test_each_economy_reports_provenance(snapshot):
         provenance = economy["provenance"]
         assert provenance["inflation_yoy"] == "mock"
         assert set(provenance) >= {
-            "inflation_yoy", "gdp_growth", "unemployment", "policy_rate", "pmi",
+            "inflation_yoy", "inflation_consensus",
+            "gdp_growth", "gdp_consensus",
+            "unemployment", "unemployment_consensus",
+            "policy_rate", "policy_rate_consensus",
+            "pmi", "pmi_consensus",
+            "fx_3m_return", "fx_carry", "equity_3m_return", "news_pressure",
         }
 
 
@@ -272,7 +281,7 @@ def test_overlay_market_inputs_mock_is_noop():
     before = df["equity_3m_return"].tolist()
     se.overlay_market_inputs(df, provenance, source="mock")
     assert df["equity_3m_return"].tolist() == before
-    assert "equity_3m_return" not in provenance["United States of America"]
+    assert provenance["United States of America"]["equity_3m_return"] == "mock"
 
 
 def test_overlay_market_inputs_live_overlays_fx_and_equity():
@@ -287,12 +296,38 @@ def test_overlay_market_inputs_live_overlays_fx_and_equity():
     assert provenance[usa]["fx_3m_return"] == "yahoo:2024-04"
 
 
+def test_overlay_news_pressure_mock_is_noop():
+    df, provenance, _ec = se.load_macro_inputs(source="mock")
+    before = df["news_pressure"].tolist()
+    se.overlay_news_pressure(df, provenance, source="mock")
+    assert df["news_pressure"].tolist() == before
+    assert provenance["United States of America"]["news_pressure"] == "mock"
+
+
+def test_overlay_news_pressure_live_overlays_when_all_economies_resolve():
+    df, provenance, _ec = se.load_macro_inputs(source="mock")
+
+    def fake_fetch(url):
+        return {"articles": [{}, {}, {}]} if "policy+uncertainty" in url else {"articles": [{}]}
+
+    se.overlay_news_pressure(df, provenance, source="live", fetch_json=fake_fetch)
+    usa = "United States of America"
+    assert df.loc[usa, "news_pressure"] > 0
+    assert provenance[usa]["news_pressure"].startswith("gdelt:")
+
+
+def test_news_pressure_rank_is_configured_for_each_asset_class():
+    config = se.load_signal_config()
+    for asset_weights in config["weights"].values():
+        assert "news_pressure_rank" in asset_weights
+
+
 def test_overlay_fx_carry_mock_is_noop():
     df, provenance, _ec = se.load_macro_inputs(source="mock")
     before = df["fx_carry"].tolist()
     se.overlay_fx_carry(df, provenance, source="mock")
     assert df["fx_carry"].tolist() == before
-    assert "fx_carry" not in provenance["United States of America"]
+    assert provenance["United States of America"]["fx_carry"] == "mock"
 
 
 def test_overlay_fx_carry_live_derives_from_policy_rate_diff():

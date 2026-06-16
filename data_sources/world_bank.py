@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-import httpx
+from data_sources.http import fetch_json as http_fetch_json
 
 WB_BASE = "https://api.worldbank.org/v2"
 
@@ -34,9 +34,7 @@ LIVE_COLUMNS = tuple(WB_INDICATOR_BY_COLUMN)
 
 
 def _default_fetch_json(url: str) -> list:
-    response = httpx.get(url, timeout=20.0)
-    response.raise_for_status()
-    return response.json()
+    return http_fetch_json(url)
 
 
 def fetch_indicator(
