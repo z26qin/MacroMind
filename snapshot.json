@@ -15,22 +15,31 @@
       "country": "United States of America",
       "iso3": "USA",
       "provenance": {
-        "gdp_growth": "world_bank:2024",
-        "inflation_yoy": "world_bank:2024",
-        "pmi": "mock",
-        "policy_rate": "mock",
-        "unemployment": "world_bank:2025",
-        "gdp_consensus": "imf_weo:2025",
-        "unemployment_consensus": "imf_weo:2026",
-        "fx_3m_return": "yahoo:2026-06",
+        "curve_slope_2s10s": "mock",
         "equity_3m_return": "yahoo:2026-06",
-        "fx_carry": "derived:policy_rate_diff"
+        "equity_forward_pe": "mock",
+        "fx_3m_return": "yahoo:2026-06",
+        "fx_carry": "derived:policy_rate_diff",
+        "gdp_consensus": "imf_weo:2025",
+        "gdp_growth": "world_bank:2024",
+        "house_price_yoy": "mock",
+        "inflation_consensus": "mock",
+        "inflation_yoy": "world_bank:2024",
+        "news_pressure": "mock",
+        "pmi": "mock",
+        "pmi_consensus": "mock",
+        "policy_rate": "mock",
+        "policy_rate_consensus": "mock",
+        "rate_3m_change": "mock",
+        "reit_3m_return": "mock",
+        "unemployment": "world_bank:2025",
+        "unemployment_consensus": "imf_weo:2026"
       },
       "signals": {
         "fx": {
-          "deterministic": -1.0,
+          "deterministic": -0.8,
           "rag": 0.0,
-          "final": -0.9125,
+          "final": -0.73,
           "driver": "Negative FX signal led by policy surprise and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "No strong mock qualitative narrative is assigned for this economy and asset class.",
           "rag_confidence": 0.35,
@@ -48,6 +57,12 @@
               "value": 0.2,
               "weight": 0.2,
               "contribution": 0.04
+            },
+            {
+              "feature": "news_pressure_rank",
+              "value": -0.2,
+              "weight": -0.1,
+              "contribution": 0.02
             }
           ],
           "top_negative_drivers": [
@@ -100,13 +115,20 @@
               "contribution": 0.15
             }
           ],
-          "top_negative_drivers": []
+          "top_negative_drivers": [
+            {
+              "feature": "news_pressure_rank",
+              "value": -0.2,
+              "weight": 0.1,
+              "contribution": -0.02
+            }
+          ]
         },
         "equity": {
-          "deterministic": 0.2,
+          "deterministic": -0.2,
           "rag": 0.3,
-          "final": 0.2188,
-          "driver": "Positive equity signal led by equity forward pe, combining growth, PMI, momentum, and valuation ranks.",
+          "final": -0.1063,
+          "driver": "Negative equity signal led by equity forward pe, combining growth, PMI, momentum, and valuation ranks.",
           "rag_summary": "News tone is mildly positive due to resilient AI capex and earnings strength.",
           "rag_confidence": 0.75,
           "rag_effective_weight": 0.1875,
@@ -122,9 +144,15 @@
             },
             {
               "feature": "equity_3m_return_rank",
-              "value": 0.6,
+              "value": 0.2,
               "weight": 0.25,
-              "contribution": 0.15
+              "contribution": 0.05
+            },
+            {
+              "feature": "news_pressure_rank",
+              "value": -0.2,
+              "weight": -0.15,
+              "contribution": 0.03
             }
           ],
           "top_negative_drivers": [
@@ -143,9 +171,9 @@
           ]
         },
         "real_estate": {
-          "deterministic": 0.2,
+          "deterministic": 0.6,
           "rag": 0.0,
-          "final": 0.1825,
+          "final": 0.5475,
           "driver": "Positive real estate signal led by policy surprise, balancing rates, policy, REIT momentum, housing, and labor ranks.",
           "rag_summary": "No strong mock qualitative narrative is assigned for this economy and asset class.",
           "rag_confidence": 0.35,
@@ -163,6 +191,12 @@
               "value": 0.2,
               "weight": 0.2,
               "contribution": 0.04
+            },
+            {
+              "feature": "news_pressure_rank",
+              "value": -0.2,
+              "weight": -0.1,
+              "contribution": 0.02
             }
           ],
           "top_negative_drivers": [
@@ -188,25 +222,34 @@
         }
       },
       "composite": {
-        "deterministic": 0.1,
+        "deterministic": 0.15,
         "rag": 0.075,
-        "final": 0.1003
+        "final": 0.1559
       }
     },
     "Canada": {
       "country": "Canada",
       "iso3": "CAN",
       "provenance": {
-        "gdp_growth": "world_bank:2024",
-        "inflation_yoy": "world_bank:2024",
-        "pmi": "mock",
-        "policy_rate": "mock",
-        "unemployment": "world_bank:2025",
-        "gdp_consensus": "imf_weo:2025",
-        "unemployment_consensus": "imf_weo:2026",
-        "fx_3m_return": "yahoo:2026-06",
+        "curve_slope_2s10s": "mock",
         "equity_3m_return": "yahoo:2026-06",
-        "fx_carry": "derived:policy_rate_diff"
+        "equity_forward_pe": "mock",
+        "fx_3m_return": "yahoo:2026-06",
+        "fx_carry": "derived:policy_rate_diff",
+        "gdp_consensus": "imf_weo:2025",
+        "gdp_growth": "world_bank:2024",
+        "house_price_yoy": "mock",
+        "inflation_consensus": "mock",
+        "inflation_yoy": "world_bank:2024",
+        "news_pressure": "mock",
+        "pmi": "mock",
+        "pmi_consensus": "mock",
+        "policy_rate": "mock",
+        "policy_rate_consensus": "mock",
+        "rate_3m_change": "mock",
+        "reit_3m_return": "mock",
+        "unemployment": "world_bank:2025",
+        "unemployment_consensus": "imf_weo:2026"
       },
       "signals": {
         "fx": {
@@ -226,16 +269,16 @@
               "contribution": 0.25
             },
             {
+              "feature": "news_pressure_rank",
+              "value": -1.0,
+              "weight": -0.1,
+              "contribution": 0.1
+            },
+            {
               "feature": "growth_surprise_rank",
               "value": 0.2,
               "weight": 0.3,
               "contribution": 0.06
-            },
-            {
-              "feature": "unemployment_surprise_rank",
-              "value": -1.0,
-              "weight": -0.05,
-              "contribution": 0.05
             }
           ],
           "top_negative_drivers": [
@@ -248,9 +291,9 @@
           ]
         },
         "rates": {
-          "deterministic": -0.2,
+          "deterministic": -0.6,
           "rag": 0.0,
-          "final": -0.1825,
+          "final": -0.5475,
           "driver": "Negative bond signal led by inflation surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
           "rag_summary": "No strong mock qualitative narrative is assigned for this economy and asset class.",
           "rag_confidence": 0.35,
@@ -278,10 +321,10 @@
               "contribution": -0.2
             },
             {
-              "feature": "growth_surprise_rank",
-              "value": 0.2,
-              "weight": -0.25,
-              "contribution": -0.05
+              "feature": "news_pressure_rank",
+              "value": -1.0,
+              "weight": 0.1,
+              "contribution": -0.1
             }
           ]
         },
@@ -302,16 +345,16 @@
               "contribution": 0.15
             },
             {
+              "feature": "news_pressure_rank",
+              "value": -1.0,
+              "weight": -0.15,
+              "contribution": 0.15
+            },
+            {
               "feature": "equity_forward_pe_rank",
               "value": -0.6,
               "weight": -0.2,
               "contribution": 0.12
-            },
-            {
-              "feature": "growth_surprise_rank",
-              "value": 0.2,
-              "weight": 0.3,
-              "contribution": 0.06
             }
           ],
           "top_negative_drivers": [
@@ -371,31 +414,40 @@
         }
       },
       "composite": {
-        "deterministic": 0.3,
+        "deterministic": 0.2,
         "rag": -0.05,
-        "final": 0.2694
+        "final": 0.1781
       }
     },
     "China": {
       "country": "China",
       "iso3": "CHN",
       "provenance": {
-        "gdp_growth": "world_bank:2024",
-        "inflation_yoy": "world_bank:2024",
-        "pmi": "mock",
-        "policy_rate": "mock",
-        "unemployment": "world_bank:2025",
-        "gdp_consensus": "imf_weo:2025",
-        "unemployment_consensus": "imf_weo:2026",
-        "fx_3m_return": "yahoo:2026-06",
+        "curve_slope_2s10s": "mock",
         "equity_3m_return": "yahoo:2026-06",
-        "fx_carry": "derived:policy_rate_diff"
+        "equity_forward_pe": "mock",
+        "fx_3m_return": "yahoo:2026-06",
+        "fx_carry": "derived:policy_rate_diff",
+        "gdp_consensus": "imf_weo:2025",
+        "gdp_growth": "world_bank:2024",
+        "house_price_yoy": "mock",
+        "inflation_consensus": "mock",
+        "inflation_yoy": "world_bank:2024",
+        "news_pressure": "mock",
+        "pmi": "mock",
+        "pmi_consensus": "mock",
+        "policy_rate": "mock",
+        "policy_rate_consensus": "mock",
+        "rate_3m_change": "mock",
+        "reit_3m_return": "mock",
+        "unemployment": "world_bank:2025",
+        "unemployment_consensus": "imf_weo:2026"
       },
       "signals": {
         "fx": {
-          "deterministic": -0.6,
+          "deterministic": -0.8,
           "rag": 0.0,
-          "final": -0.5475,
+          "final": -0.73,
           "driver": "Negative FX signal led by fx 3m return and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "No strong mock qualitative narrative is assigned for this economy and asset class.",
           "rag_confidence": 0.35,
@@ -423,10 +475,10 @@
               "contribution": -0.12
             },
             {
-              "feature": "growth_surprise_rank",
-              "value": -0.2,
-              "weight": 0.3,
-              "contribution": -0.06
+              "feature": "news_pressure_rank",
+              "value": 1.0,
+              "weight": -0.1,
+              "contribution": -0.1
             }
           ]
         },
@@ -453,10 +505,10 @@
               "contribution": 0.12
             },
             {
-              "feature": "growth_surprise_rank",
-              "value": -0.2,
-              "weight": -0.25,
-              "contribution": 0.05
+              "feature": "news_pressure_rank",
+              "value": 1.0,
+              "weight": 0.1,
+              "contribution": 0.1
             }
           ],
           "top_negative_drivers": [
@@ -501,10 +553,10 @@
               "contribution": -0.15
             },
             {
-              "feature": "growth_surprise_rank",
-              "value": -0.2,
-              "weight": 0.3,
-              "contribution": -0.06
+              "feature": "news_pressure_rank",
+              "value": 1.0,
+              "weight": -0.15,
+              "contribution": -0.15
             }
           ]
         },
@@ -545,34 +597,43 @@
               "contribution": -0.18
             },
             {
-              "feature": "unemployment_surprise_rank",
-              "value": 0.6,
+              "feature": "news_pressure_rank",
+              "value": 1.0,
               "weight": -0.1,
-              "contribution": -0.06
+              "contribution": -0.1
             }
           ]
         }
       },
       "composite": {
-        "deterministic": -0.4,
+        "deterministic": -0.45,
         "rag": -0.05,
-        "final": -0.3606
+        "final": -0.4062
       }
     },
     "Japan": {
       "country": "Japan",
       "iso3": "JPN",
       "provenance": {
-        "gdp_growth": "world_bank:2024",
-        "inflation_yoy": "world_bank:2024",
-        "pmi": "mock",
-        "policy_rate": "mock",
-        "unemployment": "world_bank:2025",
-        "gdp_consensus": "imf_weo:2025",
-        "unemployment_consensus": "imf_weo:2026",
-        "fx_3m_return": "yahoo:2026-06",
+        "curve_slope_2s10s": "mock",
         "equity_3m_return": "yahoo:2026-06",
-        "fx_carry": "derived:policy_rate_diff"
+        "equity_forward_pe": "mock",
+        "fx_3m_return": "yahoo:2026-06",
+        "fx_carry": "derived:policy_rate_diff",
+        "gdp_consensus": "imf_weo:2025",
+        "gdp_growth": "world_bank:2024",
+        "house_price_yoy": "mock",
+        "inflation_consensus": "mock",
+        "inflation_yoy": "world_bank:2024",
+        "news_pressure": "mock",
+        "pmi": "mock",
+        "pmi_consensus": "mock",
+        "policy_rate": "mock",
+        "policy_rate_consensus": "mock",
+        "rate_3m_change": "mock",
+        "reit_3m_return": "mock",
+        "unemployment": "world_bank:2025",
+        "unemployment_consensus": "imf_weo:2026"
       },
       "signals": {
         "fx": {
@@ -600,10 +661,10 @@
               "contribution": 0.12
             },
             {
-              "feature": "unemployment_surprise_rank",
-              "value": -0.2,
-              "weight": -0.05,
-              "contribution": 0.01
+              "feature": "news_pressure_rank",
+              "value": -0.6,
+              "weight": -0.1,
+              "contribution": 0.06
             }
           ],
           "top_negative_drivers": [
@@ -652,10 +713,10 @@
               "contribution": -0.25
             },
             {
-              "feature": "unemployment_surprise_rank",
-              "value": -0.2,
-              "weight": 0.2,
-              "contribution": -0.04
+              "feature": "news_pressure_rank",
+              "value": -0.6,
+              "weight": 0.1,
+              "contribution": -0.06
             }
           ]
         },
@@ -714,16 +775,16 @@
               "contribution": 0.06
             },
             {
+              "feature": "news_pressure_rank",
+              "value": -0.6,
+              "weight": -0.1,
+              "contribution": 0.06
+            },
+            {
               "feature": "policy_surprise_rank",
               "value": -0.2,
               "weight": -0.25,
               "contribution": 0.05
-            },
-            {
-              "feature": "unemployment_surprise_rank",
-              "value": -0.2,
-              "weight": -0.1,
-              "contribution": 0.02
             }
           ],
           "top_negative_drivers": [
@@ -752,16 +813,25 @@
       "country": "Brazil",
       "iso3": "BRA",
       "provenance": {
-        "gdp_growth": "world_bank:2024",
-        "inflation_yoy": "world_bank:2024",
-        "pmi": "mock",
-        "policy_rate": "mock",
-        "unemployment": "world_bank:2025",
-        "gdp_consensus": "imf_weo:2025",
-        "unemployment_consensus": "imf_weo:2026",
-        "fx_3m_return": "yahoo:2026-06",
+        "curve_slope_2s10s": "mock",
         "equity_3m_return": "yahoo:2026-06",
-        "fx_carry": "derived:policy_rate_diff"
+        "equity_forward_pe": "mock",
+        "fx_3m_return": "yahoo:2026-06",
+        "fx_carry": "derived:policy_rate_diff",
+        "gdp_consensus": "imf_weo:2025",
+        "gdp_growth": "world_bank:2024",
+        "house_price_yoy": "mock",
+        "inflation_consensus": "mock",
+        "inflation_yoy": "world_bank:2024",
+        "news_pressure": "mock",
+        "pmi": "mock",
+        "pmi_consensus": "mock",
+        "policy_rate": "mock",
+        "policy_rate_consensus": "mock",
+        "rate_3m_change": "mock",
+        "reit_3m_return": "mock",
+        "unemployment": "world_bank:2025",
+        "unemployment_consensus": "imf_weo:2026"
       },
       "signals": {
         "fx": {
@@ -797,16 +867,16 @@
               "contribution": -0.3
             },
             {
+              "feature": "news_pressure_rank",
+              "value": 0.6,
+              "weight": -0.1,
+              "contribution": -0.06
+            },
+            {
               "feature": "unemployment_surprise_rank",
               "value": 1.0,
               "weight": -0.05,
               "contribution": -0.05
-            },
-            {
-              "feature": "fx_3m_return_rank",
-              "value": -0.2,
-              "weight": 0.2,
-              "contribution": -0.04
             }
           ]
         },
@@ -831,6 +901,12 @@
               "value": 1.0,
               "weight": 0.2,
               "contribution": 0.2
+            },
+            {
+              "feature": "news_pressure_rank",
+              "value": 0.6,
+              "weight": 0.1,
+              "contribution": 0.06
             }
           ],
           "top_negative_drivers": [
@@ -920,6 +996,12 @@
               "value": 1.0,
               "weight": -0.1,
               "contribution": -0.1
+            },
+            {
+              "feature": "news_pressure_rank",
+              "value": 0.6,
+              "weight": -0.1,
+              "contribution": -0.06
             }
           ]
         }
@@ -934,16 +1016,25 @@
       "country": "Euro Area",
       "iso3": "EUR",
       "provenance": {
-        "gdp_growth": "world_bank:2024",
-        "inflation_yoy": "mock",
-        "pmi": "mock",
-        "policy_rate": "mock",
-        "unemployment": "world_bank:2025",
-        "gdp_consensus": "imf_weo:2025",
-        "unemployment_consensus": "imf_weo:2026",
-        "fx_3m_return": "yahoo:2026-06",
+        "curve_slope_2s10s": "mock",
         "equity_3m_return": "yahoo:2026-06",
-        "fx_carry": "derived:policy_rate_diff"
+        "equity_forward_pe": "mock",
+        "fx_3m_return": "yahoo:2026-06",
+        "fx_carry": "derived:policy_rate_diff",
+        "gdp_consensus": "imf_weo:2025",
+        "gdp_growth": "world_bank:2024",
+        "house_price_yoy": "mock",
+        "inflation_consensus": "mock",
+        "inflation_yoy": "mock",
+        "news_pressure": "mock",
+        "pmi": "mock",
+        "pmi_consensus": "mock",
+        "policy_rate": "mock",
+        "policy_rate_consensus": "mock",
+        "rate_3m_change": "mock",
+        "reit_3m_return": "mock",
+        "unemployment": "world_bank:2025",
+        "unemployment_consensus": "imf_weo:2026"
       },
       "signals": {
         "fx": {
@@ -987,13 +1078,19 @@
               "value": -0.2,
               "weight": 0.2,
               "contribution": -0.04
+            },
+            {
+              "feature": "news_pressure_rank",
+              "value": 0.2,
+              "weight": -0.1,
+              "contribution": -0.02
             }
           ]
         },
         "rates": {
-          "deterministic": -0.6,
+          "deterministic": -0.2,
           "rag": 0.0,
-          "final": -0.5475,
+          "final": -0.1825,
           "driver": "Negative bond signal led by growth surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
           "rag_summary": "No strong mock qualitative narrative is assigned for this economy and asset class.",
           "rag_confidence": 0.35,
@@ -1005,6 +1102,12 @@
               "value": -0.2,
               "weight": -0.35,
               "contribution": 0.07
+            },
+            {
+              "feature": "news_pressure_rank",
+              "value": 0.2,
+              "weight": 0.1,
+              "contribution": 0.02
             }
           ],
           "top_negative_drivers": [
@@ -1029,10 +1132,10 @@
           ]
         },
         "equity": {
-          "deterministic": -0.2,
+          "deterministic": 0.2,
           "rag": -0.2,
-          "final": -0.2,
-          "driver": "Negative equity signal led by pmi surprise, combining growth, PMI, momentum, and valuation ranks.",
+          "final": 0.135,
+          "driver": "Positive equity signal led by pmi surprise, combining growth, PMI, momentum, and valuation ranks.",
           "rag_summary": "Narrative is cautious due to weak manufacturing data and subdued earnings tone.",
           "rag_confidence": 0.65,
           "rag_effective_weight": 0.1625,
@@ -1048,9 +1151,9 @@
             },
             {
               "feature": "equity_3m_return_rank",
-              "value": 0.2,
+              "value": 0.6,
               "weight": 0.25,
-              "contribution": 0.05
+              "contribution": 0.15
             },
             {
               "feature": "equity_forward_pe_rank",
@@ -1065,13 +1168,19 @@
               "value": -1.0,
               "weight": 0.25,
               "contribution": -0.25
+            },
+            {
+              "feature": "news_pressure_rank",
+              "value": 0.2,
+              "weight": -0.15,
+              "contribution": -0.03
             }
           ]
         },
         "real_estate": {
-          "deterministic": 0.6,
+          "deterministic": 0.2,
           "rag": 0.0,
-          "final": 0.5475,
+          "final": 0.1825,
           "driver": "Positive real estate signal led by rate 3m change, balancing rates, policy, REIT momentum, housing, and labor ranks.",
           "rag_summary": "No strong mock qualitative narrative is assigned for this economy and asset class.",
           "rag_confidence": 0.35,
@@ -1114,9 +1223,9 @@
         }
       },
       "composite": {
-        "deterministic": 0.0,
+        "deterministic": 0.1,
         "rag": -0.05,
-        "final": -0.0044
+        "final": 0.0794
       }
     }
   }

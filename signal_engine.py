@@ -23,6 +23,7 @@ from rag_signal import compute_rag_signal
 from data_sources import world_bank as wb
 from data_sources import imf_weo
 from data_sources import market
+from data_sources import gdelt
 from snapshot_models import (
     AssetSignalModel,
     CompositeSignalModel,
@@ -83,6 +84,10 @@ REQUIRED_MARKET_COLUMNS = {
     "reit_3m_return",
     "house_price_yoy",
 }
+REQUIRED_NEWS_COLUMNS = {
+    "economy",
+    "news_pressure",
+}
 
 # Single source of truth for the (actual, consensus, surprise) column triples.
 # add_surprises consumes all of these; the live overlay derives its consensus
@@ -99,7 +104,15 @@ SURPRISE_SPECS = (
 # i.e. the ones eligible for the expected-change consensus overlay.
 LIVE_MACRO_COLUMNS = ("inflation_yoy", "gdp_growth", "unemployment")
 INPUT_PROVENANCE_COLUMNS = tuple(
-    sorted((REQUIRED_MACRO_COLUMNS | REQUIRED_CONSENSUS_COLUMNS | REQUIRED_MARKET_COLUMNS) - {"economy"})
+    sorted(
+        (
+            REQUIRED_MACRO_COLUMNS
+            | REQUIRED_CONSENSUS_COLUMNS
+            | REQUIRED_MARKET_COLUMNS
+            | REQUIRED_NEWS_COLUMNS
+        )
+        - {"economy"}
+    )
 )
 
 
@@ -220,19 +233,23 @@ def load_mock_data(data_dir: Path = DATA_DIR) -> pd.DataFrame:
     macro_path = data_dir / "mock_macro.csv"
     consensus_path = data_dir / "mock_consensus.csv"
     market_path = data_dir / "mock_market.csv"
+    news_path = data_dir / "mock_news.csv"
 
     macro = pd.read_csv(macro_path)
     consensus = pd.read_csv(consensus_path)
     market = pd.read_csv(market_path)
+    news = pd.read_csv(news_path)
 
     validate_input_frame(macro, macro_path, REQUIRED_MACRO_COLUMNS)
     validate_input_frame(consensus, consensus_path, REQUIRED_CONSENSUS_COLUMNS)
     validate_input_frame(market, market_path, REQUIRED_MARKET_COLUMNS)
+    validate_input_frame(news, news_path, REQUIRED_NEWS_COLUMNS)
 
     df = (
         macro.set_index("economy")
         .join(consensus.set_index("economy"), how="inner")
         .join(market.set_index("economy"), how="inner")
+        .join(news.set_index("economy"), how="inner")
         .loc[list(UNIVERSE)]
     )
     if df.isna().any().any():
@@ -372,6 +389,29 @@ def overlay_market_inputs(
         for economy, (return_pct, asof) in resolved.items():
             df.loc[economy, column] = return_pct
             provenance[economy][column] = f"yahoo:{asof}"
+    return df
+
+
+def overlay_news_pressure(
+    df: pd.DataFrame,
+    provenance: dict[str, dict[str, str]],
+    source: str = "mock",
+    fetch_json=None,
+) -> pd.DataFrame:
+    """Overlay live GDELT news-pressure scores all-or-nothing across economies."""
+    if source != "live":
+        return df
+
+    kwargs = {} if fetch_json is None else {"fetch_json": fetch_json}
+    pressure = gdelt.load_news_pressure(tuple(df.index), **kwargs)
+    resolved = resolve_all_or_none(
+        df.index, lambda economy: pressure.get(economy)
+    )
+    if resolved is None:
+        return df
+    for economy, (score, asof) in resolved.items():
+        df.loc[economy, "news_pressure"] = score
+        provenance[economy]["news_pressure"] = f"gdelt:{asof}"
     return df
 
 
@@ -573,10 +613,12 @@ def generate_snapshot(
     path: Path = SNAPSHOT_PATH,
     as_of: str | None = None,
     source: str = "mock",
+    gdelt_fetch_json=None,
 ) -> dict:
     config = load_signal_config()
     df, provenance, expected_change_columns = load_macro_inputs(source=source)
     df = overlay_market_inputs(df, provenance, source=source)
+    df = overlay_news_pressure(df, provenance, source=source, fetch_json=gdelt_fetch_json)
     df = overlay_fx_carry(df, provenance, source=source)
     df = add_surprises(df, expected_change_columns)
     df = add_ranked_features(df, config["weights"])
