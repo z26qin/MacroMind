@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-06-15",
+  "as_of": "2026-06-16",
   "methodology_version": "v0.1",
   "data_source": "live",
   "universe": [
@@ -37,9 +37,9 @@
       },
       "signals": {
         "fx": {
-          "deterministic": -0.8,
+          "deterministic": -0.4,
           "rag": 0.0,
-          "final": -0.73,
+          "final": -0.365,
           "driver": "Negative FX signal led by policy surprise and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "No strong mock qualitative narrative is assigned for this economy and asset class.",
           "rag_confidence": 0.35,
@@ -54,9 +54,9 @@
             },
             {
               "feature": "fx_3m_return_rank",
-              "value": 0.2,
+              "value": 0.6,
               "weight": 0.2,
-              "contribution": 0.04
+              "contribution": 0.12
             },
             {
               "feature": "news_pressure_rank",
@@ -222,9 +222,9 @@
         }
       },
       "composite": {
-        "deterministic": 0.15,
+        "deterministic": 0.25,
         "rag": 0.075,
-        "final": 0.1559
+        "final": 0.2472
       }
     },
     "Canada": {
@@ -445,9 +445,9 @@
       },
       "signals": {
         "fx": {
-          "deterministic": -0.8,
+          "deterministic": -1.0,
           "rag": 0.0,
-          "final": -0.73,
+          "final": -0.9125,
           "driver": "Negative FX signal led by fx 3m return and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "No strong mock qualitative narrative is assigned for this economy and asset class.",
           "rag_confidence": 0.35,
@@ -606,9 +606,9 @@
         }
       },
       "composite": {
-        "deterministic": -0.45,
+        "deterministic": -0.5,
         "rag": -0.05,
-        "final": -0.4062
+        "final": -0.4519
       }
     },
     "Japan": {
@@ -637,9 +637,9 @@
       },
       "signals": {
         "fx": {
-          "deterministic": 0.6,
+          "deterministic": 0.2,
           "rag": -0.2,
-          "final": 0.48,
+          "final": 0.14,
           "driver": "Positive FX signal led by growth surprise and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "Qualitative tone is cautious due to policy normalization uncertainty.",
           "rag_confidence": 0.6,
@@ -655,16 +655,16 @@
               "contribution": 0.3
             },
             {
-              "feature": "fx_3m_return_rank",
-              "value": 0.6,
-              "weight": 0.2,
-              "contribution": 0.12
-            },
-            {
               "feature": "news_pressure_rank",
               "value": -0.6,
               "weight": -0.1,
               "contribution": 0.06
+            },
+            {
+              "feature": "fx_3m_return_rank",
+              "value": 0.2,
+              "weight": 0.2,
+              "contribution": 0.04
             }
           ],
           "top_negative_drivers": [
@@ -804,9 +804,9 @@
         }
       },
       "composite": {
-        "deterministic": 0.0,
+        "deterministic": -0.1,
         "rag": -0.05,
-        "final": -0.0169
+        "final": -0.1019
       }
     },
     "Brazil": {
@@ -835,9 +835,9 @@
       },
       "signals": {
         "fx": {
-          "deterministic": -0.2,
+          "deterministic": -0.4,
           "rag": 0.2,
-          "final": -0.135,
+          "final": -0.3025,
           "driver": "Negative FX signal led by growth surprise and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "News narrative is supportive due to carry demand and resilient external balances.",
           "rag_confidence": 0.65,
@@ -867,16 +867,16 @@
               "contribution": -0.3
             },
             {
+              "feature": "fx_3m_return_rank",
+              "value": -0.6,
+              "weight": 0.2,
+              "contribution": -0.12
+            },
+            {
               "feature": "news_pressure_rank",
               "value": 0.6,
               "weight": -0.1,
               "contribution": -0.06
-            },
-            {
-              "feature": "unemployment_surprise_rank",
-              "value": 1.0,
-              "weight": -0.05,
-              "contribution": -0.05
             }
           ]
         },
@@ -1007,9 +1007,9 @@
         }
       },
       "composite": {
-        "deterministic": 0.0,
+        "deterministic": -0.05,
         "rag": 0.05,
-        "final": 0.0119
+        "final": -0.03
       }
     },
     "Euro Area": {
@@ -1038,9 +1038,9 @@
       },
       "signals": {
         "fx": {
-          "deterministic": 0.2,
+          "deterministic": 0.6,
           "rag": 0.0,
-          "final": 0.1825,
+          "final": 0.5475,
           "driver": "Positive FX signal led by growth surprise and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "No strong mock qualitative narrative is assigned for this economy and asset class.",
           "rag_confidence": 0.35,
@@ -1068,13 +1068,13 @@
           ],
           "top_negative_drivers": [
             {
-              "feature": "fx_3m_return_rank",
-              "value": -0.6,
+              "feature": "fx_carry_rank",
+              "value": -0.2,
               "weight": 0.2,
-              "contribution": -0.12
+              "contribution": -0.04
             },
             {
-              "feature": "fx_carry_rank",
+              "feature": "fx_3m_return_rank",
               "value": -0.2,
               "weight": 0.2,
               "contribution": -0.04
@@ -1223,9 +1223,9 @@
         }
       },
       "composite": {
-        "deterministic": 0.1,
+        "deterministic": 0.2,
         "rag": -0.05,
-        "final": 0.0794
+        "final": 0.1706
       }
     }
   }
