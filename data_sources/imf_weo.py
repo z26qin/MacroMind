@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-import httpx
+from data_sources.http import fetch_json as http_fetch_json
 
 IMF_BASE = "https://www.imf.org/external/datamapper/api/v1"
 
@@ -42,9 +42,7 @@ FORECAST_COLUMNS = tuple(IMF_INDICATOR_BY_COLUMN)
 
 def _default_fetch_json(url: str) -> dict:
     # No custom User-Agent: the IMF WAF rejects 'Mozilla' UAs with HTTP 403.
-    response = httpx.get(url, timeout=20.0)
-    response.raise_for_status()
-    return response.json()
+    return http_fetch_json(url, headers=None)
 
 
 def fetch_indicator(

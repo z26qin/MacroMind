@@ -13,11 +13,10 @@ rate-limits bursts, so the default fetch sends a UA and retries on 429.
 """
 from __future__ import annotations
 
-import time
 from datetime import datetime, timezone
 from typing import Callable
 
-import httpx
+from data_sources.http import fetch_json as http_fetch_json
 
 YAHOO_BASE = "https://query1.finance.yahoo.com/v8/finance/chart"
 
@@ -44,18 +43,7 @@ US_ECONOMY = "United States of America"
 
 def _default_fetch_json(url: str) -> dict:
     # Yahoo needs a browser UA (no-UA -> 429) and rate-limits bursts.
-    headers = {"User-Agent": "Mozilla/5.0"}
-    response = None
-    for attempt in range(4):
-        response = httpx.get(url, timeout=20.0, headers=headers, follow_redirects=True)
-        if response.status_code == 200:
-            return response.json()
-        if response.status_code == 429:
-            time.sleep(1.5 * (attempt + 1))
-            continue
-        response.raise_for_status()
-    response.raise_for_status()
-    return response.json()
+    return http_fetch_json(url, headers={"User-Agent": "Mozilla/5.0"})
 
 
 def fetch_3m_return(

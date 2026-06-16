@@ -23,6 +23,13 @@ from rag_signal import compute_rag_signal
 from data_sources import world_bank as wb
 from data_sources import imf_weo
 from data_sources import market
+from snapshot_models import (
+    AssetSignalModel,
+    CompositeSignalModel,
+    EconomySnapshotModel,
+    SignalSnapshotModel,
+    model_to_dict,
+)
 
 
 SNAPSHOT_PATH = Path("snapshot.json")
@@ -91,6 +98,9 @@ SURPRISE_SPECS = (
 # The macro columns that have a live World Bank actual and an IMF WEO forecast,
 # i.e. the ones eligible for the expected-change consensus overlay.
 LIVE_MACRO_COLUMNS = ("inflation_yoy", "gdp_growth", "unemployment")
+INPUT_PROVENANCE_COLUMNS = tuple(
+    sorted((REQUIRED_MACRO_COLUMNS | REQUIRED_CONSENSUS_COLUMNS | REQUIRED_MARKET_COLUMNS) - {"economy"})
+)
 
 
 def clip_signal(value: float) -> float:
@@ -232,6 +242,34 @@ def load_mock_data(data_dir: Path = DATA_DIR) -> pd.DataFrame:
     return df
 
 
+def initialize_provenance(economies: Iterable[str]) -> dict[str, dict[str, str]]:
+    """Mark every signal input as mock before live overlays replace sources."""
+    return {
+        economy: {column: "mock" for column in INPUT_PROVENANCE_COLUMNS}
+        for economy in economies
+    }
+
+
+def overlay_world_bank_actuals(
+    df: pd.DataFrame,
+    provenance: dict[str, dict[str, str]],
+    fetch_json=None,
+) -> pd.DataFrame:
+    """Overlay live World Bank realized values onto eligible macro columns."""
+    end_year = date.today().year
+    start_year = end_year - LIVE_HISTORY_YEARS
+    wb_kwargs = {} if fetch_json is None else {"fetch_json": fetch_json}
+    macro, _wb_consensus, live_provenance = wb.load_world_bank_macro(
+        tuple(df.index), start_year, end_year, **wb_kwargs
+    )
+
+    for economy in df.index:
+        for column, value in macro[economy].items():
+            df.loc[economy, column] = value
+            provenance[economy][column] = live_provenance[economy][column]
+    return df
+
+
 def load_macro_inputs(
     source: str = "mock",
     data_dir: Path = DATA_DIR,
@@ -248,44 +286,25 @@ def load_macro_inputs(
     expected_change_columns so the surprise becomes forecast(T+1) - actual(T).
     """
     df = load_mock_data(data_dir)
-
-    tracked_columns = sorted(REQUIRED_MACRO_COLUMNS - {"economy"})
-    provenance = {
-        economy: {column: "mock" for column in tracked_columns}
-        for economy in df.index
-    }
+    provenance = initialize_provenance(df.index)
 
     if source == "mock":
         return df, provenance, frozenset()
     if source != "live":
         raise ValueError(f"Unknown data source: {source!r} (expected 'mock' or 'live')")
 
-    end_year = date.today().year
-    start_year = end_year - LIVE_HISTORY_YEARS
-    wb_kwargs = {} if fetch_json is None else {"fetch_json": fetch_json}
-    macro, _wb_consensus, live_provenance = wb.load_world_bank_macro(
-        tuple(df.index), start_year, end_year, **wb_kwargs
-    )
-
-    # Overlay World Bank realized actuals (consensus is replaced by IMF below).
-    for economy in df.index:
-        for column, value in macro[economy].items():
-            df.loc[economy, column] = value
-            provenance[economy][column] = live_provenance[economy][column]
-
-    imf_kwargs = {} if imf_fetch_json is None else {"fetch_json": imf_fetch_json}
-    forecasts = imf_weo.load_imf_forecasts(tuple(df.index), **imf_kwargs)
-    expected_change = _apply_imf_expected_change(df, provenance, forecasts)
+    overlay_world_bank_actuals(df, provenance, fetch_json=fetch_json)
+    expected_change = overlay_imf_expected_change(df, provenance, fetch_json=imf_fetch_json)
 
     if df.isna().any().any():
         raise ValueError("Macro inputs contain missing values after live overlay")
     return df, provenance, frozenset(expected_change)
 
 
-def _apply_imf_expected_change(
+def overlay_imf_expected_change(
     df: pd.DataFrame,
     provenance: dict[str, dict[str, str]],
-    forecasts: dict[str, dict[str, dict[int, float]]],
+    fetch_json=None,
 ) -> set[str]:
     """Overlay IMF next-year forecasts as the consensus, all-or-nothing per column.
 
@@ -294,6 +313,8 @@ def _apply_imf_expected_change(
     consensus cell is replaced with that forecast and its surprise column is
     added to the returned set. Mutates df and provenance.
     """
+    imf_kwargs = {} if fetch_json is None else {"fetch_json": fetch_json}
+    forecasts = imf_weo.load_imf_forecasts(tuple(df.index), **imf_kwargs)
     consensus_column = {a: c for a, c, _ in SURPRISE_SPECS if a in LIVE_MACRO_COLUMNS}
     surprise_column = {a: s for a, _, s in SURPRISE_SPECS if a in LIVE_MACRO_COLUMNS}
 
@@ -491,22 +512,10 @@ def build_snapshot(
     blend = config["signal_blend"]
     rag_weight = float(blend["rag_weight"])
 
-    snapshot = {
-        "as_of": as_of or date.today().isoformat(),
-        "methodology_version": METHODOLOGY_VERSION,
-        "data_source": source,
-        "universe": list(UNIVERSE),
-        "economies": {},
-    }
+    economies: dict[str, EconomySnapshotModel] = {}
 
     for country, row in df.iterrows():
-        entry = {
-            "country": country,
-            "iso3": row["iso3"],
-            "provenance": provenance[country],
-            "signals": {},
-            "composite": {},
-        }
+        signals: dict[str, AssetSignalModel] = {}
 
         deterministic_values = []
         rag_values = []
@@ -525,27 +534,39 @@ def build_snapshot(
             rag_values.append(rag_signal)
             final_values.append(final)
 
-            entry["signals"][asset_class] = {
-                "deterministic": deterministic,
-                "rag": rag_signal,
-                "final": final,
-                "driver": describe_driver(country, asset_class, row, asset_weights),
-                "rag_summary": rag["summary"],
-                "rag_confidence": round(rag_confidence, 4),
-                "rag_effective_weight": round(rag_weight * rag_confidence, 4),
-                "rag_sources": rag["sources"],
-                "top_positive_drivers": top_positive,
-                "top_negative_drivers": top_negative,
-            }
+            signals[asset_class] = AssetSignalModel(
+                deterministic=deterministic,
+                rag=rag_signal,
+                final=final,
+                driver=describe_driver(country, asset_class, row, asset_weights),
+                rag_summary=rag["summary"],
+                rag_confidence=round(rag_confidence, 4),
+                rag_effective_weight=round(rag_weight * rag_confidence, 4),
+                rag_sources=rag["sources"],
+                top_positive_drivers=top_positive,
+                top_negative_drivers=top_negative,
+            )
 
-        entry["composite"] = {
-            "deterministic": round(float(np.mean(deterministic_values)), 4),
-            "rag": round(float(np.mean(rag_values)), 4),
-            "final": round(float(np.mean(final_values)), 4),
-        }
-        snapshot["economies"][country] = entry
+        economies[country] = EconomySnapshotModel(
+            country=country,
+            iso3=row["iso3"],
+            provenance=provenance[country],
+            signals=signals,
+            composite=CompositeSignalModel(
+                deterministic=round(float(np.mean(deterministic_values)), 4),
+                rag=round(float(np.mean(rag_values)), 4),
+                final=round(float(np.mean(final_values)), 4),
+            ),
+        )
 
-    return snapshot
+    snapshot = SignalSnapshotModel(
+        as_of=as_of or date.today().isoformat(),
+        methodology_version=METHODOLOGY_VERSION,
+        data_source=source,
+        universe=list(UNIVERSE),
+        economies=economies,
+    )
+    return model_to_dict(snapshot)
 
 
 def generate_snapshot(

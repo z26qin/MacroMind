@@ -94,7 +94,10 @@ def test_load_macro_inputs_mock_marks_all_provenance_mock():
     assert len(df) == 6
     for economy in EXPECTED_UNIVERSE:
         assert provenance[economy]["inflation_yoy"] == "mock"
+        assert provenance[economy]["inflation_consensus"] == "mock"
         assert provenance[economy]["policy_rate"] == "mock"
+        assert provenance[economy]["policy_rate_consensus"] == "mock"
+        assert provenance[economy]["equity_3m_return"] == "mock"
 
 
 def test_load_macro_inputs_live_overlays_world_bank_values():
@@ -135,7 +138,12 @@ def test_each_economy_reports_provenance(snapshot):
         provenance = economy["provenance"]
         assert provenance["inflation_yoy"] == "mock"
         assert set(provenance) >= {
-            "inflation_yoy", "gdp_growth", "unemployment", "policy_rate", "pmi",
+            "inflation_yoy", "inflation_consensus",
+            "gdp_growth", "gdp_consensus",
+            "unemployment", "unemployment_consensus",
+            "policy_rate", "policy_rate_consensus",
+            "pmi", "pmi_consensus",
+            "fx_3m_return", "fx_carry", "equity_3m_return",
         }
 
 
@@ -271,7 +279,7 @@ def test_overlay_market_inputs_mock_is_noop():
     before = df["equity_3m_return"].tolist()
     se.overlay_market_inputs(df, provenance, source="mock")
     assert df["equity_3m_return"].tolist() == before
-    assert "equity_3m_return" not in provenance["United States of America"]
+    assert provenance["United States of America"]["equity_3m_return"] == "mock"
 
 
 def test_overlay_market_inputs_live_overlays_fx_and_equity():
@@ -291,7 +299,7 @@ def test_overlay_fx_carry_mock_is_noop():
     before = df["fx_carry"].tolist()
     se.overlay_fx_carry(df, provenance, source="mock")
     assert df["fx_carry"].tolist() == before
-    assert "fx_carry" not in provenance["United States of America"]
+    assert provenance["United States of America"]["fx_carry"] == "mock"
 
 
 def test_overlay_fx_carry_live_derives_from_policy_rate_diff():
