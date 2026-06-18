@@ -11,14 +11,17 @@ cross-sectionally as ``news_pressure_rank`` before applying asset-class weights.
 """
 from __future__ import annotations
 
+import hashlib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date
-import hashlib
 from math import sqrt
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 from urllib.parse import urlencode
 
 from data_sources.http import fetch_json as http_fetch_json
+
+if TYPE_CHECKING:
+    from data_sources.cache import TTLCache
 
 GDELT_DOC_BASE = "https://api.gdeltproject.org/api/v2/doc/doc"
 LOOKBACK = "7d"
@@ -126,17 +129,37 @@ def _load_one_economy(
 def load_news_pressure(
     economies: tuple[str, ...],
     fetch_json: Callable[[str], dict] = _default_fetch_json,
+    cache: "TTLCache | None" = None,
 ) -> dict[str, tuple[float, str]]:
-    """Return {economy: (news_pressure, as_of_date)} for mapped economies."""
+    """Return {economy: (news_pressure, as_of_date)} for mapped economies.
+
+    When a ``cache`` is supplied, each economy's score is served from it if a
+    non-expired entry exists; only successful fetches are written back, so a
+    failed economy is retried on the next call.
+    """
     out: dict[str, tuple[float, str]] = {}
     mapped = [economy for economy in economies if economy in ECONOMY_QUERY]
-    with ThreadPoolExecutor(max_workers=min(6, len(mapped) or 1)) as executor:
-        futures = {
-            executor.submit(_load_one_economy, economy, fetch_json): economy
-            for economy in mapped
-        }
-        for future in as_completed(futures):
-            economy, result = future.result()
-            if result is not None:
-                out[economy] = result
+
+    to_fetch: list[str] = []
+    for economy in mapped:
+        if cache is not None:
+            hit = cache.get(cache_key(economy))
+            if hit is not None:
+                score, asof = hit  # cached JSON list -> tuple
+                out[economy] = (float(score), str(asof))
+                continue
+        to_fetch.append(economy)
+
+    if to_fetch:
+        with ThreadPoolExecutor(max_workers=min(6, len(to_fetch))) as executor:
+            futures = {
+                executor.submit(_load_one_economy, economy, fetch_json): economy
+                for economy in to_fetch
+            }
+            for future in as_completed(futures):
+                economy, result = future.result()
+                if result is not None:
+                    out[economy] = result
+                    if cache is not None:
+                        cache.set(cache_key(economy), list(result))
     return out

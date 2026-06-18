@@ -1,6 +1,7 @@
 from urllib.parse import parse_qs, urlparse
 
 from data_sources import gdelt
+from data_sources.cache import TTLCache
 
 
 def test_build_query_combines_economy_and_pressure_terms():
@@ -81,3 +82,97 @@ def test_cache_key_includes_economy_lookback_and_terms():
     assert key.startswith("Brazil|")
     assert gdelt.LOOKBACK in key
     assert key.endswith(gdelt.terms_version())
+
+
+def _fake_date(monkeypatch):
+    real_date = gdelt.date
+
+    class FakeDate:
+        @staticmethod
+        def today():
+            return real_date(2026, 6, 16)
+
+    monkeypatch.setattr(gdelt, "date", FakeDate)
+
+
+def _counting_fetch(calls):
+    def fetch(url):
+        calls["n"] += 1
+        query = parse_qs(urlparse(url).query)["query"][0]
+        if "policy uncertainty" in query:
+            return {"articles": [{}, {}, {}, {}]}
+        return {"articles": [{}]}
+
+    return fetch
+
+
+def test_load_news_pressure_serves_from_cache_within_ttl(monkeypatch, tmp_path):
+    _fake_date(monkeypatch)
+    calls = {"n": 0}
+    fetch = _counting_fetch(calls)
+    clock = {"t": 1000.0}
+    cache = TTLCache(tmp_path / "news.json", ttl_seconds=100, now=lambda: clock["t"])
+
+    first = gdelt.load_news_pressure(("Canada",), fetch_json=fetch, cache=cache)
+    assert first["Canada"] == (1.3416, "2026-06-16")
+    assert calls["n"] == 2  # stress + relief
+
+    second = gdelt.load_news_pressure(("Canada",), fetch_json=fetch, cache=cache)
+    assert second["Canada"] == (1.3416, "2026-06-16")
+    assert calls["n"] == 2  # served from cache, no new requests
+
+
+def test_load_news_pressure_refetches_after_ttl(monkeypatch, tmp_path):
+    _fake_date(monkeypatch)
+    calls = {"n": 0}
+    fetch = _counting_fetch(calls)
+    clock = {"t": 1000.0}
+    cache = TTLCache(tmp_path / "news.json", ttl_seconds=100, now=lambda: clock["t"])
+
+    gdelt.load_news_pressure(("Canada",), fetch_json=fetch, cache=cache)
+    assert calls["n"] == 2
+    clock["t"] = 1200.0  # past the 100s TTL
+    gdelt.load_news_pressure(("Canada",), fetch_json=fetch, cache=cache)
+    assert calls["n"] == 4  # expired -> refetched
+
+
+def test_load_news_pressure_does_not_cache_failures(monkeypatch, tmp_path):
+    _fake_date(monkeypatch)
+
+    def failing_fetch(url):
+        raise RuntimeError("boom")
+
+    cache = TTLCache(tmp_path / "news.json", ttl_seconds=1000, now=lambda: 0.0)
+    out = gdelt.load_news_pressure(("Canada",), fetch_json=failing_fetch, cache=cache)
+    assert "Canada" not in out
+    assert cache.get(gdelt.cache_key("Canada")) is None
+
+
+def test_load_news_pressure_misses_when_terms_change(monkeypatch, tmp_path):
+    _fake_date(monkeypatch)
+    calls = {"n": 0}
+    fetch = _counting_fetch(calls)
+    cache = TTLCache(tmp_path / "news.json", ttl_seconds=1000, now=lambda: 0.0)
+
+    gdelt.load_news_pressure(("Canada",), fetch_json=fetch, cache=cache)
+    assert calls["n"] == 2
+    monkeypatch.setattr(gdelt, "STRESS_TERMS", gdelt.STRESS_TERMS + ("newterm",))
+    gdelt.load_news_pressure(("Canada",), fetch_json=fetch, cache=cache)
+    assert calls["n"] == 4  # new terms_version -> new key -> refetch
+
+
+def test_load_news_pressure_partial_cache_hit(monkeypatch, tmp_path):
+    _fake_date(monkeypatch)
+    calls = {"n": 0}
+    fetch = _counting_fetch(calls)
+    cache = TTLCache(tmp_path / "news.json", ttl_seconds=1000, now=lambda: 0.0)
+
+    # Warm only Canada.
+    gdelt.load_news_pressure(("Canada",), fetch_json=fetch, cache=cache)
+    assert calls["n"] == 2
+
+    # Ask for both; Canada is served from cache, only Japan is fetched.
+    out = gdelt.load_news_pressure(("Canada", "Japan"), fetch_json=fetch, cache=cache)
+    assert calls["n"] == 4  # 2 new fetches for Japan only
+    assert "Canada" in out
+    assert "Japan" in out
