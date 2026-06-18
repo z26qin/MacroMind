@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date
+import hashlib
 from math import sqrt
 from typing import Callable
 from urllib.parse import urlencode
@@ -22,6 +23,7 @@ from data_sources.http import fetch_json as http_fetch_json
 GDELT_DOC_BASE = "https://api.gdeltproject.org/api/v2/doc/doc"
 LOOKBACK = "7d"
 MAX_RECORDS = 250
+NEWS_CACHE_TTL_SECONDS = 21600  # 6 hours
 
 ECONOMY_QUERY = {
     "United States of America": '("United States" OR USA OR America)',
@@ -72,6 +74,20 @@ def build_url(query: str, lookback: str = LOOKBACK, max_records: int = MAX_RECOR
         "sort": "datedesc",
     }
     return f"{GDELT_DOC_BASE}?{urlencode(params)}"
+
+
+def terms_version() -> str:
+    """Short stable hash of the query term lists.
+
+    Folded into the cache key so changing STRESS_TERMS / RELIEF_TERMS
+    invalidates affected entries instead of reusing a stale score.
+    """
+    payload = "|".join((*STRESS_TERMS, "::", *RELIEF_TERMS)).encode("utf-8")
+    return hashlib.sha1(payload, usedforsecurity=False).hexdigest()[:8]
+
+
+def cache_key(economy: str) -> str:
+    return f"{economy}|{LOOKBACK}|{terms_version()}"
 
 
 def article_count(query: str, fetch_json: Callable[[str], dict] = _default_fetch_json) -> int:

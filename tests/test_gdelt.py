@@ -61,3 +61,23 @@ def test_load_news_pressure_returns_score_and_date(monkeypatch):
 
     out = gdelt.load_news_pressure(("Canada",), fetch_json=fake_fetch)
     assert out["Canada"] == (1.3416, "2026-06-16")
+
+
+def test_terms_version_is_stable_8_char_hex():
+    version = gdelt.terms_version()
+    assert version == gdelt.terms_version()
+    assert len(version) == 8
+    int(version, 16)  # hex-parseable
+
+
+def test_terms_version_changes_when_terms_change(monkeypatch):
+    before = gdelt.terms_version()
+    monkeypatch.setattr(gdelt, "STRESS_TERMS", gdelt.STRESS_TERMS + ("newterm",))
+    assert gdelt.terms_version() != before
+
+
+def test_cache_key_includes_economy_lookback_and_terms():
+    key = gdelt.cache_key("Brazil")
+    assert key.startswith("Brazil|")
+    assert gdelt.LOOKBACK in key
+    assert key.endswith(gdelt.terms_version())
