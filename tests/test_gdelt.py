@@ -176,3 +176,16 @@ def test_load_news_pressure_partial_cache_hit(monkeypatch, tmp_path):
     assert calls["n"] == 4  # 2 new fetches for Japan only
     assert "Canada" in out
     assert "Japan" in out
+
+
+def test_load_news_pressure_treats_malformed_cache_entry_as_miss(monkeypatch, tmp_path):
+    _fake_date(monkeypatch)
+    calls = {"n": 0}
+    fetch = _counting_fetch(calls)
+    cache = TTLCache(tmp_path / "news.json", ttl_seconds=1000, now=lambda: 0.0)
+    # A structurally-valid file with a malformed entry (wrong arity) must not
+    # break generation — it is treated as a miss and refetched.
+    cache.set(gdelt.cache_key("Canada"), [1.0, "2026-06-16", "extra"])
+    out = gdelt.load_news_pressure(("Canada",), fetch_json=fetch, cache=cache)
+    assert calls["n"] == 2
+    assert out["Canada"] == (1.3416, "2026-06-16")

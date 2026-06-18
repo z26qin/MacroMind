@@ -126,6 +126,21 @@ def _load_one_economy(
     return economy, (pressure_score(stress, relief), date.today().isoformat())
 
 
+def _coerce_cached_score(value: object) -> tuple[float, str] | None:
+    """Coerce a cached ``[score, asof]`` entry back to a tuple.
+
+    Returns None for any malformed entry (wrong shape or non-numeric score) so a
+    hand-edited or schema-changed cache file is treated as a miss rather than
+    breaking generation — the cache must never break the caller.
+    """
+    if isinstance(value, (list, tuple)) and len(value) == 2:
+        try:
+            return float(value[0]), str(value[1])
+        except (TypeError, ValueError):
+            return None
+    return None
+
+
 def load_news_pressure(
     economies: tuple[str, ...],
     fetch_json: Callable[[str], dict] = _default_fetch_json,
@@ -143,10 +158,9 @@ def load_news_pressure(
     to_fetch: list[str] = []
     for economy in mapped:
         if cache is not None:
-            hit = cache.get(cache_key(economy))
+            hit = _coerce_cached_score(cache.get(cache_key(economy)))
             if hit is not None:
-                score, asof = hit  # cached JSON list -> tuple
-                out[economy] = (float(score), str(asof))
+                out[economy] = hit
                 continue
         to_fetch.append(economy)
 
