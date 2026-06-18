@@ -24,6 +24,7 @@ from data_sources import world_bank as wb
 from data_sources import imf_weo
 from data_sources import market
 from data_sources import gdelt
+from data_sources.cache import TTLCache
 from snapshot_models import (
     AssetSignalModel,
     CompositeSignalModel,
@@ -34,6 +35,7 @@ from snapshot_models import (
 
 
 SNAPSHOT_PATH = Path("snapshot.json")
+NEWS_CACHE_PATH = Path(".cache") / "gdelt_news.json"
 CONFIG_PATH = Path("signal_config.yaml")
 DATA_DIR = Path("data")
 METHODOLOGY_VERSION = "v0.1"
@@ -397,12 +399,17 @@ def overlay_news_pressure(
     provenance: dict[str, dict[str, str]],
     source: str = "mock",
     fetch_json=None,
+    cache: TTLCache | None = None,
 ) -> pd.DataFrame:
     """Overlay live GDELT news-pressure scores all-or-nothing across economies."""
     if source != "live":
         return df
 
-    kwargs = {} if fetch_json is None else {"fetch_json": fetch_json}
+    kwargs = {}
+    if fetch_json is not None:
+        kwargs["fetch_json"] = fetch_json
+    if cache is not None:
+        kwargs["cache"] = cache
     pressure = gdelt.load_news_pressure(tuple(df.index), **kwargs)
     resolved = resolve_all_or_none(
         df.index, lambda economy: pressure.get(economy)
@@ -699,11 +706,14 @@ def generate_snapshot(
     as_of: str | None = None,
     source: str = "mock",
     gdelt_fetch_json=None,
+    news_cache: TTLCache | None = None,
 ) -> dict:
     config = load_signal_config()
     df, provenance, expected_change_columns = load_macro_inputs(source=source)
     df = overlay_market_inputs(df, provenance, source=source)
-    df = overlay_news_pressure(df, provenance, source=source, fetch_json=gdelt_fetch_json)
+    df = overlay_news_pressure(
+        df, provenance, source=source, fetch_json=gdelt_fetch_json, cache=news_cache
+    )
     df = overlay_fx_carry(df, provenance, source=source)
     df = add_surprises(df, expected_change_columns)
     df = add_ranked_features(df, config["weights"])
@@ -711,6 +721,11 @@ def generate_snapshot(
     snapshot = build_snapshot(df, config, provenance, source=source, as_of=as_of)
     path.write_text(json.dumps(snapshot, indent=2), encoding="utf-8")
     return snapshot
+
+
+def default_news_cache() -> TTLCache:
+    """The on-disk GDELT cache used by the live CLI path."""
+    return TTLCache(NEWS_CACHE_PATH, gdelt.NEWS_CACHE_TTL_SECONDS)
 
 
 if __name__ == "__main__":
@@ -724,5 +739,6 @@ if __name__ == "__main__":
         help="Data source: 'mock' (bundled CSVs) or 'live' (World Bank API).",
     )
     args = parser.parse_args()
-    generate_snapshot(source=args.source)
+    news_cache = default_news_cache() if args.source == "live" else None
+    generate_snapshot(source=args.source, news_cache=news_cache)
     print(f"Wrote {SNAPSHOT_PATH} (source={args.source})")

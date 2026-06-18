@@ -11,17 +11,22 @@ cross-sectionally as ``news_pressure_rank`` before applying asset-class weights.
 """
 from __future__ import annotations
 
+import hashlib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date
 from math import sqrt
-from typing import Callable
+from typing import TYPE_CHECKING, Callable
 from urllib.parse import urlencode
 
 from data_sources.http import fetch_json as http_fetch_json
 
+if TYPE_CHECKING:
+    from data_sources.cache import TTLCache
+
 GDELT_DOC_BASE = "https://api.gdeltproject.org/api/v2/doc/doc"
 LOOKBACK = "7d"
 MAX_RECORDS = 250
+NEWS_CACHE_TTL_SECONDS = 21600  # 6 hours
 
 ECONOMY_QUERY = {
     "United States of America": '("United States" OR USA OR America)',
@@ -74,6 +79,20 @@ def build_url(query: str, lookback: str = LOOKBACK, max_records: int = MAX_RECOR
     return f"{GDELT_DOC_BASE}?{urlencode(params)}"
 
 
+def terms_version() -> str:
+    """Short stable hash of the query term lists.
+
+    Folded into the cache key so changing STRESS_TERMS / RELIEF_TERMS
+    invalidates affected entries instead of reusing a stale score.
+    """
+    payload = "|".join((*STRESS_TERMS, "::", *RELIEF_TERMS)).encode("utf-8")
+    return hashlib.sha1(payload, usedforsecurity=False).hexdigest()[:8]
+
+
+def cache_key(economy: str) -> str:
+    return f"{economy}|{LOOKBACK}|{terms_version()}"
+
+
 def article_count(query: str, fetch_json: Callable[[str], dict] = _default_fetch_json) -> int:
     """Return the number of matching GDELT articles in the configured window."""
     payload = fetch_json(build_url(query))
@@ -107,20 +126,54 @@ def _load_one_economy(
     return economy, (pressure_score(stress, relief), date.today().isoformat())
 
 
+def _coerce_cached_score(value: object) -> tuple[float, str] | None:
+    """Coerce a cached ``[score, asof]`` entry back to a tuple.
+
+    Returns None for any malformed entry (wrong shape or non-numeric score) so a
+    hand-edited or schema-changed cache file is treated as a miss rather than
+    breaking generation — the cache must never break the caller.
+    """
+    if isinstance(value, (list, tuple)) and len(value) == 2:
+        try:
+            return float(value[0]), str(value[1])
+        except (TypeError, ValueError):
+            return None
+    return None
+
+
 def load_news_pressure(
     economies: tuple[str, ...],
     fetch_json: Callable[[str], dict] = _default_fetch_json,
+    cache: "TTLCache | None" = None,
 ) -> dict[str, tuple[float, str]]:
-    """Return {economy: (news_pressure, as_of_date)} for mapped economies."""
+    """Return {economy: (news_pressure, as_of_date)} for mapped economies.
+
+    When a ``cache`` is supplied, each economy's score is served from it if a
+    non-expired entry exists; only successful fetches are written back, so a
+    failed economy is retried on the next call.
+    """
     out: dict[str, tuple[float, str]] = {}
     mapped = [economy for economy in economies if economy in ECONOMY_QUERY]
-    with ThreadPoolExecutor(max_workers=min(6, len(mapped) or 1)) as executor:
-        futures = {
-            executor.submit(_load_one_economy, economy, fetch_json): economy
-            for economy in mapped
-        }
-        for future in as_completed(futures):
-            economy, result = future.result()
-            if result is not None:
-                out[economy] = result
+
+    to_fetch: list[str] = []
+    for economy in mapped:
+        if cache is not None:
+            hit = _coerce_cached_score(cache.get(cache_key(economy)))
+            if hit is not None:
+                out[economy] = hit
+                continue
+        to_fetch.append(economy)
+
+    if to_fetch:
+        with ThreadPoolExecutor(max_workers=min(6, len(to_fetch))) as executor:
+            futures = {
+                executor.submit(_load_one_economy, economy, fetch_json): economy
+                for economy in to_fetch
+            }
+            for future in as_completed(futures):
+                economy, result = future.result()
+                if result is not None:
+                    out[economy] = result
+                    if cache is not None:
+                        cache.set(cache_key(economy), list(result))
     return out

@@ -508,3 +508,43 @@ def test_conviction_methodology_invariants(snapshot):
                 # (the third "na" trigger, gross == 0, isn't observable from
                 # snapshot keys and never occurs with real data)
                 assert abs(signal["final"]) < 0.10 or signal["deterministic"] == 0
+
+
+import signal_engine
+from data_sources.cache import TTLCache
+
+
+def test_overlay_news_pressure_threads_cache(monkeypatch):
+    captured = {}
+
+    def fake_load(economies, fetch_json=None, cache=None):
+        captured["cache"] = cache
+        return {}
+
+    monkeypatch.setattr(signal_engine.gdelt, "load_news_pressure", fake_load)
+    sentinel = object()
+    df = pd.DataFrame({"news_pressure": [0.0]}, index=["United States of America"])
+    signal_engine.overlay_news_pressure(
+        df, {"United States of America": {}}, source="live", cache=sentinel
+    )
+    assert captured["cache"] is sentinel
+
+
+def test_generate_snapshot_threads_news_cache(monkeypatch, tmp_path):
+    captured = {}
+
+    def spy(df, provenance, source="mock", fetch_json=None, cache=None):
+        captured["cache"] = cache
+        return df
+
+    monkeypatch.setattr(signal_engine, "overlay_news_pressure", spy)
+    sentinel = object()
+    signal_engine.generate_snapshot(path=tmp_path / "snap.json", news_cache=sentinel)
+    assert captured["cache"] is sentinel
+
+
+def test_default_news_cache_uses_repo_path_and_ttl():
+    cache = signal_engine.default_news_cache()
+    assert isinstance(cache, TTLCache)
+    assert cache.path == signal_engine.NEWS_CACHE_PATH
+    assert cache.ttl_seconds == signal_engine.gdelt.NEWS_CACHE_TTL_SECONDS
