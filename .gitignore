@@ -6,3 +6,4 @@ venv/
 .DS_Store
 .superpowers/
 .claude/launch.json
+.cache/
