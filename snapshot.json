@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-07-02",
+  "as_of": "2026-07-03",
   "methodology_version": "v0.1",
   "data_source": "live",
   "universe": [
@@ -604,22 +604,22 @@
               "contribution": -0.3
             },
             {
+              "feature": "equity_3m_return_rank",
+              "value": -1.0,
+              "weight": 0.25,
+              "contribution": -0.25
+            },
+            {
               "feature": "equity_forward_pe_rank",
               "value": 1.0,
               "weight": -0.2,
               "contribution": -0.2
-            },
-            {
-              "feature": "equity_3m_return_rank",
-              "value": -0.6,
-              "weight": 0.25,
-              "contribution": -0.15
             }
           ],
           "conviction": {
             "band": "high",
-            "net_lean": 0.8824,
-            "top_driver_share": 0.3529,
+            "net_lean": 0.8947,
+            "top_driver_share": 0.3158,
             "top_driver": "growth_surprise",
             "narrative": "agrees"
           }
@@ -835,9 +835,9 @@
             },
             {
               "feature": "equity_3m_return_rank",
-              "value": 1.0,
+              "value": 0.6,
               "weight": 0.25,
-              "contribution": 0.25
+              "contribution": 0.15
             },
             {
               "feature": "news_pressure_rank",
@@ -862,8 +862,8 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.4568,
-            "top_driver_share": 0.3086,
+            "net_lean": 0.3803,
+            "top_driver_share": 0.3521,
             "top_driver": "pmi_surprise",
             "narrative": "no_view"
           }
@@ -1062,9 +1062,9 @@
           "top_negative_drivers": [
             {
               "feature": "equity_3m_return_rank",
-              "value": -1.0,
+              "value": -0.6,
               "weight": 0.25,
-              "contribution": -0.25
+              "contribution": -0.15
             },
             {
               "feature": "equity_forward_pe_rank",
@@ -1082,7 +1082,7 @@
           "conviction": {
             "band": "high",
             "net_lean": 1.0,
-            "top_driver_share": 0.4386,
+            "top_driver_share": 0.3191,
             "top_driver": "equity_3m_return",
             "narrative": "no_view"
           }
@@ -1292,9 +1292,9 @@
           "top_positive_drivers": [
             {
               "feature": "equity_3m_return_rank",
-              "value": 0.6,
+              "value": 1.0,
               "weight": 0.25,
-              "contribution": 0.15
+              "contribution": 0.25
             },
             {
               "feature": "growth_surprise_rank",
@@ -1325,8 +1325,8 @@
           ],
           "conviction": {
             "band": "low",
-            "net_lean": 0.0566,
-            "top_driver_share": 0.4717,
+            "net_lean": -0.1111,
+            "top_driver_share": 0.3968,
             "top_driver": "pmi_surprise",
             "narrative": "agrees"
           }
