@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-07-04",
+  "as_of": "2026-07-06",
   "methodology_version": "v0.1",
   "data_source": "live",
   "universe": [
@@ -53,13 +53,13 @@
               "contribution": 0.3
             },
             {
-              "feature": "fx_carry_rank",
-              "value": 0.6,
+              "feature": "fx_3m_return_rank",
+              "value": 1.0,
               "weight": 0.2,
-              "contribution": 0.12
+              "contribution": 0.2
             },
             {
-              "feature": "fx_3m_return_rank",
+              "feature": "fx_carry_rank",
               "value": 0.6,
               "weight": 0.2,
               "contribution": 0.12
@@ -81,8 +81,8 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.3659,
-            "top_driver_share": 0.3659,
+            "net_lean": 0.4222,
+            "top_driver_share": 0.3333,
             "top_driver": "growth_surprise",
             "narrative": "no_view"
           }
@@ -499,9 +499,9 @@
           "top_positive_drivers": [
             {
               "feature": "fx_3m_return_rank",
-              "value": 1.0,
+              "value": 0.6,
               "weight": 0.2,
-              "contribution": 0.2
+              "contribution": 0.12
             }
           ],
           "top_negative_drivers": [
@@ -525,9 +525,9 @@
             }
           ],
           "conviction": {
-            "band": "medium",
-            "net_lean": 0.5556,
-            "top_driver_share": 0.3333,
+            "band": "high",
+            "net_lean": 0.7073,
+            "top_driver_share": 0.3659,
             "top_driver": "growth_surprise",
             "narrative": "no_view"
           }
