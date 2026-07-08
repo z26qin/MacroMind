@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-07-07",
+  "as_of": "2026-07-08",
   "methodology_version": "v0.1",
   "data_source": "live",
   "universe": [
@@ -163,10 +163,10 @@
               "contribution": 0.2
             },
             {
-              "feature": "equity_3m_return_rank",
-              "value": 0.2,
-              "weight": 0.25,
-              "contribution": 0.05
+              "feature": "news_pressure_rank",
+              "value": -0.2,
+              "weight": -0.15,
+              "contribution": 0.03
             }
           ],
           "top_negative_drivers": [
@@ -175,11 +175,17 @@
               "value": -0.6,
               "weight": 0.25,
               "contribution": -0.15
+            },
+            {
+              "feature": "equity_3m_return_rank",
+              "value": -0.2,
+              "weight": 0.25,
+              "contribution": -0.05
             }
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.589,
+            "net_lean": 0.4521,
             "top_driver_share": 0.411,
             "top_driver": "growth_surprise",
             "narrative": "agrees"
@@ -386,17 +392,10 @@
               "contribution": 0.15
             }
           ],
-          "top_negative_drivers": [
-            {
-              "feature": "equity_3m_return_rank",
-              "value": -0.2,
-              "weight": 0.25,
-              "contribution": -0.05
-            }
-          ],
+          "top_negative_drivers": [],
           "conviction": {
             "band": "high",
-            "net_lean": 0.8462,
+            "net_lean": 1.0,
             "top_driver_share": 0.2769,
             "top_driver": "growth_surprise",
             "narrative": "no_view"
