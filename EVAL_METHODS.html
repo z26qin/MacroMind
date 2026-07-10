@@ -1,0 +1,72 @@
+<!doctype html><html lang='en'><head><meta charset='utf-8'><title>Fed-Thesis Eval Methods</title><style>body{font-family:system-ui,Segoe UI,Roboto,sans-serif;max-width:920px;margin:2rem auto;padding:0 1rem;line-height:1.5}h2 code{font-size:1.05rem}small{color:#6b7280;font-weight:400}pre{background:#0d1117;color:#e6edf3;padding:1rem;border-radius:8px;overflow:auto}pre.doc{background:#f3f4f6;color:#111}section{border-top:1px solid #e5e7eb;padding-top:1rem}table{border-collapse:collapse;width:100%;margin:1rem 0;font-size:.92rem}th,td{border:1px solid #e5e7eb;padding:.4rem .6rem;text-align:left}th{background:#f3f4f6}</style></head><body><h1>Fed-Thesis Eval Methods</h1><table><thead><tr><th>#</th><th>Method</th><th>Axis</th><th>Needs LLM?</th><th>Module</th></tr></thead><tbody><tr><td>1</td><td><code>hit_rate_at_k</code></td><td>Retrieval · IR (§1.2)</td><td>no</td><td>evals.retrieval_metrics</td></tr><tr><td>2</td><td><code>recall_at_k</code></td><td>Retrieval · IR (§1.2)</td><td>no</td><td>evals.retrieval_metrics</td></tr><tr><td>3</td><td><code>mrr</code></td><td>Retrieval · IR (§1.2)</td><td>no</td><td>evals.retrieval_metrics</td></tr><tr><td>4</td><td><code>ndcg_at_k</code></td><td>Retrieval · IR (§1.2)</td><td>no</td><td>evals.retrieval_metrics</td></tr><tr><td>5</td><td><code>find_lookahead_violations</code></td><td>Retrieval · Point-in-time (§3.1)</td><td>no</td><td>evals.pit</td></tr><tr><td>6</td><td><code>assert_no_lookahead</code></td><td>Retrieval · Point-in-time (§3.1)</td><td>no</td><td>evals.pit</td></tr><tr><td>7</td><td><code>grounding_rate</code></td><td>Generation · Evidence grounding (§3.4)</td><td>no</td><td>evals.grounding</td></tr><tr><td>8</td><td><code>faithfulness</code></td><td>Generation · Faithfulness (§1.1)</td><td>yes (Judge)</td><td>evals.ragas_metrics</td></tr><tr><td>9</td><td><code>answer_relevancy</code></td><td>Generation · Answer relevancy (§1.1)</td><td>yes (Judge)</td><td>evals.ragas_metrics</td></tr></tbody></table><section><h2><code>hit_rate_at_k</code> <small>Retrieval · IR (§1.2)</small></h2><p><em>module: evals.retrieval_metrics</em></p><pre class='doc'>1.0 if any gold id appears in the top-k, else 0.0 (a.k.a. Recall@k&gt;0).</pre><pre><code>def hit_rate_at_k(retrieved_ids: Sequence, gold_ids: Set, k: int) -&gt; float:
+    &quot;&quot;&quot;1.0 if any gold id appears in the top-k, else 0.0 (a.k.a. Recall@k&gt;0).&quot;&quot;&quot;
+    topk = list(retrieved_ids)[:k]
+    return 1.0 if any(i in gold_ids for i in topk) else 0.0
+</code></pre></section><section><h2><code>recall_at_k</code> <small>Retrieval · IR (§1.2)</small></h2><p><em>module: evals.retrieval_metrics</em></p><pre class='doc'>Fraction of gold ids present in the top-k. 0.0 if no gold ids.</pre><pre><code>def recall_at_k(retrieved_ids: Sequence, gold_ids: Set, k: int) -&gt; float:
+    &quot;&quot;&quot;Fraction of gold ids present in the top-k. 0.0 if no gold ids.&quot;&quot;&quot;
+    if not gold_ids:
+        return 0.0
+    topk = set(list(retrieved_ids)[:k])
+    return len(topk &amp; gold_ids) / len(gold_ids)
+</code></pre></section><section><h2><code>mrr</code> <small>Retrieval · IR (§1.2)</small></h2><p><em>module: evals.retrieval_metrics</em></p><pre class='doc'>Mean reciprocal rank across many (retrieved_ids, gold_ids) pairs.</pre><pre><code>def mrr(rankings: Iterable) -&gt; float:
+    &quot;&quot;&quot;Mean reciprocal rank across many (retrieved_ids, gold_ids) pairs.&quot;&quot;&quot;
+    rrs = [reciprocal_rank(r, g) for r, g in rankings]
+    return sum(rrs) / len(rrs) if rrs else 0.0
+</code></pre></section><section><h2><code>ndcg_at_k</code> <small>Retrieval · IR (§1.2)</small></h2><p><em>module: evals.retrieval_metrics</em></p><pre class='doc'>DCG normalized by ideal DCG. Rewards putting the gold chunk first —
+burying the answer at position 5 degrades downstream generation.</pre><pre><code>def ndcg_at_k(retrieved_ids: Sequence, gold_ids: Set, k: int) -&gt; float:
+    &quot;&quot;&quot;DCG normalized by ideal DCG. Rewards putting the gold chunk first —
+    burying the answer at position 5 degrades downstream generation.&quot;&quot;&quot;
+    ideal_hits = min(len(gold_ids), k)
+    idcg = sum(1.0 / math.log2(i + 1) for i in range(1, ideal_hits + 1))
+    if idcg == 0.0:
+        return 0.0
+    return dcg_at_k(retrieved_ids, gold_ids, k) / idcg
+</code></pre></section><section><h2><code>find_lookahead_violations</code> <small>Retrieval · Point-in-time (§3.1)</small></h2><p><em>module: evals.pit</em></p><pre class='doc'>Return every record whose event_time is &gt;= the decision timestamp.</pre><pre><code>def find_lookahead_violations(records: Sequence, decision_time_iso: str) -&gt; list:
+    &quot;&quot;&quot;Return every record whose event_time is &gt;= the decision timestamp.&quot;&quot;&quot;
+    cutoff = _to_unix(decision_time_iso)
+    out = []
+    for r in records:
+        et = r.get(&quot;event_time&quot;, &quot;&quot;)
+        if not et:
+            continue
+        if _to_unix(et) &gt;= cutoff:
+            out.append(LeakViolation(r.get(&quot;event_id&quot;, &quot;?&quot;), et, decision_time_iso))
+    return out
+</code></pre></section><section><h2><code>assert_no_lookahead</code> <small>Retrieval · Point-in-time (§3.1)</small></h2><p><em>module: evals.pit</em></p><pre class='doc'>Raise AssertionError on the first look-ahead leak. Use in CI gates.</pre><pre><code>def assert_no_lookahead(records: Sequence, decision_time_iso: str) -&gt; None:
+    &quot;&quot;&quot;Raise AssertionError on the first look-ahead leak. Use in CI gates.&quot;&quot;&quot;
+    violations = find_lookahead_violations(records, decision_time_iso)
+    assert not violations, (
+        f&quot;PIT look-ahead leakage: {len(violations)} future-dated record(s) &quot;
+        f&quot;retrieved for decision @ {decision_time_iso}: &quot;
+        f&quot;{[(v.event_id, v.event_time) for v in violations]}&quot;
+    )
+</code></pre></section><section><h2><code>grounding_rate</code> <small>Generation · Evidence grounding (§3.4)</small></h2><p><em>module: evals.grounding</em></p><pre class='doc'>Fraction of key_phrases that are verbatim-grounded in the source.</pre><pre><code>def grounding_rate(key_phrases: Sequence, source_text: str) -&gt; float:
+    &quot;&quot;&quot;Fraction of key_phrases that are verbatim-grounded in the source.&quot;&quot;&quot;
+    phrases = [p for p in key_phrases if p and p.strip()]
+    if not phrases:
+        return 0.0
+    grounded = sum(1 for p in phrases if phrase_is_grounded(p, source_text))
+    return grounded / len(phrases)
+</code></pre></section><section><h2><code>faithfulness</code> <small>Generation · Faithfulness (§1.1)</small></h2><p><em>module: evals.ragas_metrics</em></p><pre class='doc'>Fraction of the answer&#x27;s atomic claims entailed by the context.
+
+Low faithfulness + high context recall -&gt; generation problem (the context
+was there; the model confabulated). Low faithfulness + low recall -&gt;
+retrieval problem (see harness diagnostics).</pre><pre><code>def faithfulness(answer: str, context: str, judge: Judge) -&gt; float:
+    &quot;&quot;&quot;Fraction of the answer&#x27;s atomic claims entailed by the context.
+
+    Low faithfulness + high context recall -&gt; generation problem (the context
+    was there; the model confabulated). Low faithfulness + low recall -&gt;
+    retrieval problem (see harness diagnostics).&quot;&quot;&quot;
+    claims = decompose_claims(answer)
+    if not claims:
+        return 0.0
+    supported = sum(1 for c in claims if judge.entails(c, context))
+    return supported / len(claims)
+</code></pre></section><section><h2><code>answer_relevancy</code> <small>Generation · Answer relevancy (§1.1)</small></h2><p><em>module: evals.ragas_metrics</em></p><pre class='doc'>How directly the answer addresses the question (0..1). Catches the
+&#x27;faithfully answering the WRONG question&#x27; failure (guide §1.1).</pre><pre><code>def answer_relevancy(question: str, answer: str, judge: Judge) -&gt; float:
+    &quot;&quot;&quot;How directly the answer addresses the question (0..1). Catches the
+    &#x27;faithfully answering the WRONG question&#x27; failure (guide §1.1).&quot;&quot;&quot;
+    if not answer.strip():
+        return 0.0
+    return judge.relevance(question, answer)
+</code></pre></section><section><h2>Library-backed metrics <small>Part 2 — optional, EVAL_BACKEND switch</small></h2><table><thead><tr><th>Backend</th><th>Entry point</th><th>Metrics added</th><th>Judge</th></tr></thead><tbody><tr><td><code>ragas</code></td><td><code>ragas_adapter.evaluate_samples</code></td><td>faithfulness, answer_relevancy, <b>context_precision</b>, <b>context_recall</b></td><td>Claude Sonnet</td></tr><tr><td><code>deepeval</code></td><td><code>deepeval_adapter.assert_samples_pass</code></td><td>faithfulness, answer_relevancy (pytest gate w/ thresholds)</td><td>Claude Sonnet</td></tr><tr><td>LangSmith</td><td><code>langsmith_adapter.push_golden_set</code></td><td>dataset mgmt + run tracing (no new metric)</td><td>n/a</td></tr></tbody></table></section><section><h2>Diagnostic logic</h2><table><thead><tr><th>Signal</th><th>Diagnosis</th><th>Fix layer</th></tr></thead><tbody><tr><td>low `recall@k` + low `faithfulness`</td><td>retrieval problem</td><td>chunking / embeddings / top-k / rerank</td></tr><tr><td>high `recall@k` + low `faithfulness`</td><td>generation problem</td><td>prompt / model / grounding constraint</td></tr><tr><td>high `faithfulness` + low `answer_relevancy`</td><td>answering the wrong question</td><td>query understanding</td></tr><tr><td>any `pit_leakage_rate &gt; 0`</td><td>look-ahead leakage</td><td>retriever date filter — block merge</td></tr></tbody></table></section></body></html>
