@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-07-09",
+  "as_of": "2026-07-12",
   "methodology_version": "v0.1",
   "data_source": "live",
   "universe": [
@@ -53,13 +53,13 @@
               "contribution": 0.3
             },
             {
-              "feature": "fx_3m_return_rank",
-              "value": 1.0,
+              "feature": "fx_carry_rank",
+              "value": 0.6,
               "weight": 0.2,
-              "contribution": 0.2
+              "contribution": 0.12
             },
             {
-              "feature": "fx_carry_rank",
+              "feature": "fx_3m_return_rank",
               "value": 0.6,
               "weight": 0.2,
               "contribution": 0.12
@@ -81,8 +81,8 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.4222,
-            "top_driver_share": 0.3333,
+            "net_lean": 0.3659,
+            "top_driver_share": 0.3659,
             "top_driver": "growth_surprise",
             "narrative": "no_view"
           }
@@ -139,9 +139,9 @@
           }
         },
         "equity": {
-          "deterministic": 0.6,
+          "deterministic": 0.2,
           "rag": 0.3,
-          "final": 0.5437,
+          "final": 0.2188,
           "driver": "Positive equity signal led by growth surprise, combining growth, PMI, momentum, and valuation ranks.",
           "rag_summary": "News tone is mildly positive due to resilient AI capex and earnings strength.",
           "rag_confidence": 0.75,
@@ -178,15 +178,15 @@
             },
             {
               "feature": "equity_3m_return_rank",
-              "value": -0.2,
+              "value": -0.6,
               "weight": 0.25,
-              "contribution": -0.05
+              "contribution": -0.15
             }
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.4521,
-            "top_driver_share": 0.411,
+            "net_lean": 0.2771,
+            "top_driver_share": 0.3614,
             "top_driver": "growth_surprise",
             "narrative": "agrees"
           }
@@ -250,9 +250,9 @@
         }
       },
       "composite": {
-        "deterministic": 0.4,
+        "deterministic": 0.3,
         "rag": 0.075,
-        "final": 0.364
+        "final": 0.2828
       }
     },
     "Canada": {
@@ -392,10 +392,17 @@
               "contribution": 0.15
             }
           ],
-          "top_negative_drivers": [],
+          "top_negative_drivers": [
+            {
+              "feature": "equity_3m_return_rank",
+              "value": -0.2,
+              "weight": 0.25,
+              "contribution": -0.05
+            }
+          ],
           "conviction": {
             "band": "high",
-            "net_lean": 1.0,
+            "net_lean": 0.8462,
             "top_driver_share": 0.2769,
             "top_driver": "growth_surprise",
             "narrative": "no_view"
@@ -498,9 +505,9 @@
           "top_positive_drivers": [
             {
               "feature": "fx_3m_return_rank",
-              "value": 0.6,
+              "value": 1.0,
               "weight": 0.2,
-              "contribution": 0.12
+              "contribution": 0.2
             }
           ],
           "top_negative_drivers": [
@@ -524,9 +531,9 @@
             }
           ],
           "conviction": {
-            "band": "high",
-            "net_lean": 0.7073,
-            "top_driver_share": 0.3659,
+            "band": "medium",
+            "net_lean": 0.5556,
+            "top_driver_share": 0.3333,
             "top_driver": "growth_surprise",
             "narrative": "no_view"
           }
@@ -817,9 +824,9 @@
           }
         },
         "equity": {
-          "deterministic": 0.2,
+          "deterministic": 0.6,
           "rag": 0.0,
-          "final": 0.1825,
+          "final": 0.5475,
           "driver": "Positive equity signal led by pmi surprise, combining growth, PMI, momentum, and valuation ranks.",
           "rag_summary": "No strong mock qualitative narrative is assigned for this economy and asset class.",
           "rag_confidence": 0.35,
@@ -834,9 +841,9 @@
             },
             {
               "feature": "equity_3m_return_rank",
-              "value": 0.6,
+              "value": 1.0,
               "weight": 0.25,
-              "contribution": 0.15
+              "contribution": 0.25
             },
             {
               "feature": "news_pressure_rank",
@@ -861,8 +868,8 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.3803,
-            "top_driver_share": 0.3521,
+            "net_lean": 0.4568,
+            "top_driver_share": 0.3086,
             "top_driver": "pmi_surprise",
             "narrative": "no_view"
           }
@@ -920,9 +927,9 @@
         }
       },
       "composite": {
-        "deterministic": -0.1,
+        "deterministic": 0.0,
         "rag": -0.05,
-        "final": -0.0894
+        "final": 0.0019
       }
     },
     "Brazil": {
@@ -977,12 +984,6 @@
           ],
           "top_negative_drivers": [
             {
-              "feature": "fx_3m_return_rank",
-              "value": -0.6,
-              "weight": 0.2,
-              "contribution": -0.12
-            },
-            {
               "feature": "growth_surprise_rank",
               "value": -0.2,
               "weight": 0.3,
@@ -993,12 +994,18 @@
               "value": 0.6,
               "weight": -0.1,
               "contribution": -0.06
+            },
+            {
+              "feature": "unemployment_surprise_rank",
+              "value": 1.0,
+              "weight": -0.05,
+              "contribution": -0.05
             }
           ],
           "conviction": {
-            "band": "low",
-            "net_lean": 0.0938,
-            "top_driver_share": 0.3125,
+            "band": "medium",
+            "net_lean": 0.25,
+            "top_driver_share": 0.3571,
             "top_driver": "fx_carry",
             "narrative": "agrees"
           }
@@ -1052,19 +1059,20 @@
           "deterministic": -0.6,
           "rag": 0.0,
           "final": -0.5475,
-          "driver": "Negative equity signal led by equity 3m return, combining growth, PMI, momentum, and valuation ranks.",
+          "driver": "Negative equity signal led by equity forward pe, combining growth, PMI, momentum, and valuation ranks.",
           "rag_summary": "No strong mock qualitative narrative is assigned for this economy and asset class.",
           "rag_confidence": 0.35,
           "rag_effective_weight": 0.0875,
           "rag_sources": [],
-          "top_positive_drivers": [],
-          "top_negative_drivers": [
+          "top_positive_drivers": [
             {
               "feature": "equity_3m_return_rank",
-              "value": -0.6,
+              "value": 0.2,
               "weight": 0.25,
-              "contribution": -0.15
-            },
+              "contribution": 0.05
+            }
+          ],
+          "top_negative_drivers": [
             {
               "feature": "equity_forward_pe_rank",
               "value": 0.6,
@@ -1076,13 +1084,19 @@
               "value": 0.6,
               "weight": -0.15,
               "contribution": -0.09
+            },
+            {
+              "feature": "growth_surprise_rank",
+              "value": -0.2,
+              "weight": 0.3,
+              "contribution": -0.06
             }
           ],
           "conviction": {
             "band": "high",
-            "net_lean": 1.0,
-            "top_driver_share": 0.3191,
-            "top_driver": "equity_3m_return",
+            "net_lean": 0.7297,
+            "top_driver_share": 0.3243,
+            "top_driver": "equity_forward_pe",
             "narrative": "no_view"
           }
         },
@@ -1179,7 +1193,7 @@
           "deterministic": -0.2,
           "rag": 0.0,
           "final": -0.1825,
-          "driver": "Balanced fx inputs leave Euro Area near the middle of the six-economy cross-section.",
+          "driver": "Negative FX signal led by fx 3m return and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "No strong mock qualitative narrative is assigned for this economy and asset class.",
           "rag_confidence": 0.35,
           "rag_effective_weight": 0.0875,
@@ -1206,13 +1220,13 @@
           ],
           "top_negative_drivers": [
             {
-              "feature": "fx_carry_rank",
-              "value": -0.2,
+              "feature": "fx_3m_return_rank",
+              "value": -0.6,
               "weight": 0.2,
-              "contribution": -0.04
+              "contribution": -0.12
             },
             {
-              "feature": "fx_3m_return_rank",
+              "feature": "fx_carry_rank",
               "value": -0.2,
               "weight": 0.2,
               "contribution": -0.04
@@ -1226,9 +1240,9 @@
           ],
           "conviction": {
             "band": "low",
-            "net_lean": -0.1667,
-            "top_driver_share": 0.25,
-            "top_driver": "growth_surprise",
+            "net_lean": 0.125,
+            "top_driver_share": 0.375,
+            "top_driver": "fx_3m_return",
             "narrative": "no_view"
           }
         },
@@ -1291,9 +1305,9 @@
           "top_positive_drivers": [
             {
               "feature": "equity_3m_return_rank",
-              "value": 1.0,
+              "value": 0.6,
               "weight": 0.25,
-              "contribution": 0.25
+              "contribution": 0.15
             },
             {
               "feature": "growth_surprise_rank",
@@ -1324,8 +1338,8 @@
           ],
           "conviction": {
             "band": "low",
-            "net_lean": -0.1111,
-            "top_driver_share": 0.3968,
+            "net_lean": 0.0566,
+            "top_driver_share": 0.4717,
             "top_driver": "pmi_surprise",
             "narrative": "agrees"
           }
