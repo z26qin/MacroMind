@@ -13,6 +13,7 @@ from history import compute_history
 
 app = FastAPI(title="Cross-Asset Macro Dashboard")
 app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/documents", StaticFiles(directory="documents"), name="documents")
 
 
 @app.get("/")

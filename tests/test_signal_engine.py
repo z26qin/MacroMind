@@ -27,7 +27,7 @@ def test_snapshot_has_stable_top_level_schema(snapshot):
         "economies",
     }
     assert snapshot["as_of"] == "2026-06-02"
-    assert snapshot["methodology_version"] == "v0.1"
+    assert snapshot["methodology_version"] == "v0.2"
     assert snapshot["data_source"] == "mock"
 
 
@@ -50,11 +50,30 @@ def test_each_asset_signal_has_required_fields(snapshot):
         "final",
         "driver",
         "rag_summary",
+        "rag_analysis",
         "conviction",
     }
     for economy in snapshot["economies"].values():
         for signal in economy["signals"].values():
             assert required_fields <= set(signal)
+
+
+def test_narrative_analysis_is_structured_cited_and_point_in_time(snapshot):
+    covered = snapshot["economies"]["United States of America"]["signals"]["equity"]
+    analysis = covered["rag_analysis"]
+    assert analysis["direction"] == "bullish"
+    assert analysis["horizon"] == "3m"
+    assert analysis["evidence_count"] == 1
+    citation = analysis["citations"][0]
+    assert {
+        "evidence_id", "source", "source_uri", "event_time", "observed_at",
+        "revision", "vintage", "excerpt",
+    } <= set(citation)
+
+    uncovered = snapshot["economies"]["United States of America"]["signals"]["fx"]
+    assert uncovered["rag_analysis"]["direction"] == "no_view"
+    assert uncovered["rag_confidence"] == 0.0
+    assert uncovered["rag_effective_weight"] == 0.0
 
 
 def test_signal_values_are_clipped(snapshot):

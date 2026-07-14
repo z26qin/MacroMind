@@ -1,6 +1,6 @@
 # Cross-Asset Macro Dashboard
 
-A runnable prototype macro dashboard for cross-asset signals across a small, explicit economy universe, built on a transparent deterministic signal engine and a hardcoded RAG/narrative signal stub. The signal engine runs in two modes: a fully offline mock-data mode (the default) and a live mode that pulls macro, consensus, market, and news-flow data from public no-key APIs (World Bank, IMF WEO, Yahoo Finance, GDELT). The committed `snapshot.json` is a live build — see [Run](#run) and [Current Limitations](#current-limitations) for what is live vs. still mock.
+A runnable prototype macro dashboard for cross-asset signals across a small, explicit economy universe, built on a transparent deterministic signal engine and a point-in-time, cited narrative overlay. The signal engine runs in two modes: a fully offline mock-data mode (the default) and a live mode that pulls macro, consensus, market, and news-flow data from public no-key APIs (World Bank, IMF WEO, Yahoo Finance, GDELT). The committed `snapshot.json` is a live build — see [Run](#run) and [Current Limitations](#current-limitations) for what is live vs. still mock.
 
 ## Architecture
 
@@ -10,14 +10,17 @@ A runnable prototype macro dashboard for cross-asset signals across a small, exp
 - `data_sources/imf_weo.py`: IMF World Economic Outlook forecast adapter (DataMapper API, no key); supplies the live "consensus" so the live surprise becomes a forward expected-change
 - `data_sources/market.py`: live market-return adapter (Yahoo Finance chart API, no key); sources `equity_3m_return` and `fx_3m_return` in `--source live`
 - `data_sources/gdelt.py`: GDELT DOC 2.0 news-flow adapter (no key); builds an explainable `news_pressure` input from stress article flow minus constructive/relief article flow; live results are cached on disk at `.cache/gdelt_news.json` (per-economy, 6-hour TTL, git-ignored) so repeated live runs within the window skip the GDELT requests
+- `evidence_store.py`: revision-aware SQLite evidence ledger; filters both `event_time` and `observed_at` for point-in-time retrieval and keeps country/asset/horizon dimensions
 - `history.py`: builds a per-economy signal time series by reading every committed version of `snapshot.json` from git history; served at `/api/history` and drawn as a sparkline in the detail panel (requires running inside a git checkout)
 - `regime_engine.py`: deterministic macro **regime-detection** engine (regime score, narrative gap, cross-asset confirmation, templated expressions/risks) for a separate six-economy set; writes `regime_snapshot.json`, served at `/api/regime` and shown in the dashboard's Regime tab. Verdict ladder: Deteriorating / Repricing / Early / Priced in / Neutral, where the activation verdicts (Repricing, Early) additionally require cross-asset `confirmation_score >= confirmation_min` (config: `regime_config.yaml`) — otherwise the verdict is **Unconfirmed**
-- `rag_signal.py`: hardcoded qualitative narrative signal interface
+- `rag_signal.py`: structured narrative extraction over point-in-time evidence; emits direction, factors, confidence, horizon, and revision-aware citations. The offline keyword extractor implements the same interface expected of a future LLM-backed extractor
+- `evals/`: vendored retrieval, citation-grounding, point-in-time leakage, and confidence-calibration metrics plus the CI gate
+- `eval_data/pit_narrative_golden_set.jsonl`: committed adjudicated seed cases for the end-to-end narrative gate
 - `real_data_adapter.py`: placeholder for future production data adapters
 - `static/index.html`: vanilla HTML/JS dashboard using D3 and topojson
 - `snapshot.json`: stable backend-to-frontend interface
 
-No database, frontend framework, embedding call, or LLM call is used. The only external calls are the optional live-mode data APIs noted above; mock mode is fully offline.
+The evidence ledger uses local SQLite under `.cache/`. No frontend framework, embedding call, or hosted LLM call is required; the default structured extractor is deterministic so mock mode and CI remain fully offline. A production model can be injected through the `NarrativeExtractor` protocol without changing the snapshot contract or bypassing point-in-time retrieval.
 
 ## Signal Methodology
 
@@ -40,13 +43,24 @@ final_signal = (1 - effective_rag_weight) * deterministic_signal + effective_rag
 
 The RAG overlay is confidence-weighted: a full-confidence view uses the configured `rag_weight` (0.25), while a no-view / low-confidence cell collapses toward the deterministic signal. Each signal reports its `rag_effective_weight`.
 
-The RAG signal is a qualitative narrative overlay returned by:
+The narrative signal is a structured, cited overlay returned by:
 
 ```python
 compute_rag_signal(country, asset_class)
 ```
 
-For now, it uses hardcoded scores and local mock snippets in `documents/`. Composite signals are equal-weight means of FX, rates, equity, and real estate.
+The repository seeds six evidence records from `documents/`. Scores are derived from retrieved evidence rather than a country/asset score map. Every covered cell carries a `rag_analysis` block with direction, horizon, matched positive/negative factors, evidence count, and citations containing `event_time`, `observed_at`, source, revision, and vintage. No evidence produces `confidence = 0`, so an uncovered narrative cannot dilute the deterministic signal. Composite signals are equal-weight means of FX, rates, equity, and real estate.
+
+### Point-in-time evidence
+
+Each evidence revision requires:
+
+- `event_time` and `observed_at` as timezone-aware ISO-8601 timestamps
+- `source`, `revision`, and `vintage`
+- `country`, `asset`, and `horizon`
+- an `evidence_id`, title, content, and citation URI
+
+The same `evidence_id` may have multiple revisions. A query returns the latest revision that was actually observed by the decision timestamp; later revisions remain invisible. Country-level `macro` and `cross_asset` evidence can also be retrieved for a specific asset.
 
 ### Conviction
 
@@ -90,11 +104,15 @@ Clicking one of those countries shows both the map country and the synthetic Eur
 
 ## Run
 
+Python 3.11 or newer is required.
+
 ```bash
 pip install -r requirements.txt
 python signal_engine.py            # mock data (deterministic, offline)
 python signal_engine.py --source live   # live World Bank macro data
 python regime_engine.py            # rebuild regime_snapshot.json (regenerates on demand too)
+python evidence_store.py ingest evidence/seed.jsonl
+python evidence_store.py query --country Japan --asset fx --horizon 3m --as-of 2026-06-02T23:59:59Z
 uvicorn main:app --reload
 ```
 
@@ -108,6 +126,8 @@ Open:
 
 ```bash
 pytest
+python -m evals.ci
+python -m evals.report
 ```
 
 ## Current Limitations
@@ -116,7 +136,7 @@ pytest
 - Consensus for live macro columns (inflation, GDP growth, unemployment) is the IMF WEO **next-year forecast**; the live "surprise" is the forecast-implied expected change, `forecast(T+1) - actual(T)`. It is an institutional forecast, not an intra-period analyst-consensus print. A column only switches to this expected-change mode when every economy has both a World Bank actual and an IMF forecast (all-or-nothing); otherwise it stays mock beat/miss. `policy_rate` and `pmi` have no live source, so their surprises always stay mock beat/miss.
 - Live external sources are the World Bank (macro), IMF WEO (consensus), Yahoo Finance (FX/equity returns), and GDELT (news pressure); policy rate, PMI, and real estate have no live source yet
 - The GDELT news-pressure overlay caches scores per economy on disk (`.cache/gdelt_news.json`, 6-hour TTL). The cache stores only successful fetches, so a partially-failed run refetches just the missing economies next time; delete the file to force a full refresh.
-- RAG is hardcoded/stubbed
+- The default narrative extractor is an offline keyword baseline. The point-in-time retrieval, structured output contract, and citation checks are ready for an LLM-backed extractor, but no hosted model provider is configured yet.
 - Country mapping depends on world-atlas country names
 
 ## TODO
@@ -124,7 +144,8 @@ pytest
 - Extend live coverage to policy rate and PMI (needs keyed/proprietary sources)
 - Extend live market data to rates/curve, forward P/E, REIT, and real estate (BIS)
 - Source live policy rates (would also make `fx_carry` genuinely live)
-- Add real RAG pipeline with retrieval and citations
+- Add production evidence connectors and an LLM-backed `NarrativeExtractor`
+- Expand the golden set with historical PM-adjudicated outcomes by asset, horizon, and regime
 
 ## Future Data Sources
 

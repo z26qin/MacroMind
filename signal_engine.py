@@ -20,6 +20,7 @@ import pandas as pd
 import yaml
 
 from rag_signal import compute_rag_signal
+from evidence_store import EvidenceStore, open_default_evidence_store
 from data_sources import world_bank as wb
 from data_sources import imf_weo
 from data_sources import market
@@ -38,7 +39,7 @@ SNAPSHOT_PATH = Path("snapshot.json")
 NEWS_CACHE_PATH = Path(".cache") / "gdelt_news.json"
 CONFIG_PATH = Path("signal_config.yaml")
 DATA_DIR = Path("data")
-METHODOLOGY_VERSION = "v0.1"
+METHODOLOGY_VERSION = "v0.2"
 LIVE_HISTORY_YEARS = 8
 
 ASSET_CLASSES = ("fx", "rates", "equity", "real_estate")
@@ -635,6 +636,7 @@ def build_snapshot(
     provenance: dict[str, dict[str, str]],
     source: str = "mock",
     as_of: str | None = None,
+    evidence_store: EvidenceStore | None = None,
 ) -> dict:
     weights = config["weights"]
     blend = config["signal_blend"]
@@ -652,7 +654,9 @@ def build_snapshot(
         for asset_class in ASSET_CLASSES:
             asset_weights = weights[asset_class]
             deterministic = round(clip_signal(row[f"{asset_class}_deterministic_signal"]), 4)
-            rag = compute_rag_signal(country, asset_class)
+            rag = compute_rag_signal(
+                country, asset_class, store=evidence_store, as_of=as_of
+            )
             rag_signal = round(clip_signal(rag["signal"]), 4)
             rag_confidence = float(rag["confidence"])
             final = round(blend_signal(deterministic, rag_signal, rag_confidence, rag_weight), 4)
@@ -674,6 +678,7 @@ def build_snapshot(
                 rag_confidence=round(rag_confidence, 4),
                 rag_effective_weight=round(rag_weight * rag_confidence, 4),
                 rag_sources=rag["sources"],
+                rag_analysis=rag["analysis"],
                 top_positive_drivers=top_positive,
                 top_negative_drivers=top_negative,
                 conviction=conviction,
@@ -707,6 +712,7 @@ def generate_snapshot(
     source: str = "mock",
     gdelt_fetch_json=None,
     news_cache: TTLCache | None = None,
+    evidence_store: EvidenceStore | None = None,
 ) -> dict:
     config = load_signal_config()
     df, provenance, expected_change_columns = load_macro_inputs(source=source)
@@ -718,7 +724,20 @@ def generate_snapshot(
     df = add_surprises(df, expected_change_columns)
     df = add_ranked_features(df, config["weights"])
     df = compute_deterministic_signals(df, config["weights"])
-    snapshot = build_snapshot(df, config, provenance, source=source, as_of=as_of)
+    owns_evidence_store = evidence_store is None
+    narrative_store = evidence_store or open_default_evidence_store()
+    try:
+        snapshot = build_snapshot(
+            df,
+            config,
+            provenance,
+            source=source,
+            as_of=as_of,
+            evidence_store=narrative_store,
+        )
+    finally:
+        if owns_evidence_store:
+            narrative_store.close()
     path.write_text(json.dumps(snapshot, indent=2), encoding="utf-8")
     return snapshot
 

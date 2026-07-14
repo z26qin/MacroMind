@@ -21,6 +21,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Run quality gates
+        run: |
+          pytest -q
+          python -m evals.ci
+
       - name: Generate snapshot
         run: python signal_engine.py --source live
 

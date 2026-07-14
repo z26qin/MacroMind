@@ -477,6 +477,20 @@
     .conv-line { margin: 6px 0 0; color: var(--text); font-size: 12.5px; line-height: 1.45; }
     .asset details { margin-top: 8px; }
     .asset summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+    .narrative-card {
+      margin-top: 9px;
+      padding: 9px;
+      border-radius: 6px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      font-size: 12px;
+    }
+    .narrative-head { display: flex; justify-content: space-between; gap: 8px; }
+    .factor-list { margin-top: 6px; color: var(--muted); line-height: 1.5; }
+    .citation { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+    .citation a { color: var(--active); font-weight: 680; }
+    .citation-meta { color: var(--muted); font-size: 10px; margin-top: 2px; }
+    .citation-excerpt { color: var(--text); margin-top: 4px; line-height: 1.4; }
 
     @media (max-width: 900px) {
       header { align-items: start; flex-direction: column; }
@@ -490,7 +504,7 @@
   <header>
     <div>
       <h1>Cross-Asset Macro Dashboard</h1>
-      <div class="subtitle">Mock signals blend transparent ranked macro rules with a placeholder narrative interface.</div>
+      <div class="subtitle">Transparent ranked macro signals with point-in-time, cited narrative evidence.</div>
     </div>
     <div class="header-right">
       <div class="view-tabs" aria-label="View">
@@ -839,6 +853,35 @@
       `;
     }
 
+    function citationHref(uri) {
+      const value = String(uri || "");
+      if (/^https?:\/\//i.test(value)) return value;
+      if (value.startsWith("documents/")) return `/${value}`;
+      return "#";
+    }
+
+    function narrativeHtml(analysis, fallback) {
+      if (!analysis) return `<p>${escapeHtml(fallback || "No narrative analysis.")}</p>`;
+      if (analysis.direction === "no_view") {
+        return `<div class="narrative-card"><strong>No narrative view</strong>`
+          + `<div class="factor-list">No point-in-time evidence for this asset and horizon.</div></div>`;
+      }
+      const positive = (analysis.positive_factors || []).map(escapeHtml).join(", ") || "none";
+      const negative = (analysis.negative_factors || []).map(escapeHtml).join(", ") || "none";
+      const citations = (analysis.citations || []).map(citation => `
+        <div class="citation">
+          <a href="${escapeHtml(citationHref(citation.source_uri))}" target="_blank" rel="noopener noreferrer">${escapeHtml(citation.title)}</a>
+          <div class="citation-meta">${escapeHtml(citation.source)} · event ${escapeHtml(citation.event_time)} · observed ${escapeHtml(citation.observed_at)} · rev ${escapeHtml(citation.revision)} · vintage ${escapeHtml(citation.vintage)}</div>
+          <div class="citation-excerpt">${escapeHtml(citation.excerpt)}</div>
+        </div>
+      `).join("");
+      return `<div class="narrative-card">
+        <div class="narrative-head"><strong>${escapeHtml(analysis.direction)} · ${escapeHtml(analysis.horizon)}</strong><span>${Math.round(analysis.confidence * 100)}% confidence</span></div>
+        <div class="factor-list">Positive: ${positive}<br>Negative: ${negative}</div>
+        <details><summary>${escapeHtml(String(analysis.evidence_count))} cited evidence item(s)</summary>${citations}</details>
+      </div>`;
+    }
+
     function sparkline(series) {
       if (!series || series.length < 2) return "";
       const w = 220, h = 44, pad = 4, n = series.length;
@@ -890,7 +933,7 @@
           </div>
           ${convictionLine(item.conviction)}
           <p class="driver-reason">${formatReason(item.driver)}</p>
-          <p>${escapeHtml(item.rag_summary)}</p>
+          ${narrativeHtml(item.rag_analysis, item.rag_summary)}
           <details>
             <summary>Show math</summary>
             <p>Final ${fmt(item.final)} · deterministic ${fmt(item.deterministic)} · RAG ${fmt(item.rag)}</p>
