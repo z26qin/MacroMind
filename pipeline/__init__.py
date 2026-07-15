@@ -28,9 +28,17 @@ from pipeline.fallback import (
     policy_for_source,
     resolve_with_policy,
 )
+from pipeline.store import (
+    DEFAULT_OBSERVATION_DB,
+    ImmutableStoreConflict,
+    ObservationStore,
+    StoredObservation,
+    StoreWriteResult,
+)
 
 __all__ = [
     "DataFrequency",
+    "DEFAULT_OBSERVATION_DB",
     "CoverageReport",
     "FallbackAction",
     "FallbackDecision",
@@ -38,15 +46,19 @@ __all__ = [
     "FallbackResolution",
     "FallbackScope",
     "LIVE_FALLBACK_POLICIES",
+    "ImmutableStoreConflict",
     "LiveAdapter",
     "MetricCoverage",
     "Observation",
+    "ObservationStore",
     "PipelineCoverageReport",
     "PipelineRunContext",
     "RunMode",
     "SourceBatch",
     "SourceError",
     "SourceStatus",
+    "StoredObservation",
+    "StoreWriteResult",
     "build_coverage_report",
     "combine_coverage_reports",
     "decide_fallback",
