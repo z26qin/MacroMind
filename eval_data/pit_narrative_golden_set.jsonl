@@ -1,0 +1,6 @@
+{"case_id":"us-equity-bullish","country":"United States of America","asset":"equity","horizon":"3m","decision_time":"2026-06-02","gold_evidence_ids":["us-equity-ai-capex"],"expected_direction":"bullish"}
+{"case_id":"japan-fx-bearish","country":"Japan","asset":"fx","horizon":"3m","decision_time":"2026-06-02","gold_evidence_ids":["japan-fx-policy-normalization"],"expected_direction":"bearish"}
+{"case_id":"china-equity-bearish","country":"China","asset":"equity","horizon":"3m","decision_time":"2026-06-02","gold_evidence_ids":["china-equity-property-risk"],"expected_direction":"bearish"}
+{"case_id":"canada-real-estate-bearish","country":"Canada","asset":"real_estate","horizon":"3m","decision_time":"2026-06-02","gold_evidence_ids":["canada-housing-mortgage-reset"],"expected_direction":"bearish"}
+{"case_id":"brazil-fx-bullish","country":"Brazil","asset":"fx","horizon":"3m","decision_time":"2026-06-02","gold_evidence_ids":["brazil-fx-carry-support"],"expected_direction":"bullish"}
+{"case_id":"euro-equity-bearish","country":"Euro Area","asset":"equity","horizon":"3m","decision_time":"2026-06-02","gold_evidence_ids":["euro-equity-manufacturing-weakness"],"expected_direction":"bearish"}

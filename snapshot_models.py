@@ -25,6 +25,30 @@ class ConvictionModel(SnapshotModel):
     narrative: str
 
 
+class NarrativeCitationModel(SnapshotModel):
+    evidence_id: str
+    source: str
+    title: str
+    source_uri: str
+    event_time: str
+    observed_at: str
+    revision: str
+    vintage: str
+    excerpt: str
+
+
+class StructuredNarrativeModel(SnapshotModel):
+    direction: str
+    signal: float = Field(ge=-1.0, le=1.0)
+    confidence: float = Field(ge=0.0, le=1.0)
+    horizon: str
+    as_of: str
+    evidence_count: int = Field(ge=0)
+    positive_factors: list[str]
+    negative_factors: list[str]
+    citations: list[NarrativeCitationModel]
+
+
 class AssetSignalModel(SnapshotModel):
     deterministic: float = Field(ge=-1.0, le=1.0)
     rag: float = Field(ge=-1.0, le=1.0)
@@ -34,6 +58,7 @@ class AssetSignalModel(SnapshotModel):
     rag_confidence: float = Field(ge=0.0, le=1.0)
     rag_effective_weight: float = Field(ge=0.0, le=1.0)
     rag_sources: list[str]
+    rag_analysis: StructuredNarrativeModel
     top_positive_drivers: list[ContributionModel]
     top_negative_drivers: list[ContributionModel]
     conviction: ConvictionModel

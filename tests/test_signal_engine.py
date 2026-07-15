@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import pytest
 
 from signal_engine import ASSET_CLASSES, UNIVERSE, generate_snapshot
@@ -27,7 +29,7 @@ def test_snapshot_has_stable_top_level_schema(snapshot):
         "economies",
     }
     assert snapshot["as_of"] == "2026-06-02"
-    assert snapshot["methodology_version"] == "v0.1"
+    assert snapshot["methodology_version"] == "v0.2"
     assert snapshot["data_source"] == "mock"
 
 
@@ -50,11 +52,30 @@ def test_each_asset_signal_has_required_fields(snapshot):
         "final",
         "driver",
         "rag_summary",
+        "rag_analysis",
         "conviction",
     }
     for economy in snapshot["economies"].values():
         for signal in economy["signals"].values():
             assert required_fields <= set(signal)
+
+
+def test_narrative_analysis_is_structured_cited_and_point_in_time(snapshot):
+    covered = snapshot["economies"]["United States of America"]["signals"]["equity"]
+    analysis = covered["rag_analysis"]
+    assert analysis["direction"] == "bullish"
+    assert analysis["horizon"] == "3m"
+    assert analysis["evidence_count"] == 1
+    citation = analysis["citations"][0]
+    assert {
+        "evidence_id", "source", "source_uri", "event_time", "observed_at",
+        "revision", "vintage", "excerpt",
+    } <= set(citation)
+
+    uncovered = snapshot["economies"]["United States of America"]["signals"]["fx"]
+    assert uncovered["rag_analysis"]["direction"] == "no_view"
+    assert uncovered["rag_confidence"] == 0.0
+    assert uncovered["rag_effective_weight"] == 0.0
 
 
 def test_signal_values_are_clipped(snapshot):
@@ -343,22 +364,6 @@ def test_overlay_fx_carry_live_derives_from_policy_rate_diff():
     assert provenance["United States of America"]["fx_carry"] == "derived:policy_rate_diff"
 
 
-def test_resolve_all_or_none_returns_map_when_every_economy_resolves():
-    out = se.resolve_all_or_none(("a", "b", "c"), lambda economy: economy.upper())
-    assert out == {"a": "A", "b": "B", "c": "C"}
-
-
-def test_resolve_all_or_none_returns_none_when_any_economy_misses():
-    seen = []
-
-    def resolve(economy):
-        seen.append(economy)
-        return None if economy == "b" else economy.upper()
-
-    assert se.resolve_all_or_none(("a", "b", "c"), resolve) is None
-    assert seen == ["a", "b"]  # short-circuits on the first miss
-
-
 def test_load_signal_config_rejects_blend_not_summing_to_one(tmp_path):
     bad = tmp_path / "bad.yaml"
     bad.write_text(
@@ -530,16 +535,35 @@ def test_overlay_news_pressure_threads_cache(monkeypatch):
     assert captured["cache"] is sentinel
 
 
-def test_generate_snapshot_threads_news_cache(monkeypatch, tmp_path):
+def test_collect_live_batches_threads_news_cache(monkeypatch):
     captured = {}
 
-    def spy(df, provenance, source="mock", fetch_json=None, cache=None):
+    def spy(context, economies, *, fetch_json=None, cache=None, clock=None):
         captured["cache"] = cache
-        return df
+        return signal_engine.gdelt.SourceBatch(
+            run_id=context.run_id,
+            source=signal_engine.gdelt.SOURCE,
+            expected_observation_count=len(economies),
+            requested_at=context.started_at,
+            completed_at=context.started_at,
+        )
 
-    monkeypatch.setattr(signal_engine, "overlay_news_pressure", spy)
+    monkeypatch.setattr(signal_engine.gdelt, "load_observations", spy)
+    context, _ = signal_engine.create_run_context(
+        as_of="2026-07-15",
+        source="live",
+        config_path=signal_engine.CONFIG_PATH,
+        clock=lambda: datetime(2026, 7, 15, 12, tzinfo=timezone.utc),
+        run_id="cache-thread-test",
+    )
     sentinel = object()
-    signal_engine.generate_snapshot(path=tmp_path / "snap.json", news_cache=sentinel)
+    signal_engine.collect_live_batches(
+        context,
+        world_bank_fetch_json=_wb_fake_all_six,
+        imf_fetch_json=_imf_fake_all_six,
+        market_fetch_json=_market_fake_all,
+        news_cache=sentinel,
+    )
     assert captured["cache"] is sentinel
 
 
