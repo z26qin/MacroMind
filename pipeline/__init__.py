@@ -1,5 +1,6 @@
 """Shared contracts for MacroMind's modular data pipeline."""
 
+from pipeline.adapters import LiveAdapter
 from pipeline.contracts import (
     DataFrequency,
     Observation,
@@ -12,6 +13,7 @@ from pipeline.contracts import (
 
 __all__ = [
     "DataFrequency",
+    "LiveAdapter",
     "Observation",
     "PipelineRunContext",
     "RunMode",

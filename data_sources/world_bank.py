@@ -10,6 +10,21 @@ from __future__ import annotations
 from typing import Callable
 
 from data_sources.http import fetch_json as http_fetch_json
+from data_sources.normalization import (
+    Clock,
+    annual_period,
+    capture_utc,
+    ingestion_vintage,
+    normalize_request,
+    utc_now,
+)
+from pipeline.contracts import (
+    DataFrequency,
+    Observation,
+    PipelineRunContext,
+    SourceBatch,
+    SourceError,
+)
 
 WB_BASE = "https://api.worldbank.org/v2"
 
@@ -31,6 +46,14 @@ WB_INDICATOR_BY_COLUMN = {
 }
 
 LIVE_COLUMNS = tuple(WB_INDICATOR_BY_COLUMN)
+DEFAULT_HISTORY_YEARS = 8
+
+SOURCE = "world_bank"
+UNIT_BY_COLUMN = {
+    "inflation_yoy": "percent_yoy",
+    "gdp_growth": "percent_yoy",
+    "unemployment": "percent_labor_force",
+}
 
 
 def _default_fetch_json(url: str) -> list:
@@ -85,6 +108,109 @@ def latest_and_baseline(
     prior = [value for _, value in history[1 : 1 + baseline_window]]
     consensus = sum(prior) / len(prior) if prior else actual
     return actual, consensus, actual_year
+
+
+def load_observations(
+    context: PipelineRunContext,
+    economies: tuple[str, ...],
+    *,
+    start_year: int | None = None,
+    end_year: int | None = None,
+    fetch_json: Callable[[str], list] = _default_fetch_json,
+    clock: Clock = utc_now,
+) -> SourceBatch:
+    """Load World Bank history into the canonical live-adapter contract.
+
+    The API does not expose a reliable release timestamp for each value, so
+    ``event_time`` remains unknown. Acquisition time is retained as the PIT
+    vintage instead of inventing a publication time.
+    """
+    requested_economies = normalize_request(context, economies)
+    end_year = context.as_of.year if end_year is None else end_year
+    start_year = end_year - DEFAULT_HISTORY_YEARS if start_year is None else start_year
+    if end_year < start_year:
+        raise ValueError("end_year cannot be earlier than start_year")
+
+    requested_at = capture_utc(clock, "requested_at")
+    records: list[tuple[str, str, int, float]] = []
+    errors: list[SourceError] = []
+    for column in LIVE_COLUMNS:
+        try:
+            series = fetch_indicator(column, start_year, end_year, fetch_json=fetch_json)
+        except Exception as exc:
+            errors.extend(
+                SourceError(
+                    code="fetch_failed",
+                    message=f"{type(exc).__name__}: {exc}",
+                    retryable=not isinstance(exc, ValueError),
+                    country=economy,
+                    metric=column,
+                )
+                for economy in requested_economies
+            )
+            continue
+
+        for economy in requested_economies:
+            history = [
+                (year, value)
+                for year, value in series.get(economy, [])
+                if start_year <= year <= end_year
+            ]
+            if not history:
+                errors.append(
+                    SourceError(
+                        code="missing_series",
+                        message="World Bank returned no non-null observations in the requested window",
+                        country=economy,
+                        metric=column,
+                    )
+                )
+                continue
+            records.extend((economy, column, year, value) for year, value in history)
+
+    completed_at = capture_utc(clock, "completed_at")
+    vintage = ingestion_vintage(completed_at)
+    observations = []
+    for economy, column, year, value in records:
+        try:
+            period_start, period_end = annual_period(year)
+            observations.append(
+                Observation(
+                    metric=column,
+                    value=value,
+                    unit=UNIT_BY_COLUMN[column],
+                    country=economy,
+                    frequency=DataFrequency.ANNUAL,
+                    period_start=period_start,
+                    period_end=period_end,
+                    event_time=None,
+                    observed_at=completed_at,
+                    source=SOURCE,
+                    revision="unreported",
+                    vintage=vintage,
+                )
+            )
+        except (TypeError, ValueError) as exc:
+            errors.append(
+                SourceError(
+                    code="invalid_observation",
+                    message=f"{type(exc).__name__}: {exc}",
+                    country=economy,
+                    metric=column,
+                )
+            )
+
+    return SourceBatch(
+        run_id=context.run_id,
+        source=SOURCE,
+        expected_observation_count=(
+            len(requested_economies) * len(LIVE_COLUMNS) * (end_year - start_year + 1)
+        ),
+        requested_at=requested_at,
+        completed_at=completed_at,
+        observations=tuple(observations),
+        errors=tuple(errors),
+    )
 
 
 def load_world_bank_macro(

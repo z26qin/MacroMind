@@ -13,12 +13,26 @@ from __future__ import annotations
 
 import hashlib
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from math import sqrt
 from typing import TYPE_CHECKING, Callable
 from urllib.parse import urlencode
 
 from data_sources.http import fetch_json as http_fetch_json
+from data_sources.normalization import (
+    Clock,
+    capture_utc,
+    ingestion_vintage,
+    normalize_request,
+    utc_now,
+)
+from pipeline.contracts import (
+    DataFrequency,
+    Observation,
+    PipelineRunContext,
+    SourceBatch,
+    SourceError,
+)
 
 if TYPE_CHECKING:
     from data_sources.cache import TTLCache
@@ -27,6 +41,7 @@ GDELT_DOC_BASE = "https://api.gdeltproject.org/api/v2/doc/doc"
 LOOKBACK = "7d"
 MAX_RECORDS = 250
 NEWS_CACHE_TTL_SECONDS = 21600  # 6 hours
+SOURCE = "gdelt"
 
 ECONOMY_QUERY = {
     "United States of America": '("United States" OR USA OR America)',
@@ -177,3 +192,96 @@ def load_news_pressure(
                     if cache is not None:
                         cache.set(cache_key(economy), list(result))
     return out
+
+
+def load_observations(
+    context: PipelineRunContext,
+    economies: tuple[str, ...],
+    *,
+    fetch_json: Callable[[str], dict] = _default_fetch_json,
+    cache: "TTLCache | None" = None,
+    clock: Clock = utc_now,
+) -> SourceBatch:
+    """Load rolling news pressure into the canonical source contract."""
+    requested_economies = normalize_request(context, economies)
+    requested_at = capture_utc(clock, "requested_at")
+    load_error: Exception | None = None
+    try:
+        pressure = load_news_pressure(
+            requested_economies,
+            fetch_json=fetch_json,
+            cache=cache,
+        )
+    except Exception as exc:
+        pressure = {}
+        load_error = exc
+    completed_at = capture_utc(clock, "completed_at")
+    vintage = ingestion_vintage(completed_at)
+    errors: list[SourceError] = []
+    observations: list[Observation] = []
+    lookback_days = int(LOOKBACK.removesuffix("d"))
+
+    for economy in requested_economies:
+        result = pressure.get(economy)
+        if result is None:
+            unsupported = economy not in ECONOMY_QUERY
+            errors.append(
+                SourceError(
+                    code="unsupported_economy" if unsupported else "fetch_failed",
+                    message=(
+                        "No GDELT query mapping for economy"
+                        if unsupported
+                        else (
+                            f"{type(load_error).__name__}: {load_error}"
+                            if load_error is not None
+                            else "GDELT returned no usable news-pressure result"
+                        )
+                    ),
+                    retryable=not unsupported,
+                    country=economy,
+                    metric="news_pressure",
+                )
+            )
+            continue
+        score, asof = result
+        try:
+            period_end = datetime.combine(
+                date.fromisoformat(asof),
+                datetime.min.time(),
+                tzinfo=timezone.utc,
+            )
+            observations.append(
+                Observation(
+                    metric="news_pressure",
+                    value=score,
+                    unit="normalized_article_pressure",
+                    country=economy,
+                    frequency=DataFrequency.WINDOW,
+                    period_start=period_end - timedelta(days=lookback_days),
+                    period_end=period_end,
+                    event_time=period_end,
+                    observed_at=completed_at,
+                    source=SOURCE,
+                    revision=f"terms:{terms_version()}",
+                    vintage=vintage,
+                )
+            )
+        except (TypeError, ValueError) as exc:
+            errors.append(
+                SourceError(
+                    code="invalid_observation",
+                    message=f"{type(exc).__name__}: {exc}",
+                    country=economy,
+                    metric="news_pressure",
+                )
+            )
+
+    return SourceBatch(
+        run_id=context.run_id,
+        source=SOURCE,
+        expected_observation_count=len(requested_economies),
+        requested_at=requested_at,
+        completed_at=completed_at,
+        observations=tuple(observations),
+        errors=tuple(errors),
+    )
