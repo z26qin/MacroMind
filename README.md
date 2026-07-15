@@ -5,7 +5,11 @@ A runnable prototype macro dashboard for cross-asset signals across a small, exp
 ## Architecture
 
 - `main.py`: FastAPI backend
-- `signal_engine.py`: loads mock CSV inputs, applies YAML-configured signal formulas, and writes `snapshot.json`
+- `signal_engine.py`: compatibility facade and CLI for the staged signal pipeline
+- `pipeline/orchestrator.py`: explicit run coordinator from context/config through adapters, raw persistence, PIT selection, quality gates, features, and snapshot output
+- `pipeline/stages/`: isolated input, feature-engineering, configuration, and snapshot-assembly stages
+- `pipeline/store.py`: append-only SQLite raw observation ledger with revision-aware `query_as_of` retrieval
+- `pipeline/quality.py`: versioned freshness, unit, admissible-range, model-ready coverage, and date-alignment gates; rejected live values fall back under the declared source policy
 - `data_sources/world_bank.py`: live macro data adapter (World Bank API, no key); used when generation runs with `--source live`
 - `data_sources/imf_weo.py`: IMF World Economic Outlook forecast adapter (DataMapper API, no key); supplies the live "consensus" so the live surprise becomes a forward expected-change
 - `data_sources/market.py`: live market-return adapter (Yahoo Finance chart API, no key); sources `equity_3m_return` and `fx_3m_return` in `--source live`
@@ -61,6 +65,17 @@ Each evidence revision requires:
 - an `evidence_id`, title, content, and citation URI
 
 The same `evidence_id` may have multiple revisions. A query returns the latest revision that was actually observed by the decision timestamp; later revisions remain invisible. Country-level `macro` and `cross_asset` evidence can also be retrieved for a specific asset.
+
+### Live observation quality gates
+
+Live adapters always write their complete `SourceBatch` results to the append-only raw store. The orchestrator then performs PIT retrieval and runs quality policy `v1` before any live value can enter a signal:
+
+- **Freshness:** latest model candidates are limited to 730 days for World Bank annual actuals, 240 days by IMF observation time, 45 days for Yahoo monthly market bars, and 2 days for GDELT.
+- **Unit and range:** every live metric has an exact unit contract and a broad admissible range; failures reject that observation without rewriting raw history.
+- **Date alignment:** realized periods cannot end after the decision time, and IMF forecasts must match the quality-approved World Bank actual year plus one.
+- **Coverage:** coverage is recalculated after the other gates. World Bank retains approved countries per cell; IMF, Yahoo, and GDELT fall back for the whole metric unless the six-economy cross-section is complete.
+
+Gate outcomes are returned on `PipelineResult.quality`, including accepted/blocked counts, per-gate issues, and the coverage decisions. Acquisition coverage remains separately available on `PipelineResult.coverage`.
 
 ### Conviction
 

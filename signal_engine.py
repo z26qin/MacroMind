@@ -15,6 +15,12 @@ from pipeline.orchestrator import (
     generate_snapshot,
     run_signal_pipeline,
 )
+from pipeline.quality import (
+    DataQualityReport,
+    QUALITY_POLICY_VERSION,
+    QUALITY_RULES,
+    run_quality_gates,
+)
 from pipeline.signal_definition import (
     ASSET_CLASSES,
     CONFIG_PATH,
@@ -75,6 +81,7 @@ __all__ = [
     "ASSET_CLASSES",
     "CONFIG_PATH",
     "DATA_DIR",
+    "DataQualityReport",
     "INPUT_PROVENANCE_COLUMNS",
     "ISO3_BY_ECONOMY",
     "LIVE_HISTORY_YEARS",
@@ -83,6 +90,8 @@ __all__ = [
     "METHODOLOGY_VERSION",
     "NEWS_CACHE_PATH",
     "PipelineResult",
+    "QUALITY_POLICY_VERSION",
+    "QUALITY_RULES",
     "REQUIRED_CONSENSUS_COLUMNS",
     "REQUIRED_MACRO_COLUMNS",
     "REQUIRED_MARKET_COLUMNS",
@@ -120,6 +129,7 @@ __all__ = [
     "overlay_world_bank_observations",
     "percentile_to_signal",
     "run_feature_stages",
+    "run_quality_gates",
     "run_signal_pipeline",
     "strongest_feature",
     "validate_input_frame",

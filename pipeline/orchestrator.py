@@ -19,6 +19,7 @@ from pipeline.coverage import (
     build_coverage_report,
     combine_coverage_reports,
 )
+from pipeline.quality import DataQualityReport, run_quality_gates
 from pipeline.signal_definition import (
     CONFIG_PATH,
     LIVE_HISTORY_YEARS,
@@ -47,6 +48,7 @@ class PipelineResult:
     snapshot: dict
     batches: tuple[SourceBatch, ...]
     coverage: PipelineCoverageReport | None
+    quality: DataQualityReport | None
     store_write: StoreWriteResult | None
     completed_stages: tuple[str, ...]
 
@@ -197,6 +199,7 @@ def run_signal_pipeline(
     expected_change_columns = frozenset()
     batches: tuple[SourceBatch, ...] = ()
     coverage: PipelineCoverageReport | None = None
+    quality: DataQualityReport | None = None
     store_write: StoreWriteResult | None = None
     completed.append("baseline")
 
@@ -229,10 +232,17 @@ def run_signal_pipeline(
                 for batch in batches
             }
             completed.append("pit_select")
+            quality_result = run_quality_gates(
+                observations_by_source,
+                as_of=context.as_of,
+                economies=UNIVERSE,
+            )
+            quality = quality_result.report
+            completed.append("quality_gates")
             expected_change_columns = apply_live_observations(
                 frame,
                 provenance,
-                observations_by_source,
+                quality_result.by_source(),
             )
             completed.append("overlay")
         finally:
@@ -263,6 +273,7 @@ def run_signal_pipeline(
         snapshot=snapshot,
         batches=batches,
         coverage=coverage,
+        quality=quality,
         store_write=store_write,
         completed_stages=tuple(completed),
     )

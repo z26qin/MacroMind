@@ -54,7 +54,12 @@ def imf_fetch(url):
 
 
 def market_fetch(_url):
-    timestamps = [1704067200, 1706745600, 1709251200, 1711929600]
+    timestamps = [
+        int(datetime(2026, 4, 14, tzinfo=UTC).timestamp()),
+        int(datetime(2026, 5, 14, tzinfo=UTC).timestamp()),
+        int(datetime(2026, 6, 14, tzinfo=UTC).timestamp()),
+        int(datetime(2026, 7, 14, tzinfo=UTC).timestamp()),
+    ]
     closes = [100.0, 105.0, 108.0, 110.0]
     return {
         "chart": {
@@ -134,6 +139,7 @@ def test_mock_run_exposes_explicit_stage_sequence(tmp_path):
     )
     assert result.batches == ()
     assert result.coverage is None
+    assert result.quality is None
     assert result.store_write is None
     assert json.loads(path.read_text(encoding="utf-8")) == result.snapshot
 
@@ -158,6 +164,7 @@ def test_live_run_connects_adapters_coverage_store_and_pit_overlay(
             "coverage",
             "persist",
             "pit_select",
+            "quality_gates",
             "overlay",
             "features",
             "snapshot",
@@ -177,6 +184,12 @@ def test_live_run_connects_adapters_coverage_store_and_pit_overlay(
             "gdelt",
         )
         assert result.store_write is not None
+        assert result.quality is not None
+        assert result.quality.status.value == "pass"
+        assert result.quality.input_observation_count == 90
+        assert result.quality.candidate_observation_count == 54
+        assert result.quality.accepted_observation_count == 54
+        assert result.quality.blocked_observation_count == 0
         assert result.store_write.inserted_batches == 4
         assert observation_store.counts() == {
             "pipeline_runs": 1,
@@ -188,7 +201,7 @@ def test_live_run_connects_adapters_coverage_store_and_pit_overlay(
         provenance = result.snapshot["economies"]["Canada"]["provenance"]
         assert provenance["inflation_yoy"] == "world_bank:2024"
         assert provenance["inflation_consensus"] == "imf_weo:2025"
-        assert provenance["equity_3m_return"] == "yahoo:2024-04"
+        assert provenance["equity_3m_return"] == "yahoo:2026-07"
         assert provenance["news_pressure"] == "gdelt:2026-07-15"
     finally:
         observation_store.close()
@@ -210,6 +223,10 @@ def test_historical_run_persists_new_data_but_cannot_see_it_as_of_the_past(
         assert result.store_write is not None
         assert result.store_write.inserted_observations == 90
         assert observation_store.query_as_of(result.context.as_of) == ()
+        assert result.quality is not None
+        assert result.quality.status.value == "degraded"
+        assert result.quality.accepted_observation_count == 0
+        assert dict(result.quality.issue_counts)["coverage"] == 9
 
         provenance = result.snapshot["economies"]["Canada"]["provenance"]
         assert provenance["inflation_yoy"] == "mock"
