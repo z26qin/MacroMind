@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 import pytest
 
 from signal_engine import ASSET_CLASSES, UNIVERSE, generate_snapshot
@@ -533,16 +535,35 @@ def test_overlay_news_pressure_threads_cache(monkeypatch):
     assert captured["cache"] is sentinel
 
 
-def test_generate_snapshot_threads_news_cache(monkeypatch, tmp_path):
+def test_collect_live_batches_threads_news_cache(monkeypatch):
     captured = {}
 
-    def spy(df, provenance, source="mock", fetch_json=None, cache=None):
+    def spy(context, economies, *, fetch_json=None, cache=None, clock=None):
         captured["cache"] = cache
-        return df
+        return signal_engine.gdelt.SourceBatch(
+            run_id=context.run_id,
+            source=signal_engine.gdelt.SOURCE,
+            expected_observation_count=len(economies),
+            requested_at=context.started_at,
+            completed_at=context.started_at,
+        )
 
-    monkeypatch.setattr(signal_engine, "overlay_news_pressure", spy)
+    monkeypatch.setattr(signal_engine.gdelt, "load_observations", spy)
+    context, _ = signal_engine.create_run_context(
+        as_of="2026-07-15",
+        source="live",
+        config_path=signal_engine.CONFIG_PATH,
+        clock=lambda: datetime(2026, 7, 15, 12, tzinfo=timezone.utc),
+        run_id="cache-thread-test",
+    )
     sentinel = object()
-    signal_engine.generate_snapshot(path=tmp_path / "snap.json", news_cache=sentinel)
+    signal_engine.collect_live_batches(
+        context,
+        world_bank_fetch_json=_wb_fake_all_six,
+        imf_fetch_json=_imf_fake_all_six,
+        market_fetch_json=_market_fake_all,
+        news_cache=sentinel,
+    )
     assert captured["cache"] is sentinel
 
 
