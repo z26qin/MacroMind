@@ -362,22 +362,6 @@ def test_overlay_fx_carry_live_derives_from_policy_rate_diff():
     assert provenance["United States of America"]["fx_carry"] == "derived:policy_rate_diff"
 
 
-def test_resolve_all_or_none_returns_map_when_every_economy_resolves():
-    out = se.resolve_all_or_none(("a", "b", "c"), lambda economy: economy.upper())
-    assert out == {"a": "A", "b": "B", "c": "C"}
-
-
-def test_resolve_all_or_none_returns_none_when_any_economy_misses():
-    seen = []
-
-    def resolve(economy):
-        seen.append(economy)
-        return None if economy == "b" else economy.upper()
-
-    assert se.resolve_all_or_none(("a", "b", "c"), resolve) is None
-    assert seen == ["a", "b"]  # short-circuits on the first miss
-
-
 def test_load_signal_config_rejects_blend_not_summing_to_one(tmp_path):
     bad = tmp_path / "bad.yaml"
     bad.write_text(

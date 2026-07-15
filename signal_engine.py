@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 from datetime import date
 from pathlib import Path
-from typing import Callable, Iterable, TypeVar
+from typing import Iterable
 
 import numpy as np
 import pandas as pd
@@ -26,6 +26,7 @@ from data_sources import imf_weo
 from data_sources import market
 from data_sources import gdelt
 from data_sources.cache import TTLCache
+from pipeline.fallback import FallbackAction, policy_for_source, resolve_with_policy
 from snapshot_models import (
     AssetSignalModel,
     CompositeSignalModel,
@@ -151,28 +152,6 @@ def percentile_to_signal(series: pd.Series) -> pd.Series:
     return (2.0 * pct - 1.0).clip(-1.0, 1.0)
 
 
-_T = TypeVar("_T")
-
-
-def resolve_all_or_none(
-    economies: Iterable[str],
-    resolve: Callable[[str], _T | None],
-) -> dict[str, _T] | None:
-    """Resolve a value for every economy, or return None if any is missing.
-
-    Encodes the live-overlay rule that a column goes live only when every
-    economy has data: one ``None`` short-circuits and falls the whole column
-    back to mock.
-    """
-    resolved: dict[str, _T] = {}
-    for economy in economies:
-        value = resolve(economy)
-        if value is None:
-            return None
-        resolved[economy] = value
-    return resolved
-
-
 def load_signal_config(path: Path = CONFIG_PATH) -> dict:
     if not path.exists():
         raise FileNotFoundError(f"Missing signal config: {path}")
@@ -283,10 +262,21 @@ def overlay_world_bank_actuals(
         tuple(df.index), start_year, end_year, **wb_kwargs
     )
 
-    for economy in df.index:
-        for column, value in macro[economy].items():
+    policy = policy_for_source("world_bank")
+    for column in LIVE_MACRO_COLUMNS:
+        resolution = resolve_with_policy(
+            policy,
+            column,
+            df.index,
+            lambda economy, col=column: (
+                None
+                if col not in macro[economy]
+                else (macro[economy][col], live_provenance[economy][col])
+            ),
+        )
+        for economy, (value, source_label) in resolution.selected_values:
             df.loc[economy, column] = value
-            provenance[economy][column] = live_provenance[economy][column]
+            provenance[economy][column] = source_label
     return df
 
 
@@ -347,13 +337,17 @@ def overlay_imf_expected_change(
         return None if forecast is None else (forecast, forecast_year)
 
     expected_change: set[str] = set()
+    policy = policy_for_source("imf_weo")
     for macro_col, cons_col in consensus_column.items():
-        resolved = resolve_all_or_none(
-            df.index, lambda economy, col=macro_col: imf_forecast(economy, col)
+        resolution = resolve_with_policy(
+            policy,
+            macro_col,
+            df.index,
+            lambda economy, col=macro_col: imf_forecast(economy, col),
         )
-        if resolved is None:
+        if resolution.decision.action is not FallbackAction.LIVE:
             continue  # not fully IMF-backed -> keep mock consensus for this column
-        for economy, (forecast, forecast_year) in resolved.items():
+        for economy, (forecast, forecast_year) in resolution.selected_values:
             df.loc[economy, cons_col] = forecast
             provenance[economy][cons_col] = f"imf_weo:{forecast_year}"
         expected_change.add(surprise_column[macro_col])
@@ -383,13 +377,17 @@ def overlay_market_inputs(
     kwargs = {} if fetch_json is None else {"fetch_json": fetch_json}
     returns = market.load_market_returns(tuple(df.index), **kwargs)
 
+    policy = policy_for_source("yahoo")
     for column in MARKET_LIVE_COLUMNS:
-        resolved = resolve_all_or_none(
-            df.index, lambda economy, col=column: returns.get(economy, {}).get(col)
+        resolution = resolve_with_policy(
+            policy,
+            column,
+            df.index,
+            lambda economy, col=column: returns.get(economy, {}).get(col),
         )
-        if resolved is None:
+        if resolution.decision.action is not FallbackAction.LIVE:
             continue  # not fully live -> keep mock for this column
-        for economy, (return_pct, asof) in resolved.items():
+        for economy, (return_pct, asof) in resolution.selected_values:
             df.loc[economy, column] = return_pct
             provenance[economy][column] = f"yahoo:{asof}"
     return df
@@ -412,12 +410,15 @@ def overlay_news_pressure(
     if cache is not None:
         kwargs["cache"] = cache
     pressure = gdelt.load_news_pressure(tuple(df.index), **kwargs)
-    resolved = resolve_all_or_none(
-        df.index, lambda economy: pressure.get(economy)
+    resolution = resolve_with_policy(
+        policy_for_source("gdelt"),
+        "news_pressure",
+        df.index,
+        lambda economy: pressure.get(economy),
     )
-    if resolved is None:
+    if resolution.decision.action is not FallbackAction.LIVE:
         return df
-    for economy, (score, asof) in resolved.items():
+    for economy, (score, asof) in resolution.selected_values:
         df.loc[economy, "news_pressure"] = score
         provenance[economy]["news_pressure"] = f"gdelt:{asof}"
     return df
