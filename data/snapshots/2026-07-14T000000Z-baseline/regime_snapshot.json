@@ -1,0 +1,268 @@
+{
+  "as_of": "2026-06-12",
+  "methodology_version": "v0.1",
+  "regime_universe": [
+    "Argentina",
+    "Greece",
+    "Turkey",
+    "Japan",
+    "China",
+    "Brazil"
+  ],
+  "confirmation_min": 0.25,
+  "countries": {
+    "Argentina": {
+      "country": "Argentina",
+      "regime_score": 0.655,
+      "narrative_score": 0.05,
+      "narrative_gap": 0.605,
+      "confirmation_score": 0.4571,
+      "verdict": "Repricing",
+      "buckets": {
+        "policy": 0.85,
+        "liquidity": 0.45,
+        "foreign_access": 0.6,
+        "rating_momentum": 0.75,
+        "index_catalyst": 0.4
+      },
+      "cross_asset_confirmation": {
+        "equity": 0.8,
+        "sovereign_credit": 0.6,
+        "fx": 0.2,
+        "cds": 0.5,
+        "etf_flows": 0.3,
+        "local_banks": 0.9,
+        "rates": -0.1
+      },
+      "drivers": [
+        "Fiscal adjustment continuing",
+        "IMF support improving external funding",
+        "FX framework less distorted",
+        "Reserve accumulation still fragile"
+      ],
+      "best_expressions": [
+        "Long sovereign USD bonds",
+        "Long local banks / ADR basket",
+        "Long energy exporters (YPF)",
+        "Avoid unhedged local FX"
+      ],
+      "left_tail_risks": [
+        "FX gap widens",
+        "IMF review delay",
+        "Election shock",
+        "Reserve target miss",
+        "Social unrest"
+      ]
+    },
+    "Greece": {
+      "country": "Greece",
+      "regime_score": 0.66,
+      "narrative_score": 0.5,
+      "narrative_gap": 0.16,
+      "confirmation_score": 0.5143,
+      "verdict": "Early",
+      "buckets": {
+        "policy": 0.6,
+        "liquidity": 0.55,
+        "foreign_access": 0.7,
+        "rating_momentum": 0.8,
+        "index_catalyst": 0.7
+      },
+      "cross_asset_confirmation": {
+        "equity": 0.7,
+        "sovereign_credit": 0.7,
+        "fx": 0.3,
+        "cds": 0.6,
+        "etf_flows": 0.5,
+        "local_banks": 0.6,
+        "rates": 0.2
+      },
+      "drivers": [
+        "Fiscal credibility restored",
+        "Bank balance sheets normalized",
+        "Index reclassification catalyst",
+        "Sovereign spread compression"
+      ],
+      "best_expressions": [
+        "Long Greek bank equities",
+        "Long GGB sovereign vs Bund",
+        "Long Greece equity ETF",
+        "RV: Greece vs periphery"
+      ],
+      "left_tail_risks": [
+        "EU growth slowdown",
+        "Political slippage",
+        "Banking-sector wobble",
+        "Tourism shock"
+      ]
+    },
+    "Turkey": {
+      "country": "Turkey",
+      "regime_score": 0.27,
+      "narrative_score": 0.1,
+      "narrative_gap": 0.17,
+      "confirmation_score": 0.2286,
+      "verdict": "Unconfirmed",
+      "buckets": {
+        "policy": 0.3,
+        "liquidity": 0.2,
+        "foreign_access": 0.25,
+        "rating_momentum": 0.4,
+        "index_catalyst": 0.1
+      },
+      "cross_asset_confirmation": {
+        "equity": 0.3,
+        "sovereign_credit": 0.4,
+        "fx": 0.1,
+        "cds": 0.3,
+        "etf_flows": 0.2,
+        "local_banks": 0.3,
+        "rates": 0.0
+      },
+      "drivers": [
+        "Return to orthodox monetary policy",
+        "Real rates turning positive",
+        "Reserves rebuilding",
+        "Disinflation starting"
+      ],
+      "best_expressions": [
+        "Long TRY carry (hedged)",
+        "Long Turkish banks",
+        "Receive TRY rates as inflation falls",
+        "Long equity ETF"
+      ],
+      "left_tail_risks": [
+        "Policy U-turn",
+        "FX reserve adequacy",
+        "Inflation re-acceleration",
+        "Geopolitical shock"
+      ]
+    },
+    "Japan": {
+      "country": "Japan",
+      "regime_score": 0.34,
+      "narrative_score": 0.45,
+      "narrative_gap": -0.11,
+      "confirmation_score": 0.2286,
+      "verdict": "Priced in",
+      "buckets": {
+        "policy": 0.4,
+        "liquidity": 0.3,
+        "foreign_access": 0.45,
+        "rating_momentum": 0.2,
+        "index_catalyst": 0.3
+      },
+      "cross_asset_confirmation": {
+        "equity": 0.5,
+        "sovereign_credit": 0.3,
+        "fx": -0.3,
+        "cds": 0.2,
+        "etf_flows": 0.4,
+        "local_banks": 0.3,
+        "rates": 0.2
+      },
+      "drivers": [
+        "BoJ policy normalization",
+        "Sustained wage growth",
+        "Corporate governance reform",
+        "Yen undervaluation"
+      ],
+      "best_expressions": [
+        "Long Japan banks",
+        "Long Nikkei (FX-hedged)",
+        "Pay JGB rates",
+        "Long value vs growth"
+      ],
+      "left_tail_risks": [
+        "Global risk-off / yen surge",
+        "BoJ delays normalization",
+        "Wage momentum fades",
+        "China demand shock"
+      ]
+    },
+    "China": {
+      "country": "China",
+      "regime_score": -0.31,
+      "narrative_score": -0.15,
+      "narrative_gap": -0.16,
+      "confirmation_score": -0.2857,
+      "verdict": "Deteriorating",
+      "buckets": {
+        "policy": -0.4,
+        "liquidity": -0.2,
+        "foreign_access": -0.35,
+        "rating_momentum": -0.3,
+        "index_catalyst": -0.2
+      },
+      "cross_asset_confirmation": {
+        "equity": -0.4,
+        "sovereign_credit": -0.2,
+        "fx": -0.1,
+        "cds": -0.3,
+        "etf_flows": -0.5,
+        "local_banks": -0.4,
+        "rates": -0.1
+      },
+      "drivers": [
+        "Property-sector drag",
+        "Soft domestic confidence",
+        "Deflationary pressure",
+        "Stimulus underwhelming"
+      ],
+      "best_expressions": [
+        "Underweight China equities",
+        "Long defensive HK names",
+        "Short CNH (hedged)",
+        "Avoid property beta"
+      ],
+      "left_tail_risks": [
+        "Large-scale stimulus surprise",
+        "Policy bazooka",
+        "Export rebound",
+        "Valuation snapback"
+      ]
+    },
+    "Brazil": {
+      "country": "Brazil",
+      "regime_score": 0.25,
+      "narrative_score": 0.25,
+      "narrative_gap": 0.0,
+      "confirmation_score": 0.2571,
+      "verdict": "Priced in",
+      "buckets": {
+        "policy": 0.3,
+        "liquidity": 0.25,
+        "foreign_access": 0.2,
+        "rating_momentum": 0.3,
+        "index_catalyst": 0.1
+      },
+      "cross_asset_confirmation": {
+        "equity": 0.4,
+        "sovereign_credit": 0.3,
+        "fx": 0.2,
+        "cds": 0.2,
+        "etf_flows": 0.3,
+        "local_banks": 0.3,
+        "rates": 0.1
+      },
+      "drivers": [
+        "High real rates",
+        "Disinflation underway",
+        "Fiscal uncertainty lingering",
+        "Commodity support"
+      ],
+      "best_expressions": [
+        "Receive BRL rates",
+        "Long Brazilian equities",
+        "Long BRL carry (hedged)",
+        "Long commodity exporters"
+      ],
+      "left_tail_risks": [
+        "Fiscal slippage",
+        "Inflation surprise",
+        "Commodity downturn",
+        "Political noise"
+      ]
+    }
+  }
+}
