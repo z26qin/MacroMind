@@ -43,10 +43,22 @@ def _is_live(provenance_value) -> bool:
     )
 
 
+def _regime_countries(regime: dict) -> dict:
+    """Normalize regime countries to {name: record}.
+
+    The committed regime_snapshot.json keys records by country name; test
+    fixtures and possible future emitters may use a list of records instead.
+    """
+    raw = regime.get("countries") or {}
+    if isinstance(raw, dict):
+        return dict(raw)
+    return {c["country"]: c for c in raw}
+
+
 def opportunity_ranking(regime: dict) -> list[str]:
     """Gap desc, confirmation desc — the one ranking rule, mirrored by the UI."""
     ranked = sorted(
-        regime.get("countries", []),
+        _regime_countries(regime).values(),
         key=lambda c: (
             -(c.get("narrative_gap") or 0.0),
             -(c.get("confirmation_score") or 0.0),
@@ -105,8 +117,8 @@ def compute_diff(base: dict, target: dict) -> dict:
         return False
 
     # ---- regime: verdict flips (L1) + drift (L3) + coverage (L4) ----
-    base_countries = {c["country"]: c for c in base_reg.get("countries", [])}
-    target_countries = {c["country"]: c for c in target_reg.get("countries", [])}
+    base_countries = _regime_countries(base_reg)
+    target_countries = _regime_countries(target_reg)
     for name in sorted(set(base_countries) | set(target_countries)):
         b, t = base_countries.get(name), target_countries.get(name)
         if b is None or t is None:

@@ -111,3 +111,14 @@ def test_unchanged_count():
     assert diff["changes"] == []
     assert diff["minor_count"] == 0
     assert diff["unchanged_count"] == 2
+
+
+def test_regime_countries_accepts_dict_shape():
+    # 真实 regime_snapshot.json 以国名为 key;list 形状也要兼容
+    base = make_side(countries=[make_regime_country("Brazil", "Unconfirmed")])
+    target = make_side("t")
+    target["regime"]["countries"] = {
+        "Brazil": make_regime_country("Brazil", "Repricing"),
+    }
+    diff = snapshot_diff.compute_diff(base, target)
+    assert ("verdict_flip", "Brazil") in kinds(diff)
