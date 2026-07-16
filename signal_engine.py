@@ -138,6 +138,8 @@ __all__ = [
 
 if __name__ == "__main__":
     import argparse
+    import json as _json
+    from pathlib import Path as _Path
 
     parser = argparse.ArgumentParser(description="Generate the macro signal snapshot.")
     parser.add_argument(
@@ -146,7 +148,24 @@ if __name__ == "__main__":
         default="mock",
         help="Data source: mock fallback or live staged adapters.",
     )
+    parser.add_argument(
+        "--quality-out",
+        default=None,
+        help="Optional path to write a small quality-gate summary JSON.",
+    )
     args = parser.parse_args()
     cache = default_news_cache() if args.source == "live" else None
-    generate_snapshot(source=args.source, news_cache=cache)
+    result = run_signal_pipeline(source=args.source, news_cache=cache)
+    if args.quality_out:
+        report = result.quality
+        summary = None
+        if report is not None:
+            summary = {
+                "status": report.status.value,
+                "accepted": report.accepted_observation_count,
+                "blocked": report.blocked_observation_count,
+            }
+        out_path = _Path(args.quality_out)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(_json.dumps(summary))
     print(f"Wrote {SNAPSHOT_PATH} (source={args.source})")
