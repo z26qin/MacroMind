@@ -239,7 +239,74 @@ MM.views.briefing = (function () {
         `<div class="empty-state">加载失败:${MM.util.escapeHtml(String(err))}</div>`;
     });
     render(); // rail/opps render immediately from already-loaded snapshot data
+    runController.init();
   }
+
+  // Drives the RUN button and polls /api/run/status while a run is live.
+  const runController = {
+    timer: null, bound: false, wasRunning: false,
+    init() {
+      if (this.bound) return;
+      this.bound = true;
+      document.querySelector("#run-btn").addEventListener("click", () => this.onClick());
+      this.poll(); // reconnect to a run already in flight when the tab opens
+    },
+    onClick() {
+      const btn = document.querySelector("#run-btn");
+      if (btn.dataset.state === "failed") {
+        const status = this.lastStatus || {};
+        alert((status.log_tail || ["(no log)"]).join("\n"));
+        this.setButton("idle", "▶ RUN LIVE");
+        return;
+      }
+      if (btn.dataset.state === "running") return;
+      const source = document.querySelector("#run-mock").checked ? "mock" : "live";
+      MM.api.postRun(source).then(({ status }) => {
+        if (status === 409) this.setButton("running", "⏳ 已在运行");
+        this.poll();
+      });
+    },
+    poll() {
+      clearInterval(this.timer);
+      this.timer = setInterval(() => MM.api.getRunStatus().then(s => this.apply(s)), 1500);
+      MM.api.getRunStatus().then(s => this.apply(s));
+    },
+    apply(s) {
+      this.lastStatus = s;
+      if (s.state === "running") {
+        const p = s.phase ? `${s.phase.index + 1}/${s.phase.total} ${s.phase.name}` : "…";
+        this.setButton("running", `⏳ ${p}`);
+        const meta = document.querySelector("#briefing-meta");
+        if (s.log_tail && s.log_tail.length) {
+          meta.textContent = s.log_tail[s.log_tail.length - 1].slice(0, 90);
+        }
+      } else {
+        clearInterval(this.timer);
+        if (s.state === "succeeded" && this.wasRunning) {
+          this.setButton("idle", "✓ RUN LIVE");
+          // Re-pull everything so briefing + other views reflect the new snapshot.
+          Promise.all([MM.api.getSignals(), MM.api.getRegime()]).then(([sig, reg]) => {
+            MM.state.snapshot = sig;
+            MM.state.economies = sig.economies || {};
+            MM.state.regimeData = reg;
+            load();
+          });
+        } else if (s.state === "failed") {
+          this.setButton("failed", "✗ FAILED · 点看日志");
+          console.error("run failed:", s.error, s.log_tail);
+        } else {
+          this.setButton("idle", "▶ RUN LIVE");
+        }
+      }
+      this.wasRunning = s.state === "running";
+    },
+    setButton(stateName, label) {
+      const btn = document.querySelector("#run-btn");
+      btn.dataset.state = stateName;
+      btn.textContent = label;
+      btn.disabled = stateName === "running";
+    },
+  };
 
   return { load, render, state };
 })();
