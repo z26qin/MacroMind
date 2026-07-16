@@ -14,7 +14,8 @@
     </div>
     <div class="header-right">
       <div class="view-tabs" aria-label="View">
-        <button class="active" data-tab="map">Map</button>
+        <button class="active" data-tab="briefing">Briefing</button>
+        <button data-tab="map">Map</button>
         <button data-tab="heatmap">Heatmap</button>
         <button data-tab="regime">Regime</button>
         <button data-tab="guide">Guide</button>
@@ -32,6 +33,25 @@
 
   <main>
     <section>
+      <div id="briefing-view" hidden>
+        <div class="briefing-bar">
+          <span id="briefing-meta" class="num">loading…</span>
+          <span class="briefing-bar-right">
+            <label class="mock-toggle"><input type="checkbox" id="run-mock"> mock</label>
+            <button id="run-btn">▶ RUN LIVE</button>
+          </span>
+        </div>
+        <div class="briefing-grid">
+          <aside id="briefing-rail"></aside>
+          <section id="briefing-center">
+            <div class="section-title">CHANGES</div>
+            <div id="briefing-changes"></div>
+            <div class="section-title" style="margin-top:16px">OPPORTUNITY BOARD</div>
+            <div id="briefing-opps"></div>
+          </section>
+          <aside id="briefing-inspector"></aside>
+        </div>
+      </div>
       <div id="map-view">
         <div class="map-wrap">
           <svg id="map" aria-label="World macro signal map"></svg>
@@ -208,6 +228,7 @@
   <script src="/static/js/views/map.js"></script>
   <script src="/static/js/views/heatmap.js"></script>
   <script src="/static/js/views/regime.js"></script>
+  <script src="/static/js/views/briefing.js"></script>
   <script src="/static/js/app.js"></script>
 </body>
 </html>

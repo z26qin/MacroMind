@@ -4,7 +4,7 @@ window.MM = window.MM || {};
 
 MM.state = {
   selectedView: "composite",
-  selectedTab: "map",
+  selectedTab: "briefing",
   selectedCountry: null,   // map/heatmap selection
   countries: [],           // topojson features
   snapshot: { economies: {} },
@@ -241,15 +241,18 @@ MM.state = {
 
 MM.setTab = function (tab) {
   MM.state.selectedTab = tab;
+  const fullWidth = tab === "regime" || tab === "guide" || tab === "briefing";
+  document.querySelector("#briefing-view").hidden = tab !== "briefing";
   document.querySelector("#map-view").hidden = tab !== "map";
   document.querySelector("#heatmap-view").hidden = tab !== "heatmap";
   document.querySelector("#regime-view").hidden = tab !== "regime";
   document.querySelector("#guide-view").hidden = tab !== "guide";
   document.querySelector("#asset-toggles").hidden = tab !== "map";
-  document.querySelector("#panel").hidden = tab === "regime" || tab === "guide";
-  document.querySelector("main").classList.toggle("regime-full", tab === "regime" || tab === "guide");
+  document.querySelector("#panel").hidden = fullWidth;
+  document.querySelector("main").classList.toggle("regime-full", fullWidth);
   document.querySelectorAll("button[data-tab]").forEach(b =>
     b.classList.toggle("active", b.dataset.tab === tab));
+  if (tab === "briefing") MM.views.briefing.load();
   if (tab === "map") MM.views.map.draw();
   if (tab === "heatmap") MM.views.heatmap.draw();
   if (tab === "regime") MM.views.regime.render();
@@ -300,8 +303,10 @@ window.addEventListener("DOMContentLoaded", () => {
     MM.state.economies = signalData.economies || {};
     MM.state.regimeData = regimeData;
     MM.state.countries = topojson.feature(world, world.objects.countries).features;
-    MM.views.map.draw();
-    window.addEventListener("resize", () => MM.views.map.draw());
+    MM.setTab(MM.state.selectedTab); // land on briefing with data ready
+    window.addEventListener("resize", () => {
+      if (MM.state.selectedTab === "map") MM.views.map.draw();
+    });
   }).catch(error => {
     document.querySelector("#panel").innerHTML =
       `<div class="eyebrow">Load error</div><div class="panel-title">Dashboard failed to load</div><div class="meta">${MM.util.escapeHtml(error)}</div>`;
