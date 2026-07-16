@@ -122,3 +122,90 @@ def test_regime_countries_accepts_dict_shape():
     }
     diff = snapshot_diff.compute_diff(base, target)
     assert ("verdict_flip", "Brazil") in kinds(diff)
+
+
+def test_opportunity_rank_move_and_top_crossing():
+    base = make_side(countries=[
+        make_regime_country("Argentina", gap=0.60, conf=0.4),
+        make_regime_country("Brazil", gap=0.50),
+        make_regime_country("Turkey", gap=0.40),
+        make_regime_country("Greece", gap=0.30),
+    ])
+    # Greece 0.30 -> 0.55: rank 4 -> 2(跨入前3 + 移动2位)
+    target = make_side("t", countries=[
+        make_regime_country("Argentina", gap=0.60, conf=0.4),
+        make_regime_country("Brazil", gap=0.50),
+        make_regime_country("Turkey", gap=0.40),
+        make_regime_country("Greece", gap=0.55),
+    ])
+    moves = [c for c in snapshot_diff.compute_diff(base, target)["changes"]
+             if c["kind"] == "opp_rank_move"]
+    greece = [m for m in moves if m["country"] == "Greece"]
+    assert greece and greece[0]["from"] == 4 and greece[0]["to"] == 2
+    assert greece[0]["level"] == 2
+    # Turkey 3 -> 4: 跨出前3也要报,即使只移动1位
+    turkey = [m for m in moves if m["country"] == "Turkey"]
+    assert turkey and turkey[0]["from"] == 3 and turkey[0]["to"] == 4
+
+
+def test_asset_rank_move_needs_two_positions():
+    base = make_side(economies={
+        "Brazil": make_economy({"equity": 0.30}),
+        "Japan": make_economy({"equity": 0.20}),
+        "Canada": make_economy({"equity": 0.10}),
+    })
+    # Canada equity 0.10 -> 0.40: rank 3 -> 1
+    target = make_side("t", economies={
+        "Brazil": make_economy({"equity": 0.30}),
+        "Japan": make_economy({"equity": 0.20}),
+        "Canada": make_economy({"equity": 0.40}),
+    })
+    moves = [c for c in snapshot_diff.compute_diff(base, target)["changes"]
+             if c["kind"] == "asset_rank_move" and c["country"] == "Canada"]
+    assert moves and moves[0]["from"] == 3 and moves[0]["to"] == 1
+
+
+def test_evidence_change_on_count_or_citations():
+    econ_base = make_economy()
+    econ_target = make_economy()
+    econ_target["signals"]["equity"]["rag_analysis"] = {
+        "evidence_count": 2,
+        "citations": [{"uri": "doc://cb-minutes-0711"}],
+    }
+    diff = snapshot_diff.compute_diff(
+        make_side(economies={"Brazil": econ_base}),
+        make_side("t", economies={"Brazil": econ_target}),
+    )
+    entries = [c for c in diff["changes"] if c["kind"] == "evidence_change"]
+    assert entries and entries[0]["level"] == 4
+    assert entries[0]["detail"]["citations_added"] == ["doc://cb-minutes-0711"]
+
+
+def test_rag_confidence_move():
+    econ_base = make_economy()
+    econ_target = make_economy()
+    econ_target["signals"]["fx"]["rag_confidence"] = 0.25
+    diff = snapshot_diff.compute_diff(
+        make_side(economies={"Japan": econ_base}),
+        make_side("t", economies={"Japan": econ_target}),
+    )
+    assert any(c["kind"] == "evidence_change" and c.get("field") == "fx"
+               for c in diff["changes"])
+
+
+def test_provenance_flip_live_to_fallback():
+    econ_base = make_economy(provenance={"gdp_growth": "world_bank:2025"})
+    econ_target = make_economy(provenance={"gdp_growth": "mock"})
+    diff = snapshot_diff.compute_diff(
+        make_side(economies={"Canada": econ_base}),
+        make_side("t", economies={"Canada": econ_target}),
+    )
+    flips = [c for c in diff["changes"] if c["kind"] == "provenance_flip"]
+    assert flips and "live → fallback" in flips[0]["headline"]
+    # derived: 前缀不算 live,mock->derived 不报翻转
+    econ_derived = make_economy(provenance={"gdp_growth": "derived:x"})
+    diff2 = snapshot_diff.compute_diff(
+        make_side(economies={"Canada": make_economy(provenance={"gdp_growth": "mock"})}),
+        make_side("t", economies={"Canada": econ_derived}),
+    )
+    assert not [c for c in diff2["changes"] if c["kind"] == "provenance_flip"]

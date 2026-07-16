@@ -185,8 +185,59 @@ def compute_diff(base: dict, target: dict) -> dict:
 
 
 def _add_rank_moves(base_sig, target_sig, base_reg, target_reg, add):
-    """L2 rank moves — implemented in Task 3."""
+    """L2: opportunity-board and per-cell cross-sectional rank moves."""
+    opp_base = opportunity_ranking(base_reg)
+    opp_target = opportunity_ranking(target_reg)
+    for name in sorted(set(opp_base) & set(opp_target)):
+        pb, pt = opp_base.index(name), opp_target.index(name)
+        crossed_top = (pb < TOP_N) != (pt < TOP_N)
+        if crossed_top or abs(pt - pb) >= RANK_MOVE_MIN:
+            add(2, "opp_rank_move", name,
+                f"{name}: opportunity rank {pb + 1} → {pt + 1}",
+                **{"from": pb + 1, "to": pt + 1})
+
+    for cell in CELL_KEYS:
+        rank_base = _asset_ranking(base_sig, cell)
+        rank_target = _asset_ranking(target_sig, cell)
+        for name in sorted(set(rank_base) & set(rank_target)):
+            pb, pt = rank_base.index(name), rank_target.index(name)
+            if abs(pt - pb) >= RANK_MOVE_MIN:
+                add(2, "asset_rank_move", name,
+                    f"{name} {cell}: rank {pb + 1} → {pt + 1}",
+                    field=cell, **{"from": pb + 1, "to": pt + 1})
 
 
 def _add_context_changes(base_econ, target_econ, add, crossed):
-    """L4 evidence + provenance — implemented in Task 3."""
+    """L4: evidence/citation changes, rag-confidence moves, provenance flips."""
+    for name in sorted(set(base_econ) & set(target_econ)):
+        b, t = base_econ[name], target_econ[name]
+        for asset in ASSET_KEYS:
+            b_cell = (b.get("signals") or {}).get(asset) or {}
+            t_cell = (t.get("signals") or {}).get(asset) or {}
+            b_ra = b_cell.get("rag_analysis") or {}
+            t_ra = t_cell.get("rag_analysis") or {}
+            b_cits = {str(c.get("uri") or c) for c in (b_ra.get("citations") or [])}
+            t_cits = {str(c.get("uri") or c) for c in (t_ra.get("citations") or [])}
+            if b_ra.get("evidence_count", 0) != t_ra.get("evidence_count", 0) or b_cits != t_cits:
+                add(4, "evidence_change", name,
+                    f"{name} {asset}: evidence "
+                    f"{b_ra.get('evidence_count', 0)} → {t_ra.get('evidence_count', 0)}",
+                    field=asset,
+                    detail={
+                        "citations_added": sorted(t_cits - b_cits),
+                        "citations_removed": sorted(b_cits - t_cits),
+                    })
+            b_conf, t_conf = b_cell.get("rag_confidence"), t_cell.get("rag_confidence")
+            if b_conf is not None and t_conf is not None:
+                if crossed(name, t_conf - b_conf, RAG_CONF_MIN):
+                    add(4, "evidence_change", name,
+                        f"{name} {asset}: rag_confidence {b_conf:.2f} → {t_conf:.2f}",
+                        field=asset, **{"from": b_conf, "to": t_conf})
+        b_prov = b.get("provenance") or {}
+        t_prov = t.get("provenance") or {}
+        for key in sorted(set(b_prov) & set(t_prov)):
+            if _is_live(b_prov[key]) != _is_live(t_prov[key]):
+                direction = "live → fallback" if _is_live(b_prov[key]) else "fallback → live"
+                add(4, "provenance_flip", name,
+                    f"{name} {key}: {direction}",
+                    field=key, **{"from": b_prov[key], "to": t_prov[key]})
