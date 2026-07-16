@@ -1,4 +1,25 @@
+    /* Terminal dark theme (default). Light palette lives on [data-theme="light"]. */
     :root {
+      --bg: #0a0e0a;
+      --panel: #10150f;
+      --text: #d7ded4;
+      --muted: #6c746a;
+      --line: #2a2f2a;
+      --nodata: #1c231c;
+      --water: #0d120d;
+      --active: #e8b339;
+      --active-text: #0a0e0a;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+      --positive: #4ade80;
+      --negative: #f87171;
+      --warn: #e8b339;
+      --amber: #e8b339;
+      --scale-mid: #232a23;   /* zero point of the map color scale */
+      --badge-text: #0a0e0a;  /* text on bright badge/pill fills */
+      --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+    }
+
+    [data-theme="light"] {
       --bg: #f7f8f5;
       --panel: #ffffff;
       --text: #20231f;
@@ -12,24 +33,9 @@
       --positive: #3d8b5a;
       --negative: #b94b4b;
       --warn: #b07d1a;
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #111411;
-        --panel: #1a1f1a;
-        --text: #eef2ec;
-        --muted: #a5afa1;
-        --line: #30382f;
-        --nodata: #3f453d;
-        --water: #151a16;
-        --active: #eef2ec;
-        --active-text: #111411;
-        --shadow: 0 18px 45px rgba(0, 0, 0, 0.28);
-        --positive: #62b47c;
-        --negative: #d36b6b;
-        --warn: #d6a743;
-      }
+      --amber: #8a6d1f;
+      --scale-mid: #e6e5da;
+      --badge-text: #ffffff;
     }
 
     * { box-sizing: border-box; }
@@ -53,9 +59,11 @@
 
     h1 {
       margin: 0;
-      font-size: 24px;
+      font-size: 18px;
       font-weight: 720;
-      letter-spacing: 0;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--amber);
     }
 
     .subtitle {
@@ -89,12 +97,17 @@
       gap: 5px;
       min-width: 540px;
     }
+    /* Dark-friendly cells: deep panel base, signal color carried by border
+       and text instead of a full fill (full fills glare on dark). */
     .hm-cell {
-      padding: 11px 6px;
+      padding: 10px 6px;
       border-radius: 6px;
       font-size: 12px;
       font-weight: 700;
-      color: #fff;
+      font-family: var(--mono);
+      background: var(--panel);
+      border: 1px solid var(--cell-color, var(--line));
+      color: var(--cell-color, var(--muted));
       text-align: center;
       white-space: nowrap;
       cursor: pointer;
@@ -136,7 +149,7 @@
     .pill-pos { fill: var(--positive); }
     .pill-warn { fill: var(--warn); }
     .pill-mut { fill: var(--muted); }
-    .flow-pill-text { font-size: 13px; font-weight: 720; fill: #fff; }
+    .flow-pill-text { font-size: 13px; font-weight: 720; fill: var(--badge-text); }
 
     .sparkline { display: block; width: 100%; height: 44px; min-height: 0; margin: 4px 0 2px; }
     .sparkline polyline { fill: none; stroke-width: 1.6; }
@@ -203,7 +216,11 @@
     }
 
     .map-wrap {
-      min-height: calc(100vh - 125px);
+      /* Definite height (not min-height): the map svg sizes itself from its
+         container, and an auto-height container lets the svg's own viewBox
+         feed back into layout and balloon the page. */
+      height: calc(100vh - 125px);
+      min-height: 400px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: var(--water);
@@ -215,7 +232,6 @@
       display: block;
       width: 100%;
       height: 100%;
-      min-height: calc(100vh - 125px);
     }
 
     .country {
@@ -430,7 +446,7 @@
       height: 10px;
       margin-bottom: 6px;
       border-radius: 999px;
-      background: linear-gradient(90deg, #b94b4b, #e6e5da, #3d8b5a);
+      background: linear-gradient(90deg, var(--negative), var(--scale-mid), var(--positive));
       border: 1px solid var(--line);
     }
 
@@ -446,7 +462,7 @@
       letter-spacing: 0.04em;
       padding: 2px 7px;
       border-radius: 999px;
-      color: #fff;
+      color: var(--badge-text);
       vertical-align: middle;
       white-space: nowrap;
     }
@@ -489,5 +505,15 @@
       header { align-items: start; flex-direction: column; }
       .toggles { justify-content: flex-start; }
       main { grid-template-columns: 1fr; padding: 14px; }
-      .map-wrap, aside, svg { min-height: 520px; }
+      .map-wrap { height: 520px; min-height: 520px; }
+      aside { min-height: 520px; }
     }
+
+    /* ---- Terminal typography ---- */
+    .num, td.num, .legend-labels, .selected-signal strong, .metric strong {
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+    }
+    .subtitle { letter-spacing: 0.02em; }
+    button { font-size: 12.5px; }
+    button.active { border-color: var(--active); font-weight: 650; }

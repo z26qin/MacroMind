@@ -40,7 +40,7 @@ MM.views.regime = (function () {
       .attr("fill", "var(--positive)").attr("opacity", 0.12);
     svg.append("line")
       .attr("x1", x(-1)).attr("y1", y(-1)).attr("x2", x(1)).attr("y2", y(1))
-      .attr("stroke", "var(--line)").attr("stroke-dasharray", "4 4");
+      .attr("stroke", "var(--amber)").attr("stroke-dasharray", "4 4");
     svg.append("line").attr("x1", x(-1)).attr("y1", y(0)).attr("x2", x(1)).attr("y2", y(0)).attr("stroke", "var(--line)");
     svg.append("line").attr("x1", x(0)).attr("y1", y(-1)).attr("x2", x(0)).attr("y2", y(1)).attr("stroke", "var(--line)");
 
@@ -56,7 +56,7 @@ MM.views.regime = (function () {
     g.append("circle").attr("r", 6).attr("fill", d => color(d.regime_score))
       .attr("stroke", "var(--text)").attr("stroke-width", 0.5);
     g.append("text").attr("x", 9).attr("dy", "0.32em").attr("font-size", 11)
-      .attr("fill", "var(--text)").text(d => d.country);
+      .attr("fill", "var(--text)").text(d => MM.i18n.display(d.country));
 
     svg.append("text").attr("x", W - m).attr("y", H - 10).attr("text-anchor", "end")
       .attr("font-size", 10).attr("fill", "var(--muted)").text("regime / data score →");
@@ -77,7 +77,7 @@ MM.views.regime = (function () {
   function renderRegimeCard(country) {
     const U = MM.util;
     const regimeData = MM.state.regimeData;
-    const color = MM.views.map.color;
+    const color = U.makeTextScale();
     const c = regimeData && regimeData.countries[country];
     const card = document.querySelector("#regime-card");
     if (!c) { card.innerHTML = `<div class="meta">Select a country.</div>`; return; }
@@ -93,7 +93,7 @@ MM.views.regime = (function () {
       : "";
     card.innerHTML = `
       <div class="eyebrow">Regime card</div>
-      <div class="panel-title">${U.escapeHtml(c.country)} ${U.verdictBadgeHtml(c.regime_score)}</div>
+      <div class="panel-title">${U.escapeHtml(MM.i18n.display(c.country))} ${U.verdictBadgeHtml(c.regime_score)}</div>
       <div class="meta">Verdict: <strong>${U.escapeHtml(c.verdict)}</strong></div>
       ${unconfirmedHint}
       <div class="metric-grid">
@@ -114,17 +114,17 @@ MM.views.regime = (function () {
   function renderRegimeTable() {
     const U = MM.util;
     const regimeData = MM.state.regimeData;
-    const color = MM.views.map.color;
+    const color = U.makeTextScale();
     const rows = regimeData.regime_universe
       .map(c => regimeData.countries[c])
       .slice()
       .sort((a, b) => b.narrative_gap - a.narrative_gap);
     const body = rows.map(c => `
       <tr data-country="${U.escapeHtml(c.country)}">
-        <td>${U.escapeHtml(c.country)}</td>
-        <td style="color:${color(c.regime_score)}">${U.fmt(c.regime_score)}</td>
-        <td style="color:${color(c.narrative_gap)}">${U.fmt(c.narrative_gap)}</td>
-        <td style="color:${color(c.confirmation_score)}">${U.fmt(c.confirmation_score)}</td>
+        <td>${U.escapeHtml(MM.i18n.display(c.country))}</td>
+        <td class="num" style="color:${color(c.regime_score)}">${U.fmt(c.regime_score)}</td>
+        <td class="num" style="color:${color(c.narrative_gap)}">${U.fmt(c.narrative_gap)}</td>
+        <td class="num" style="color:${color(c.confirmation_score)}">${U.fmt(c.confirmation_score)}</td>
         <td>${U.escapeHtml(c.verdict)}</td>
       </tr>`).join("");
     document.querySelector("#regime-table").innerHTML = `

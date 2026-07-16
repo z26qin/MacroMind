@@ -5,10 +5,21 @@ MM.views.map = (function () {
   const svg = d3.select("#map");
   const panel = document.querySelector("#panel");
   const tooltip = document.querySelector("#tooltip");
-  const color = d3.scaleLinear()
-    .domain([-1, 0, 1])
-    .range(["#b94b4b", "#e6e5da", "#3d8b5a"])
-    .clamp(true);
+
+  // Map fill scale reads theme tokens so both themes stay in tune;
+  // rebuilt via refreshTheme() when the user toggles light/dark.
+  function makeColorScale() {
+    const css = getComputedStyle(document.documentElement);
+    return d3.scaleLinear()
+      .domain([-1, 0, 1])
+      .range([
+        css.getPropertyValue("--negative").trim(),
+        css.getPropertyValue("--scale-mid").trim(),
+        css.getPropertyValue("--positive").trim(),
+      ])
+      .clamp(true);
+  }
+  let color = makeColorScale();
 
   function renderPanel(countryName) {
     const U = MM.util;
@@ -18,7 +29,7 @@ MM.views.map = (function () {
     if (!entry) {
       panel.innerHTML = `
         <div class="eyebrow">Map country</div>
-        <div class="panel-title">${U.escapeHtml(countryName)}</div>
+        <div class="panel-title">${U.escapeHtml(MM.i18n.display(countryName))}</div>
         <div class="meta">No signal available.</div>
       `;
       return;
@@ -51,8 +62,8 @@ MM.views.map = (function () {
 
     panel.innerHTML = `
       <div class="eyebrow">Map country</div>
-      <div class="panel-title">${U.escapeHtml(countryName)}</div>
-      <div class="meta">Economy: ${U.escapeHtml(entry.country)}<br>As of: ${U.escapeHtml(MM.state.snapshot.as_of || "Unknown")} · Methodology: ${U.escapeHtml(MM.state.snapshot.methodology_version || "Unknown")}</div>
+      <div class="panel-title">${U.escapeHtml(MM.i18n.display(countryName))}</div>
+      <div class="meta">Economy: ${U.escapeHtml(MM.i18n.display(entry.country))}<br>As of: ${U.escapeHtml(MM.state.snapshot.as_of || "Unknown")} · Methodology: ${U.escapeHtml(MM.state.snapshot.methodology_version || "Unknown")}</div>
       <div class="selected-signal">
         ${U.viewLabel(MM.state.selectedView)} signal ${U.verdictBadgeHtml(selectedValue)}
         <strong>${U.fmt(selectedValue)}</strong>
@@ -100,7 +111,7 @@ MM.views.map = (function () {
         const conviction = (entry && MM.state.selectedView !== "composite")
           ? entry.signals[MM.state.selectedView].conviction : null;
         const convBadge = U.convictionBadgeHtml(conviction);
-        tooltip.innerHTML = `<strong>${U.escapeHtml(name)}</strong><br>${economyName ? `Economy: ${U.escapeHtml(economyName)}<br>${U.viewLabel(MM.state.selectedView)}: ${U.verdictBadgeHtml(value)} ${U.fmt(value)}${convBadge ? "<br>" + convBadge : ""}` : "No data"}`;
+        tooltip.innerHTML = `<strong>${U.escapeHtml(MM.i18n.display(name))}</strong><br>${economyName ? `Economy: ${U.escapeHtml(MM.i18n.display(economyName))}<br>${U.viewLabel(MM.state.selectedView)}: ${U.verdictBadgeHtml(value)} ${U.fmt(value)}${convBadge ? "<br>" + convBadge : ""}` : "No data"}`;
       })
       .on("mouseleave", () => { tooltip.style.opacity = 0; })
       .on("click", (event, d) => {
@@ -137,5 +148,11 @@ MM.views.map = (function () {
       .classed("selected", d => d.properties.name === MM.state.selectedCountry);
   }
 
-  return { draw, updateColors, renderPanel, color };
+  return {
+    draw,
+    updateColors,
+    renderPanel,
+    get color() { return color; },
+    refreshTheme() { color = makeColorScale(); },
+  };
 })();

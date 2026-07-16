@@ -191,6 +191,21 @@ MM.state = {
       + `</svg>`;
   }
 
+  // Text color scale for numbers on panel backgrounds. Unlike the map fill
+  // scale (whose zero point is a dark/neutral surface color), zero here maps
+  // to --muted so near-zero values stay readable as text.
+  function makeTextScale() {
+    const css = getComputedStyle(document.documentElement);
+    return d3.scaleLinear()
+      .domain([-1, 0, 1])
+      .range([
+        css.getPropertyValue("--negative").trim(),
+        css.getPropertyValue("--muted").trim(),
+        css.getPropertyValue("--positive").trim(),
+      ])
+      .clamp(true);
+  }
+
   function historyBlock(economyName, view) {
     const series = (MM.state.historyData[economyName] || {})[view] || [];
     if (series.length < 2) return "";
@@ -220,6 +235,7 @@ MM.state = {
     narrativeHtml,
     sparkline,
     historyBlock,
+    makeTextScale,
   };
 })();
 
@@ -250,6 +266,19 @@ window.macroDashboardDebug = {
 };
 
 window.addEventListener("DOMContentLoaded", () => {
+  // Theme toggle: dark is the default; "light" is stamped on <html>.
+  const savedTheme = localStorage.getItem("mmTheme");
+  if (savedTheme) document.documentElement.dataset.theme = savedTheme;
+  document.querySelector("#theme-toggle")?.addEventListener("click", () => {
+    const root = document.documentElement;
+    const next = root.dataset.theme === "light" ? "" : "light";
+    if (next) root.dataset.theme = next; else delete root.dataset.theme;
+    localStorage.setItem("mmTheme", next);
+    MM.views.map.refreshTheme();
+    MM.setTab(MM.state.selectedTab);
+    if (MM.state.selectedCountry) MM.views.map.renderPanel(MM.state.selectedCountry);
+  });
+
   document.querySelectorAll("button[data-view]").forEach(button => {
     button.addEventListener("click", () => {
       MM.state.selectedView = button.dataset.view;
