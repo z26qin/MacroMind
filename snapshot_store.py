@@ -26,8 +26,9 @@ def _utc_stamp(now: datetime | None = None) -> str:
     return now.strftime("%Y-%m-%dT%H%M%SZ")
 
 
-def list_snapshots(snapshots_dir: Path = SNAPSHOTS_DIR) -> list[dict]:
+def list_snapshots(snapshots_dir: Path | None = None) -> list[dict]:
     """Complete archives sorted oldest-first: [{id, as_of, meta}, ...]."""
+    snapshots_dir = SNAPSHOTS_DIR if snapshots_dir is None else snapshots_dir
     if not snapshots_dir.exists():
         return []
     entries = []
@@ -48,8 +49,9 @@ def list_snapshots(snapshots_dir: Path = SNAPSHOTS_DIR) -> list[dict]:
     return entries
 
 
-def load_snapshot(snapshot_id: str, snapshots_dir: Path = SNAPSHOTS_DIR) -> dict:
+def load_snapshot(snapshot_id: str, snapshots_dir: Path | None = None) -> dict:
     """Load one archive in the diff-engine input shape {"id", "signal", "regime"}."""
+    snapshots_dir = SNAPSHOTS_DIR if snapshots_dir is None else snapshots_dir
     root = snapshots_dir / snapshot_id
     return {
         "id": snapshot_id,
@@ -58,7 +60,7 @@ def load_snapshot(snapshot_id: str, snapshots_dir: Path = SNAPSHOTS_DIR) -> dict
     }
 
 
-def latest_pair(snapshots_dir: Path = SNAPSHOTS_DIR) -> tuple[dict, dict] | None:
+def latest_pair(snapshots_dir: Path | None = None) -> tuple[dict, dict] | None:
     """(base_entry, target_entry) — the two newest archives, or None when < 2."""
     entries = list_snapshots(snapshots_dir)
     if len(entries) < 2:
@@ -69,9 +71,9 @@ def latest_pair(snapshots_dir: Path = SNAPSHOTS_DIR) -> tuple[dict, dict] | None
 def archive_current(
     source: str,
     *,
-    snapshots_dir: Path = SNAPSHOTS_DIR,
-    signal_path: Path = SIGNAL_PATH,
-    regime_path: Path = REGIME_PATH,
+    snapshots_dir: Path | None = None,
+    signal_path: Path | None = None,
+    regime_path: Path | None = None,
     now: datetime | None = None,
     extra_meta: dict | None = None,
     snapshot_id: str | None = None,
@@ -81,6 +83,9 @@ def archive_current(
     Copies into a dot-prefixed staging dir and renames at the end, so an
     interrupted archive can never be listed as a complete snapshot.
     """
+    snapshots_dir = SNAPSHOTS_DIR if snapshots_dir is None else snapshots_dir
+    signal_path = SIGNAL_PATH if signal_path is None else signal_path
+    regime_path = REGIME_PATH if regime_path is None else regime_path
     snapshot_id = snapshot_id or _utc_stamp(now)
     target = snapshots_dir / snapshot_id
     if target.exists():
@@ -104,9 +109,9 @@ def archive_current(
 
 def seed_baseline_if_empty(
     *,
-    snapshots_dir: Path = SNAPSHOTS_DIR,
-    signal_path: Path = SIGNAL_PATH,
-    regime_path: Path = REGIME_PATH,
+    snapshots_dir: Path | None = None,
+    signal_path: Path | None = None,
+    regime_path: Path | None = None,
 ) -> str | None:
     """Archive the committed working snapshots as a baseline when none exist.
 
@@ -114,6 +119,9 @@ def seed_baseline_if_empty(
     files are missing. The id derives from the signal snapshot's as_of date so
     seeding is deterministic across machines.
     """
+    snapshots_dir = SNAPSHOTS_DIR if snapshots_dir is None else snapshots_dir
+    signal_path = SIGNAL_PATH if signal_path is None else signal_path
+    regime_path = REGIME_PATH if regime_path is None else regime_path
     if list_snapshots(snapshots_dir):
         return None
     if not (signal_path.exists() and regime_path.exists()):
