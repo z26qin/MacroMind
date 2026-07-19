@@ -241,8 +241,9 @@ MM.state = {
 
 MM.setTab = function (tab) {
   MM.state.selectedTab = tab;
-  const fullWidth = tab === "regime" || tab === "guide" || tab === "briefing";
+  const fullWidth = tab !== "map" && tab !== "heatmap";
   document.querySelector("#briefing-view").hidden = tab !== "briefing";
+  document.querySelector("#summary-view").hidden = tab !== "summary";
   document.querySelector("#map-view").hidden = tab !== "map";
   document.querySelector("#heatmap-view").hidden = tab !== "heatmap";
   document.querySelector("#regime-view").hidden = tab !== "regime";
@@ -253,10 +254,53 @@ MM.setTab = function (tab) {
   document.querySelectorAll("button[data-tab]").forEach(b =>
     b.classList.toggle("active", b.dataset.tab === tab));
   if (tab === "briefing") MM.views.briefing.load();
+  if (tab === "summary") MM.views.summary.render();
   if (tab === "map") MM.views.map.draw();
   if (tab === "heatmap") MM.views.heatmap.draw();
   if (tab === "regime") MM.views.regime.render();
 };
+
+// ---- P2 keyboard minimal set: j/k rail, 1-5 asset views, ? help ----
+const MM_VIEW_KEYS = { "1": "composite", "2": "fx", "3": "rates", "4": "equity", "5": "real_estate" };
+const MM_KEY_HELP = [
+  ["j / k", "Briefing 国家轨上下移动"],
+  ["1-5", "资产切换 Composite / FX / Rates / Equity / RE"],
+  ["?", "开关此帮助"],
+];
+
+function mmMoveRail(delta) {
+  if (MM.state.selectedTab !== "briefing") return;
+  const rows = [...document.querySelectorAll("#briefing-rail .rail-row")];
+  if (!rows.length) return;
+  const names = rows.map(r => r.dataset.country);
+  const current = names.indexOf(MM.views.briefing.state.railFilter);
+  const next = Math.max(0, Math.min(names.length - 1, current + delta));
+  if (next === current) return; // clicking the same row again would deselect
+  rows[next].click();
+}
+
+function mmToggleHelp() {
+  const existing = document.querySelector("#key-help");
+  if (existing) { existing.remove(); return; }
+  const el = document.createElement("div");
+  el.id = "key-help";
+  el.style.cssText = "position:fixed;bottom:20px;right:20px;background:var(--panel);"
+    + "border:1px solid var(--amber);border-radius:8px;padding:14px 18px;z-index:99;"
+    + "font-size:12.5px;box-shadow:var(--shadow);min-width:260px;";
+  el.innerHTML = MM_KEY_HELP.map(([key, desc]) =>
+    `<div class="inspector-kv"><span class="num" style="color:var(--amber)">${key}</span>`
+    + `<span style="margin-left:14px">${desc}</span></div>`).join("");
+  document.body.appendChild(el);
+}
+
+document.addEventListener("keydown", (e) => {
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.target instanceof Element && e.target.matches("input, textarea")) return;
+  if (e.key === "j") mmMoveRail(1);
+  else if (e.key === "k") mmMoveRail(-1);
+  else if (MM_VIEW_KEYS[e.key]) document.querySelector(`button[data-view="${MM_VIEW_KEYS[e.key]}"]`)?.click();
+  else if (e.key === "?") mmToggleHelp();
+});
 
 window.macroDashboardDebug = {
   get selectedView() { return MM.state.selectedView; },

@@ -306,3 +306,7 @@ jobs:
 5. Briefing 视图:三栏布局 + 变化流 + 机会榜 + 详情检查器
 6. Run 按钮 + 状态轮询打通
 7. P2(按余力):键盘最小集、stage 细化
+
+## 变更记录
+
+- **2026-07-16(实施后调整,用户决定):** 机会榜(OPPORTUNITY BOARD)从 Briefing 中栏迁出,落入新建的 **Summary tab**(Briefing 右侧第一个 tab)。理由:机会榜是静态横截面排名,与 Briefing"自上次快照什么变了"的职责不一致,且国家轨过滤不作用于它。Summary tab 同时新增 **SIGNAL LEADERBOARD**(signal 六国按 composite 降序),点击任一行右侧出详情检查器。Briefing 检查器随之收窄为 change / country 两种模式。

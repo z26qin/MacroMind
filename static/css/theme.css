@@ -563,3 +563,12 @@
     .inspector-kv { display: flex; justify-content: space-between; gap: 10px; font-size: 12.5px; padding: 3px 0; }
     .empty-state { color: var(--muted); font-size: 13px; padding: 18px; text-align: center; }
     @media (max-width: 1000px) { .briefing-grid { grid-template-columns: 1fr; } }
+
+    /* ---- Summary view ---- */
+    #summary-view { min-height: calc(100vh - 125px); }
+    .summary-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; align-items: start; }
+    #summary-boards, #summary-inspector {
+      border: 1px solid var(--line); border-radius: 8px; background: var(--panel); padding: 14px;
+      box-shadow: var(--shadow);
+    }
+    @media (max-width: 1000px) { .summary-grid { grid-template-columns: 1fr; } }

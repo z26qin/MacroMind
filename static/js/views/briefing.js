@@ -63,19 +63,9 @@ MM.views.briefing = (function () {
     return rows.length ? Math.min(...rows.map(c => c.level)) : null;
   }
 
-  // Same single ranking rule as snapshot_diff.opportunity_ranking:
-  // narrative_gap desc, confirmation_score breaks ties.
-  function opportunityRows() {
-    return Object.values(((MM.state.regimeData || {}).countries) || {})
-      .slice()
-      .sort((a, b) => (b.narrative_gap - a.narrative_gap) ||
-                      (b.confirmation_score - a.confirmation_score));
-  }
-
   function render() {
     renderRail();
     renderChanges();
-    renderOpps();
     renderInspector();
   }
 
@@ -129,23 +119,6 @@ MM.views.briefing = (function () {
     }));
   }
 
-  function renderOpps() {
-    const U = MM.util;
-    const el = document.querySelector("#briefing-opps");
-    el.innerHTML = opportunityRows().map((c, i) => {
-      const warn = c.verdict === "Unconfirmed" ? " ⚠" : "";
-      const sel = state.inspector?.mode === "opp" && state.inspector.payload === c.country ? " selected" : "";
-      return `<div class="opp-row${sel}" data-country="${U.escapeHtml(c.country)}">
-        <span class="num">${i + 1}</span>
-        <span>${U.escapeHtml(MM.i18n.display(c.country))} <span style="color:var(--muted)">${U.escapeHtml(c.verdict)}${warn}</span></span>
-        <span class="num">gap ${fmt(c.narrative_gap)} · conf ${fmt(c.confirmation_score)}</span></div>`;
-    }).join("");
-    el.querySelectorAll(".opp-row").forEach(row => row.addEventListener("click", () => {
-      state.inspector = { mode: "opp", payload: row.dataset.country };
-      render();
-    }));
-  }
-
   function kv(label, value) {
     return `<div class="inspector-kv"><span>${label}</span><span class="num">${value}</span></div>`;
   }
@@ -170,30 +143,6 @@ MM.views.briefing = (function () {
           : JSON.stringify(v);
         html += kv(U.escapeHtml(k), U.escapeHtml(text));
       });
-      el.innerHTML = html;
-    } else if (ins.mode === "opp") {
-      const c = opportunityRows().find(x => x.country === ins.payload);
-      if (!c) { el.innerHTML = ""; return; }
-      let html = `<div class="inspector-title">${U.escapeHtml(MM.i18n.display(c.country))} — ${U.escapeHtml(c.verdict)}</div>`;
-      html += kv("regime_score", fmt(c.regime_score))
-        + kv("narrative_gap", fmt(c.narrative_gap))
-        + kv("confirmation", fmt(c.confirmation_score));
-      const channels = c.cross_asset_confirmation || {};
-      html += `<div class="inspector-title" style="margin-top:12px">Cross-asset</div>`
-        + Object.entries(channels).map(([k, v]) =>
-            kv(U.escapeHtml(k.replace(/_/g, " ")), fmt(v))).join("");
-      const expressions = (c.best_expressions || []).slice(0, 3);
-      if (expressions.length) {
-        html += `<div class="inspector-title" style="margin-top:12px">Best expressions</div>`
-          + expressions.map(e =>
-              `<div class="inspector-kv"><span>→</span><span>${U.escapeHtml(String(e))}</span></div>`).join("");
-      }
-      const risks = (c.left_tail_risks || []).slice(0, 3);
-      if (risks.length) {
-        html += `<div class="inspector-title" style="margin-top:12px">Left-tail risks</div>`
-          + risks.map(r =>
-              `<div class="inspector-kv"><span>⚠</span><span>${U.escapeHtml(String(r))}</span></div>`).join("");
-      }
       el.innerHTML = html;
     } else {
       const name = ins.payload;
@@ -226,7 +175,9 @@ MM.views.briefing = (function () {
     const days = Math.max(0, Math.round(
       (new Date(data.target.as_of) - new Date(data.base.as_of)) / 86400000));
     const headline = data.changes.filter(c => c.level === 1).length;
-    meta.textContent = `vs ${data.base.id} · ${days}d · ${headline} headline · ${data.changes.length} changes`;
+    // Show just the date part of the base id; the full id stays in the title attr.
+    meta.textContent = `vs ${data.base.id.slice(0, 10)} · ${days}d · ${headline} headline · ${data.changes.length} changes`;
+    meta.title = `base: ${data.base.id} → target: ${data.target.id}`;
   }
 
   function load() {
@@ -284,6 +235,10 @@ MM.views.briefing = (function () {
         clearInterval(this.timer);
         if (s.state === "succeeded" && this.wasRunning) {
           this.setButton("idle", "✓ RUN LIVE");
+          setTimeout(() => {
+            const btn = document.querySelector("#run-btn");
+            if (btn.dataset.state === "idle") this.setButton("idle", "▶ RUN LIVE");
+          }, 4000);
           // Re-pull everything so briefing + other views reflect the new snapshot.
           Promise.all([MM.api.getSignals(), MM.api.getRegime()]).then(([sig, reg]) => {
             MM.state.snapshot = sig;
