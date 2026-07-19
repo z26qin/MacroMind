@@ -1,0 +1,10 @@
+{
+  "id": "2026-07-19T165142Z",
+  "source": "live",
+  "created_at": "2026-07-19T16:51:42.078300+00:00",
+  "quality": {
+    "status": "degraded",
+    "accepted": 48,
+    "blocked": 0
+  }
+}
