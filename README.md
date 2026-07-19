@@ -18,10 +18,13 @@ A runnable prototype macro dashboard for cross-asset signals across a small, exp
 - `history.py`: builds a per-economy signal time series by reading every committed version of `snapshot.json` from git history; served at `/api/history` and drawn as a sparkline in the detail panel (requires running inside a git checkout)
 - `regime_engine.py`: deterministic macro **regime-detection** engine (regime score, narrative gap, cross-asset confirmation, templated expressions/risks) for a separate six-economy set; writes `regime_snapshot.json`, served at `/api/regime` and shown in the dashboard's Regime tab. Verdict ladder: Deteriorating / Repricing / Early / Priced in / Neutral, where the activation verdicts (Repricing, Early) additionally require cross-asset `confirmation_score >= confirmation_min` (config: `regime_config.yaml`) — otherwise the verdict is **Unconfirmed**
 - `rag_signal.py`: structured narrative extraction over point-in-time evidence; emits direction, factors, confidence, horizon, and revision-aware citations. The offline keyword extractor implements the same interface expected of a future LLM-backed extractor
+- `snapshot_store.py`: archives each successful run's `snapshot.json` + `regime_snapshot.json` into `data/snapshots/<UTC timestamp>/`; the committed archive directory is the sole data source for the Briefing diff and is seeded once from the committed working snapshots
+- `snapshot_diff.py`: pure, unit-tested diff engine between two archived snapshots; grades changes into headline verdict/direction flips, rank moves, numeric drift, and evidence/provenance/coverage context (thresholds are versioned constants at the top of the module)
+- `run_manager.py`: in-memory background run state machine behind the Briefing **Run** button; runs signal + regime engines as isolated subprocesses, archives on success, and exposes phase/log status for polling
 - `evals/`: vendored retrieval, citation-grounding, point-in-time leakage, and confidence-calibration metrics plus the CI gate
 - `eval_data/pit_narrative_golden_set.jsonl`: committed adjudicated seed cases for the end-to-end narrative gate
 - `real_data_adapter.py`: placeholder for future production data adapters
-- `static/index.html`: vanilla HTML/JS dashboard using D3 and topojson
+- `static/index.html`: zero-build dashboard shell; CSS in `static/css/theme.css`, JS split under `static/js/` (shared `window.MM` namespace) with one module per view (`briefing`, `map`, `heatmap`, `regime`). Terminal dark theme by default with a light fallback; country names render in Chinese at the display layer only
 - `snapshot.json`: stable backend-to-frontend interface
 
 The evidence ledger uses local SQLite under `.cache/`. No frontend framework, embedding call, or hosted LLM call is required; the default structured extractor is deterministic so mock mode and CI remain fully offline. A production model can be injected through the `NarrativeExtractor` protocol without changing the snapshot contract or bypassing point-in-time retrieval.
@@ -136,6 +139,14 @@ If your shell exposes Python as `python3`, use `python3 signal_engine.py`.
 Open:
 
 [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+The dashboard lands on the **Briefing** tab: what changed since the previous archived snapshot, a gap-ranked opportunity board, and a click-through inspector. The **Run** button (top-right of Briefing) kicks off a pipeline run in the background — `POST /api/run` starts it, `GET /api/run/status` reports the phase, log tail, and result; on success both snapshots are archived under `data/snapshots/` and the diff refreshes. Toggle the `mock` checkbox to run offline mock data instead of live.
+
+**Run the server as a single uvicorn worker.** The run state machine lives in memory, so multiple workers would each have their own idea of whether a run is in flight; `--reload` (single worker) or a plain `uvicorn main:app` is correct, `--workers N` is not.
+
+New API surface: `GET /api/snapshots` (archived snapshots), `GET /api/changes[?base=<id>]` (graded diff, default newest pair), `POST /api/run` (start a run; 409 if one is already running), `GET /api/run/status`.
+
+A weekly GitHub Actions workflow that runs the live pipeline and commits the snapshot + archive is documented in the design spec (`docs/superpowers/specs/2026-07-15-terminal-briefing-redesign-design.md`, appendix) and ships disabled — drop the workflow file into `.github/workflows/` to enable it.
 
 ## Test
 
