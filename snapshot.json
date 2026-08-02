@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-08-01",
+  "as_of": "2026-08-02",
   "methodology_version": "v0.2",
   "data_source": "live",
   "universe": [
@@ -23,8 +23,8 @@
         "gdp_consensus": "mock",
         "gdp_growth": "mock",
         "house_price_yoy": "mock",
-        "inflation_consensus": "imf_weo:2025",
-        "inflation_yoy": "world_bank:2024",
+        "inflation_consensus": "mock",
+        "inflation_yoy": "mock",
         "news_pressure": "mock",
         "pmi": "mock",
         "pmi_consensus": "mock",
@@ -50,7 +50,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -99,10 +99,10 @@
           }
         },
         "rates": {
-          "deterministic": 0.2,
+          "deterministic": 0.6,
           "rag": 0.0,
-          "final": 0.2,
-          "driver": "Positive bond signal led by policy surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
+          "final": 0.6,
+          "driver": "Positive bond signal led by inflation surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -112,7 +112,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -120,16 +120,16 @@
           },
           "top_positive_drivers": [
             {
+              "feature": "inflation_surprise_rank",
+              "value": -0.6,
+              "weight": -0.35,
+              "contribution": 0.21
+            },
+            {
               "feature": "policy_surprise_rank",
               "value": -1.0,
               "weight": -0.2,
               "contribution": 0.2
-            },
-            {
-              "feature": "inflation_surprise_rank",
-              "value": -0.2,
-              "weight": -0.35,
-              "contribution": 0.07
             },
             {
               "feature": "unemployment_surprise_rank",
@@ -154,9 +154,9 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.2917,
-            "top_driver_share": 0.4167,
-            "top_driver": "policy_surprise",
+            "net_lean": 0.4516,
+            "top_driver_share": 0.3387,
+            "top_driver": "inflation_surprise",
             "narrative": "no_view"
           }
         },
@@ -176,7 +176,7 @@
             "signal": 0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [
               "resilient"
@@ -252,7 +252,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -308,9 +308,9 @@
         }
       },
       "composite": {
-        "deterministic": 0.2,
+        "deterministic": 0.3,
         "rag": 0.125,
-        "final": 0.2131
+        "final": 0.3131
       }
     },
     "Canada": {
@@ -325,8 +325,8 @@
         "gdp_consensus": "mock",
         "gdp_growth": "mock",
         "house_price_yoy": "mock",
-        "inflation_consensus": "imf_weo:2026",
-        "inflation_yoy": "world_bank:2025",
+        "inflation_consensus": "mock",
+        "inflation_yoy": "mock",
         "news_pressure": "mock",
         "pmi": "mock",
         "pmi_consensus": "mock",
@@ -352,7 +352,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -398,7 +398,7 @@
           "deterministic": -1.0,
           "rag": 0.0,
           "final": -1.0,
-          "driver": "Negative bond signal led by inflation surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
+          "driver": "Negative bond signal led by policy surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -408,20 +408,21 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
             "citations": []
           },
-          "top_positive_drivers": [],
-          "top_negative_drivers": [
+          "top_positive_drivers": [
             {
               "feature": "inflation_surprise_rank",
-              "value": 0.6,
+              "value": -0.2,
               "weight": -0.35,
-              "contribution": -0.21
-            },
+              "contribution": 0.07
+            }
+          ],
+          "top_negative_drivers": [
             {
               "feature": "policy_surprise_rank",
               "value": 1.0,
@@ -433,13 +434,19 @@
               "value": -0.6,
               "weight": 0.2,
               "contribution": -0.12
+            },
+            {
+              "feature": "news_pressure_rank",
+              "value": -1.0,
+              "weight": 0.1,
+              "contribution": -0.1
             }
           ],
           "conviction": {
             "band": "high",
-            "net_lean": 1.0,
-            "top_driver_share": 0.3088,
-            "top_driver": "inflation_surprise",
+            "net_lean": 0.7407,
+            "top_driver_share": 0.3704,
+            "top_driver": "policy_surprise",
             "narrative": "no_view"
           }
         },
@@ -457,7 +464,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -515,7 +522,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -596,8 +603,8 @@
         "gdp_consensus": "mock",
         "gdp_growth": "mock",
         "house_price_yoy": "mock",
-        "inflation_consensus": "imf_weo:2026",
-        "inflation_yoy": "world_bank:2025",
+        "inflation_consensus": "mock",
+        "inflation_yoy": "mock",
         "news_pressure": "mock",
         "pmi": "mock",
         "pmi_consensus": "mock",
@@ -623,7 +630,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -666,10 +673,10 @@
           }
         },
         "rates": {
-          "deterministic": -0.2,
+          "deterministic": 0.2,
           "rag": 0.0,
-          "final": -0.2,
-          "driver": "Negative bond signal led by inflation surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
+          "final": 0.2,
+          "driver": "Positive bond signal led by inflation surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -679,7 +686,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -708,15 +715,15 @@
           "top_negative_drivers": [
             {
               "feature": "inflation_surprise_rank",
-              "value": 1.0,
+              "value": 0.6,
               "weight": -0.35,
-              "contribution": -0.35
+              "contribution": -0.21
             }
           ],
           "conviction": {
-            "band": "low",
-            "net_lean": -0.1463,
-            "top_driver_share": 0.4268,
+            "band": "medium",
+            "net_lean": 0.3824,
+            "top_driver_share": 0.3088,
             "top_driver": "inflation_surprise",
             "narrative": "no_view"
           }
@@ -737,7 +744,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -813,7 +820,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -863,9 +870,9 @@
         }
       },
       "composite": {
-        "deterministic": -0.8,
+        "deterministic": -0.7,
         "rag": -0.125,
-        "final": -0.7781
+        "final": -0.6781
       }
     },
     "Japan": {
@@ -880,8 +887,8 @@
         "gdp_consensus": "mock",
         "gdp_growth": "mock",
         "house_price_yoy": "mock",
-        "inflation_consensus": "imf_weo:2026",
-        "inflation_yoy": "world_bank:2025",
+        "inflation_consensus": "mock",
+        "inflation_yoy": "mock",
         "news_pressure": "mock",
         "pmi": "mock",
         "pmi_consensus": "mock",
@@ -909,7 +916,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -978,10 +985,10 @@
           }
         },
         "rates": {
-          "deterministic": 1.0,
+          "deterministic": -0.2,
           "rag": 0.0,
-          "final": 1.0,
-          "driver": "Positive bond signal led by growth surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
+          "final": -0.2,
+          "driver": "Negative bond signal led by inflation surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -991,7 +998,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1005,12 +1012,6 @@
               "contribution": 0.25
             },
             {
-              "feature": "inflation_surprise_rank",
-              "value": -0.6,
-              "weight": -0.35,
-              "contribution": 0.21
-            },
-            {
               "feature": "policy_surprise_rank",
               "value": -0.2,
               "weight": -0.2,
@@ -1018,6 +1019,12 @@
             }
           ],
           "top_negative_drivers": [
+            {
+              "feature": "inflation_surprise_rank",
+              "value": 1.0,
+              "weight": -0.35,
+              "contribution": -0.35
+            },
             {
               "feature": "news_pressure_rank",
               "value": -0.6,
@@ -1032,10 +1039,10 @@
             }
           ],
           "conviction": {
-            "band": "high",
-            "net_lean": 0.6667,
-            "top_driver_share": 0.4167,
-            "top_driver": "growth_surprise",
+            "band": "medium",
+            "net_lean": 0.2162,
+            "top_driver_share": 0.473,
+            "top_driver": "inflation_surprise",
             "narrative": "no_view"
           }
         },
@@ -1053,7 +1060,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1115,7 +1122,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1165,9 +1172,9 @@
         }
       },
       "composite": {
-        "deterministic": -0.1,
+        "deterministic": -0.4,
         "rag": -0.125,
-        "final": -0.0956
+        "final": -0.3956
       }
     },
     "Brazil": {
@@ -1182,8 +1189,8 @@
         "gdp_consensus": "mock",
         "gdp_growth": "mock",
         "house_price_yoy": "mock",
-        "inflation_consensus": "imf_weo:2026",
-        "inflation_yoy": "world_bank:2025",
+        "inflation_consensus": "mock",
+        "inflation_yoy": "mock",
         "news_pressure": "mock",
         "pmi": "mock",
         "pmi_consensus": "mock",
@@ -1211,7 +1218,7 @@
             "signal": 0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [
               "investor demand"
@@ -1280,10 +1287,10 @@
           }
         },
         "rates": {
-          "deterministic": 0.6,
+          "deterministic": -0.6,
           "rag": 0.0,
-          "final": 0.6,
-          "driver": "Positive bond signal led by inflation surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
+          "final": -0.6,
+          "driver": "Negative bond signal led by growth surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -1293,19 +1300,13 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
             "citations": []
           },
           "top_positive_drivers": [
-            {
-              "feature": "inflation_surprise_rank",
-              "value": -1.0,
-              "weight": -0.35,
-              "contribution": 0.35
-            },
             {
               "feature": "unemployment_surprise_rank",
               "value": 0.6,
@@ -1331,13 +1332,19 @@
               "value": 0.6,
               "weight": -0.2,
               "contribution": -0.12
+            },
+            {
+              "feature": "inflation_surprise_rank",
+              "value": 0.2,
+              "weight": -0.35,
+              "contribution": -0.07
             }
           ],
           "conviction": {
-            "band": "low",
-            "net_lean": 0.1778,
-            "top_driver_share": 0.3889,
-            "top_driver": "inflation_surprise",
+            "band": "medium",
+            "net_lean": 0.4194,
+            "top_driver_share": 0.4032,
+            "top_driver": "growth_surprise",
             "narrative": "no_view"
           }
         },
@@ -1355,7 +1362,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1417,7 +1424,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1473,9 +1480,9 @@
         }
       },
       "composite": {
-        "deterministic": 0.8,
+        "deterministic": 0.5,
         "rag": 0.125,
-        "final": 0.7781
+        "final": 0.4781
       }
     },
     "Euro Area": {
@@ -1490,8 +1497,8 @@
         "gdp_consensus": "mock",
         "gdp_growth": "mock",
         "house_price_yoy": "mock",
-        "inflation_consensus": "imf_weo:2026",
-        "inflation_yoy": "world_bank:2025",
+        "inflation_consensus": "mock",
+        "inflation_yoy": "mock",
         "news_pressure": "mock",
         "pmi": "mock",
         "pmi_consensus": "mock",
@@ -1517,7 +1524,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1566,10 +1573,10 @@
           }
         },
         "rates": {
-          "deterministic": -0.6,
+          "deterministic": 1.0,
           "rag": 0.0,
-          "final": -0.6,
-          "driver": "Negative bond signal led by unemployment surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
+          "final": 1.0,
+          "driver": "Positive bond signal led by inflation surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -1579,13 +1586,19 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
             "citations": []
           },
           "top_positive_drivers": [
+            {
+              "feature": "inflation_surprise_rank",
+              "value": -1.0,
+              "weight": -0.35,
+              "contribution": 0.35
+            },
             {
               "feature": "growth_surprise_rank",
               "value": -0.6,
@@ -1607,12 +1620,6 @@
               "contribution": -0.2
             },
             {
-              "feature": "inflation_surprise_rank",
-              "value": 0.2,
-              "weight": -0.35,
-              "contribution": -0.07
-            },
-            {
               "feature": "policy_surprise_rank",
               "value": 0.2,
               "weight": -0.2,
@@ -1621,9 +1628,9 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.2917,
-            "top_driver_share": 0.4167,
-            "top_driver": "unemployment_surprise",
+            "net_lean": 0.3684,
+            "top_driver_share": 0.4605,
+            "top_driver": "inflation_surprise",
             "narrative": "no_view"
           }
         },
@@ -1643,7 +1650,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -1721,7 +1728,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-08-01T23:59:59Z",
+            "as_of": "2026-08-02T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1771,9 +1778,9 @@
         }
       },
       "composite": {
-        "deterministic": -0.2,
+        "deterministic": 0.2,
         "rag": -0.125,
-        "final": -0.1956
+        "final": 0.2044
       }
     }
   }
