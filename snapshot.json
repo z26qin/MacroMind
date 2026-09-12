@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-09-11",
+  "as_of": "2026-09-12",
   "methodology_version": "v0.2",
   "data_source": "live",
   "universe": [
@@ -50,7 +50,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -118,7 +118,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -182,7 +182,7 @@
             "signal": 0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [
               "resilient"
@@ -216,10 +216,10 @@
               "contribution": 0.2
             },
             {
-              "feature": "news_pressure_rank",
-              "value": -0.2,
-              "weight": -0.15,
-              "contribution": 0.03
+              "feature": "equity_3m_return_rank",
+              "value": 0.2,
+              "weight": 0.25,
+              "contribution": 0.05
             }
           ],
           "top_negative_drivers": [
@@ -228,17 +228,11 @@
               "value": -0.6,
               "weight": 0.25,
               "contribution": -0.15
-            },
-            {
-              "feature": "equity_3m_return_rank",
-              "value": -0.2,
-              "weight": 0.25,
-              "contribution": -0.05
             }
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.4521,
+            "net_lean": 0.589,
             "top_driver_share": 0.411,
             "top_driver": "growth_surprise",
             "narrative": "agrees"
@@ -258,7 +252,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -358,7 +352,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -407,7 +401,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -456,7 +450,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -482,10 +476,17 @@
               "contribution": 0.15
             }
           ],
-          "top_negative_drivers": [],
+          "top_negative_drivers": [
+            {
+              "feature": "equity_3m_return_rank",
+              "value": -0.2,
+              "weight": 0.25,
+              "contribution": -0.05
+            }
+          ],
           "conviction": {
             "band": "high",
-            "net_lean": 1.0,
+            "net_lean": 0.8462,
             "top_driver_share": 0.2769,
             "top_driver": "growth_surprise",
             "narrative": "no_view"
@@ -507,7 +508,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -615,7 +616,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -671,7 +672,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -729,7 +730,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -799,7 +800,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -895,7 +896,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -977,7 +978,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1039,7 +1040,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1054,9 +1055,9 @@
             },
             {
               "feature": "equity_3m_return_rank",
-              "value": 0.6,
+              "value": 1.0,
               "weight": 0.25,
-              "contribution": 0.15
+              "contribution": 0.25
             },
             {
               "feature": "news_pressure_rank",
@@ -1081,8 +1082,8 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.3803,
-            "top_driver_share": 0.3521,
+            "net_lean": 0.4568,
+            "top_driver_share": 0.3086,
             "top_driver": "pmi_surprise",
             "narrative": "no_view"
           }
@@ -1101,7 +1102,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1197,7 +1198,7 @@
             "signal": 0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [
               "investor demand"
@@ -1273,7 +1274,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1329,7 +1330,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1338,9 +1339,9 @@
           "top_positive_drivers": [
             {
               "feature": "equity_3m_return_rank",
-              "value": 1.0,
+              "value": 0.6,
               "weight": 0.25,
-              "contribution": 0.25
+              "contribution": 0.15
             }
           ],
           "top_negative_drivers": [
@@ -1364,9 +1365,9 @@
             }
           ],
           "conviction": {
-            "band": "low",
-            "net_lean": 0.1228,
-            "top_driver_share": 0.4386,
+            "band": "medium",
+            "net_lean": 0.3617,
+            "top_driver_share": 0.3191,
             "top_driver": "equity_3m_return",
             "narrative": "no_view"
           }
@@ -1385,7 +1386,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1485,7 +1486,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1553,7 +1554,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1611,7 +1612,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -1689,7 +1690,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-11T23:59:59Z",
+            "as_of": "2026-09-12T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
