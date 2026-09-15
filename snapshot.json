@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-09-14",
+  "as_of": "2026-09-15",
   "methodology_version": "v0.2",
   "data_source": "live",
   "universe": [
@@ -50,7 +50,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -118,7 +118,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -167,9 +167,9 @@
           }
         },
         "equity": {
-          "deterministic": 0.6,
+          "deterministic": 0.2,
           "rag": 0.5,
-          "final": 0.5825,
+          "final": 0.2525,
           "driver": "Positive equity signal led by growth surprise, combining growth, PMI, momentum, and valuation ranks.",
           "rag_summary": "Bullish 3m narrative from 1 cited evidence item(s).",
           "rag_confidence": 0.7,
@@ -182,7 +182,7 @@
             "signal": 0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [
               "resilient"
@@ -216,10 +216,10 @@
               "contribution": 0.2
             },
             {
-              "feature": "equity_3m_return_rank",
-              "value": 0.2,
-              "weight": 0.25,
-              "contribution": 0.05
+              "feature": "news_pressure_rank",
+              "value": -0.2,
+              "weight": -0.15,
+              "contribution": 0.03
             }
           ],
           "top_negative_drivers": [
@@ -228,11 +228,17 @@
               "value": -0.6,
               "weight": 0.25,
               "contribution": -0.15
+            },
+            {
+              "feature": "equity_3m_return_rank",
+              "value": -0.2,
+              "weight": 0.25,
+              "contribution": -0.05
             }
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.589,
+            "net_lean": 0.4521,
             "top_driver_share": 0.411,
             "top_driver": "growth_surprise",
             "narrative": "agrees"
@@ -252,7 +258,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -308,9 +314,9 @@
         }
       },
       "composite": {
-        "deterministic": 0.4,
+        "deterministic": 0.3,
         "rag": 0.125,
-        "final": 0.3956
+        "final": 0.3131
       }
     },
     "Canada": {
@@ -352,7 +358,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -401,7 +407,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -450,7 +456,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -476,17 +482,10 @@
               "contribution": 0.15
             }
           ],
-          "top_negative_drivers": [
-            {
-              "feature": "equity_3m_return_rank",
-              "value": -0.2,
-              "weight": 0.25,
-              "contribution": -0.05
-            }
-          ],
+          "top_negative_drivers": [],
           "conviction": {
             "band": "high",
-            "net_lean": 0.8462,
+            "net_lean": 1.0,
             "top_driver_share": 0.2769,
             "top_driver": "growth_surprise",
             "narrative": "no_view"
@@ -508,7 +507,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -616,7 +615,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -672,7 +671,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -730,7 +729,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -800,7 +799,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -896,7 +895,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -978,7 +977,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1027,9 +1026,9 @@
           }
         },
         "equity": {
-          "deterministic": 0.2,
+          "deterministic": 0.6,
           "rag": 0.0,
-          "final": 0.2,
+          "final": 0.6,
           "driver": "Positive equity signal led by pmi surprise, combining growth, PMI, momentum, and valuation ranks.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
@@ -1040,7 +1039,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1102,7 +1101,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1152,9 +1151,9 @@
         }
       },
       "composite": {
-        "deterministic": -0.1,
+        "deterministic": 0.0,
         "rag": -0.125,
-        "final": -0.0956
+        "final": 0.0044
       }
     },
     "Brazil": {
@@ -1198,7 +1197,7 @@
             "signal": 0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [
               "investor demand"
@@ -1274,7 +1273,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1330,7 +1329,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1386,7 +1385,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1486,7 +1485,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1554,7 +1553,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1612,7 +1611,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -1690,7 +1689,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-14T23:59:59Z",
+            "as_of": "2026-09-15T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
