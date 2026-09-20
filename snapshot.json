@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-09-19",
+  "as_of": "2026-09-20",
   "methodology_version": "v0.2",
   "data_source": "live",
   "universe": [
@@ -32,8 +32,8 @@
         "policy_rate_consensus": "mock",
         "rate_3m_change": "mock",
         "reit_3m_return": "mock",
-        "unemployment": "world_bank:2025",
-        "unemployment_consensus": "imf_weo:2026"
+        "unemployment": "mock",
+        "unemployment_consensus": "mock"
       },
       "signals": {
         "fx": {
@@ -50,7 +50,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -118,7 +118,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -182,7 +182,7 @@
             "signal": 0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [
               "resilient"
@@ -239,9 +239,9 @@
           }
         },
         "real_estate": {
-          "deterministic": 0.6,
+          "deterministic": 0.2,
           "rag": 0.0,
-          "final": 0.6,
+          "final": 0.2,
           "driver": "Positive real estate signal led by policy surprise, balancing rates, policy, REIT momentum, housing, and labor ranks.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
@@ -252,7 +252,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -308,9 +308,9 @@
         }
       },
       "composite": {
-        "deterministic": 0.4,
+        "deterministic": 0.3,
         "rag": 0.125,
-        "final": 0.3956
+        "final": 0.2956
       }
     },
     "Canada": {
@@ -334,8 +334,8 @@
         "policy_rate_consensus": "mock",
         "rate_3m_change": "mock",
         "reit_3m_return": "mock",
-        "unemployment": "world_bank:2025",
-        "unemployment_consensus": "imf_weo:2026"
+        "unemployment": "mock",
+        "unemployment_consensus": "mock"
       },
       "signals": {
         "fx": {
@@ -352,7 +352,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -382,7 +382,7 @@
           "conviction": {
             "band": "high",
             "net_lean": 1.0,
-            "top_driver_share": 0.3788,
+            "top_driver_share": 0.3906,
             "top_driver": "policy_surprise",
             "narrative": "no_view"
           }
@@ -401,7 +401,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -422,16 +422,16 @@
               "contribution": -0.2
             },
             {
-              "feature": "unemployment_surprise_rank",
-              "value": -1.0,
-              "weight": 0.2,
-              "contribution": -0.2
+              "feature": "growth_surprise_rank",
+              "value": 0.6,
+              "weight": -0.25,
+              "contribution": -0.15
             }
           ],
           "conviction": {
             "band": "high",
             "net_lean": 1.0,
-            "top_driver_share": 0.2442,
+            "top_driver_share": 0.2692,
             "top_driver": "inflation_surprise",
             "narrative": "no_view"
           }
@@ -450,7 +450,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -508,7 +508,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -542,7 +542,7 @@
               "contribution": 0.15
             },
             {
-              "feature": "unemployment_surprise_rank",
+              "feature": "news_pressure_rank",
               "value": -1.0,
               "weight": -0.1,
               "contribution": 0.1
@@ -564,8 +564,8 @@
           ],
           "conviction": {
             "band": "low",
-            "net_lean": 0.0,
-            "top_driver_share": 0.2727,
+            "net_lean": 0.0377,
+            "top_driver_share": 0.283,
             "top_driver": "rate_3m_change",
             "narrative": "agrees"
           }
@@ -598,8 +598,8 @@
         "policy_rate_consensus": "mock",
         "rate_3m_change": "mock",
         "reit_3m_return": "mock",
-        "unemployment": "world_bank:2025",
-        "unemployment_consensus": "imf_weo:2026"
+        "unemployment": "mock",
+        "unemployment_consensus": "mock"
       },
       "signals": {
         "fx": {
@@ -616,7 +616,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -652,16 +652,16 @@
           ],
           "conviction": {
             "band": "high",
-            "net_lean": 0.7073,
-            "top_driver_share": 0.3659,
+            "net_lean": 0.7143,
+            "top_driver_share": 0.3571,
             "top_driver": "growth_surprise",
             "narrative": "no_view"
           }
         },
         "rates": {
-          "deterministic": 0.2,
+          "deterministic": 0.6,
           "rag": 0.0,
-          "final": 0.2,
+          "final": 0.6,
           "driver": "Positive bond signal led by inflation surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
@@ -672,7 +672,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -686,15 +686,15 @@
               "contribution": 0.25
             },
             {
+              "feature": "unemployment_surprise_rank",
+              "value": 1.0,
+              "weight": 0.2,
+              "contribution": 0.2
+            },
+            {
               "feature": "policy_surprise_rank",
               "value": -0.6,
               "weight": -0.2,
-              "contribution": 0.12
-            },
-            {
-              "feature": "unemployment_surprise_rank",
-              "value": 0.6,
-              "weight": 0.2,
               "contribution": 0.12
             }
           ],
@@ -708,8 +708,8 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.2553,
-            "top_driver_share": 0.3723,
+            "net_lean": 0.3137,
+            "top_driver_share": 0.3431,
             "top_driver": "inflation_surprise",
             "narrative": "no_view"
           }
@@ -730,7 +730,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -800,7 +800,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -834,7 +834,7 @@
               "contribution": -0.18
             },
             {
-              "feature": "news_pressure_rank",
+              "feature": "unemployment_surprise_rank",
               "value": 1.0,
               "weight": -0.1,
               "contribution": -0.1
@@ -842,17 +842,17 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.5,
-            "top_driver_share": 0.2778,
+            "net_lean": 0.5263,
+            "top_driver_share": 0.2632,
             "top_driver": "reit_3m_return",
             "narrative": "no_view"
           }
         }
       },
       "composite": {
-        "deterministic": -0.7,
+        "deterministic": -0.6,
         "rag": -0.125,
-        "final": -0.6781
+        "final": -0.5781
       }
     },
     "Japan": {
@@ -876,8 +876,8 @@
         "policy_rate_consensus": "mock",
         "rate_3m_change": "mock",
         "reit_3m_return": "mock",
-        "unemployment": "world_bank:2025",
-        "unemployment_consensus": "imf_weo:2026"
+        "unemployment": "mock",
+        "unemployment_consensus": "mock"
       },
       "signals": {
         "fx": {
@@ -896,7 +896,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -965,9 +965,9 @@
           }
         },
         "rates": {
-          "deterministic": 0.6,
+          "deterministic": 0.2,
           "rag": 0.0,
-          "final": 0.6,
+          "final": 0.2,
           "driver": "Positive bond signal led by inflation surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
@@ -978,7 +978,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1040,7 +1040,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1102,7 +1102,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1152,9 +1152,9 @@
         }
       },
       "composite": {
-        "deterministic": -0.1,
+        "deterministic": -0.2,
         "rag": -0.125,
-        "final": -0.0956
+        "final": -0.1956
       }
     },
     "Brazil": {
@@ -1178,8 +1178,8 @@
         "policy_rate_consensus": "mock",
         "rate_3m_change": "mock",
         "reit_3m_return": "mock",
-        "unemployment": "world_bank:2025",
-        "unemployment_consensus": "imf_weo:2026"
+        "unemployment": "mock",
+        "unemployment_consensus": "mock"
       },
       "signals": {
         "fx": {
@@ -1198,7 +1198,7 @@
             "signal": 0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [
               "investor demand"
@@ -1254,8 +1254,8 @@
           ],
           "conviction": {
             "band": "low",
-            "net_lean": -0.0278,
-            "top_driver_share": 0.2778,
+            "net_lean": 0.0,
+            "top_driver_share": 0.2857,
             "top_driver": "fx_carry",
             "narrative": "agrees"
           }
@@ -1274,7 +1274,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1289,9 +1289,9 @@
             },
             {
               "feature": "unemployment_surprise_rank",
-              "value": 1.0,
+              "value": 0.6,
               "weight": 0.2,
-              "contribution": 0.2
+              "contribution": 0.12
             },
             {
               "feature": "news_pressure_rank",
@@ -1310,8 +1310,8 @@
           ],
           "conviction": {
             "band": "high",
-            "net_lean": 0.6923,
-            "top_driver_share": 0.4487,
+            "net_lean": 0.6571,
+            "top_driver_share": 0.5,
             "top_driver": "inflation_surprise",
             "narrative": "no_view"
           }
@@ -1330,7 +1330,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1386,7 +1386,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1421,9 +1421,9 @@
             },
             {
               "feature": "unemployment_surprise_rank",
-              "value": 1.0,
+              "value": 0.6,
               "weight": -0.1,
-              "contribution": -0.1
+              "contribution": -0.06
             },
             {
               "feature": "news_pressure_rank",
@@ -1434,8 +1434,8 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.2439,
-            "top_driver_share": 0.3659,
+            "net_lean": 0.3077,
+            "top_driver_share": 0.3846,
             "top_driver": "rate_3m_change",
             "narrative": "no_view"
           }
@@ -1468,8 +1468,8 @@
         "policy_rate_consensus": "mock",
         "rate_3m_change": "mock",
         "reit_3m_return": "mock",
-        "unemployment": "world_bank:2025",
-        "unemployment_consensus": "imf_weo:2026"
+        "unemployment": "mock",
+        "unemployment_consensus": "mock"
       },
       "signals": {
         "fx": {
@@ -1486,7 +1486,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1507,9 +1507,9 @@
             },
             {
               "feature": "unemployment_surprise_rank",
-              "value": -0.6,
+              "value": -1.0,
               "weight": -0.05,
-              "contribution": 0.03
+              "contribution": 0.05
             }
           ],
           "top_negative_drivers": [
@@ -1534,8 +1534,8 @@
           ],
           "conviction": {
             "band": "low",
-            "net_lean": 0.125,
-            "top_driver_share": 0.375,
+            "net_lean": 0.0588,
+            "top_driver_share": 0.3529,
             "top_driver": "fx_3m_return",
             "narrative": "no_view"
           }
@@ -1554,7 +1554,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1571,9 +1571,9 @@
           "top_negative_drivers": [
             {
               "feature": "unemployment_surprise_rank",
-              "value": -0.6,
+              "value": -1.0,
               "weight": 0.2,
-              "contribution": -0.12
+              "contribution": -0.2
             },
             {
               "feature": "inflation_surprise_rank",
@@ -1589,9 +1589,9 @@
             }
           ],
           "conviction": {
-            "band": "high",
-            "net_lean": 0.8667,
-            "top_driver_share": 0.4,
+            "band": "medium",
+            "net_lean": 0.8947,
+            "top_driver_share": 0.5263,
             "top_driver": "unemployment_surprise",
             "narrative": "no_view"
           }
@@ -1612,7 +1612,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -1677,9 +1677,9 @@
           }
         },
         "real_estate": {
-          "deterministic": 0.2,
+          "deterministic": 0.6,
           "rag": 0.0,
-          "final": 0.2,
+          "final": 0.6,
           "driver": "Positive real estate signal led by rate 3m change, balancing rates, policy, REIT momentum, housing, and labor ranks.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
@@ -1690,7 +1690,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-09-19T23:59:59Z",
+            "as_of": "2026-09-20T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1705,9 +1705,9 @@
             },
             {
               "feature": "unemployment_surprise_rank",
-              "value": -0.6,
+              "value": -1.0,
               "weight": -0.1,
-              "contribution": 0.06
+              "contribution": 0.1
             }
           ],
           "top_negative_drivers": [
@@ -1732,17 +1732,17 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.2632,
-            "top_driver_share": 0.4737,
+            "net_lean": 0.3333,
+            "top_driver_share": 0.4286,
             "top_driver": "rate_3m_change",
             "narrative": "no_view"
           }
         }
       },
       "composite": {
-        "deterministic": -0.3,
+        "deterministic": -0.2,
         "rag": -0.125,
-        "final": -0.2956
+        "final": -0.1956
       }
     }
   }
