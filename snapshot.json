@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-10-28",
+  "as_of": "2026-10-29",
   "methodology_version": "v0.2",
   "data_source": "live",
   "universe": [
@@ -37,9 +37,9 @@
       },
       "signals": {
         "fx": {
-          "deterministic": 0.6,
+          "deterministic": 1.0,
           "rag": 0.0,
-          "final": 0.6,
+          "final": 1.0,
           "driver": "Positive FX signal led by growth surprise and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
@@ -50,7 +50,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -106,7 +106,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -170,7 +170,7 @@
             "signal": 0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [
               "resilient"
@@ -240,7 +240,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -290,9 +290,9 @@
         }
       },
       "composite": {
-        "deterministic": 0.5,
+        "deterministic": 0.6,
         "rag": 0.125,
-        "final": 0.4781
+        "final": 0.5781
       }
     },
     "Canada": {
@@ -334,7 +334,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -396,7 +396,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -452,7 +452,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -510,7 +510,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -618,7 +618,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -674,7 +674,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -732,7 +732,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -802,7 +802,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -898,7 +898,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -974,7 +974,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1030,7 +1030,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1092,7 +1092,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1179,9 +1179,9 @@
       },
       "signals": {
         "fx": {
-          "deterministic": 1.0,
+          "deterministic": 0.6,
           "rag": 0.5,
-          "final": 0.9125,
+          "final": 0.5825,
           "driver": "Positive FX signal led by fx carry and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "Bullish 3m narrative from 1 cited evidence item(s).",
           "rag_confidence": 0.7,
@@ -1194,7 +1194,7 @@
             "signal": 0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [
               "investor demand"
@@ -1237,9 +1237,9 @@
           "top_negative_drivers": [
             {
               "feature": "fx_3m_return_rank",
-              "value": -0.6,
+              "value": -1.0,
               "weight": 0.2,
-              "contribution": -0.12
+              "contribution": -0.2
             },
             {
               "feature": "news_pressure_rank",
@@ -1256,8 +1256,8 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.4324,
-            "top_driver_share": 0.2703,
+            "net_lean": 0.2927,
+            "top_driver_share": 0.2439,
             "top_driver": "fx_carry",
             "narrative": "agrees"
           }
@@ -1276,7 +1276,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1338,7 +1338,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1394,7 +1394,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1450,9 +1450,9 @@
         }
       },
       "composite": {
-        "deterministic": 0.5,
+        "deterministic": 0.4,
         "rag": 0.125,
-        "final": 0.4781
+        "final": 0.3956
       }
     },
     "Euro Area": {
@@ -1494,7 +1494,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1523,9 +1523,9 @@
           "top_negative_drivers": [
             {
               "feature": "fx_3m_return_rank",
-              "value": -1.0,
+              "value": -0.6,
               "weight": 0.2,
-              "contribution": -0.2
+              "contribution": -0.12
             },
             {
               "feature": "fx_carry_rank",
@@ -1542,8 +1542,8 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.3684,
-            "top_driver_share": 0.5263,
+            "net_lean": 0.2,
+            "top_driver_share": 0.4,
             "top_driver": "fx_3m_return",
             "narrative": "no_view"
           }
@@ -1562,7 +1562,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1620,7 +1620,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -1698,7 +1698,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-10-28T23:59:59Z",
+            "as_of": "2026-10-29T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
