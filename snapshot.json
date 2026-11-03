@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-11-02",
+  "as_of": "2026-11-03",
   "methodology_version": "v0.2",
   "data_source": "live",
   "universe": [
@@ -50,7 +50,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -106,7 +106,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -170,7 +170,7 @@
             "signal": 0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [
               "resilient"
@@ -198,16 +198,16 @@
               "contribution": 0.3
             },
             {
+              "feature": "equity_3m_return_rank",
+              "value": 1.0,
+              "weight": 0.25,
+              "contribution": 0.25
+            },
+            {
               "feature": "equity_forward_pe_rank",
               "value": -1.0,
               "weight": -0.2,
               "contribution": 0.2
-            },
-            {
-              "feature": "equity_3m_return_rank",
-              "value": 0.6,
-              "weight": 0.25,
-              "contribution": 0.15
             }
           ],
           "top_negative_drivers": [
@@ -220,8 +220,8 @@
           ],
           "conviction": {
             "band": "high",
-            "net_lean": 0.6386,
-            "top_driver_share": 0.3614,
+            "net_lean": 0.6774,
+            "top_driver_share": 0.3226,
             "top_driver": "growth_surprise",
             "narrative": "agrees"
           }
@@ -240,7 +240,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -334,7 +334,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -396,7 +396,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -452,7 +452,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -460,13 +460,13 @@
           },
           "top_positive_drivers": [
             {
-              "feature": "equity_3m_return_rank",
-              "value": 1.0,
+              "feature": "pmi_surprise_rank",
+              "value": 0.6,
               "weight": 0.25,
-              "contribution": 0.25
+              "contribution": 0.15
             },
             {
-              "feature": "pmi_surprise_rank",
+              "feature": "equity_3m_return_rank",
               "value": 0.6,
               "weight": 0.25,
               "contribution": 0.15
@@ -488,8 +488,8 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.3814,
-            "top_driver_share": 0.3093,
+            "net_lean": 0.3103,
+            "top_driver_share": 0.3448,
             "top_driver": "growth_surprise",
             "narrative": "no_view"
           }
@@ -510,7 +510,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -618,7 +618,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -674,7 +674,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -732,7 +732,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -802,7 +802,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -898,7 +898,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -974,7 +974,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1030,7 +1030,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1092,7 +1092,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1194,7 +1194,7 @@
             "signal": 0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [
               "investor demand"
@@ -1276,7 +1276,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1338,7 +1338,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1394,7 +1394,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1494,7 +1494,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1562,7 +1562,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1620,7 +1620,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -1698,7 +1698,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-02T23:59:59Z",
+            "as_of": "2026-11-03T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
