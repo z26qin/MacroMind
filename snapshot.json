@@ -1,5 +1,5 @@
 {
-  "as_of": "2026-11-10",
+  "as_of": "2026-11-11",
   "methodology_version": "v0.2",
   "data_source": "live",
   "universe": [
@@ -20,8 +20,8 @@
         "equity_forward_pe": "mock",
         "fx_3m_return": "yahoo:2026-11",
         "fx_carry": "derived:policy_rate_diff",
-        "gdp_consensus": "imf_weo:2026",
-        "gdp_growth": "world_bank:2025",
+        "gdp_consensus": "mock",
+        "gdp_growth": "mock",
         "house_price_yoy": "mock",
         "inflation_consensus": "imf_weo:2025",
         "inflation_yoy": "world_bank:2024",
@@ -37,10 +37,10 @@
       },
       "signals": {
         "fx": {
-          "deterministic": 1.0,
+          "deterministic": 0.2,
           "rag": 0.0,
-          "final": 1.0,
-          "driver": "Positive FX signal led by growth surprise and cross-sectional currency momentum/carry inputs.",
+          "final": 0.2,
+          "driver": "Positive FX signal led by policy surprise and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -50,7 +50,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -59,9 +59,9 @@
           "top_positive_drivers": [
             {
               "feature": "growth_surprise_rank",
-              "value": 1.0,
+              "value": 0.6,
               "weight": 0.3,
-              "contribution": 0.3
+              "contribution": 0.18
             },
             {
               "feature": "fx_carry_rank",
@@ -86,17 +86,17 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.4048,
-            "top_driver_share": 0.3571,
-            "top_driver": "growth_surprise",
+            "net_lean": 0.3056,
+            "top_driver_share": 0.3472,
+            "top_driver": "policy_surprise",
             "narrative": "no_view"
           }
         },
         "rates": {
-          "deterministic": -0.2,
+          "deterministic": -0.6,
           "rag": 0.0,
-          "final": -0.2,
-          "driver": "Negative bond signal led by growth surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
+          "final": -0.6,
+          "driver": "Negative bond signal led by policy surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -106,7 +106,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -129,9 +129,9 @@
           "top_negative_drivers": [
             {
               "feature": "growth_surprise_rank",
-              "value": 1.0,
+              "value": 0.6,
               "weight": -0.25,
-              "contribution": -0.25
+              "contribution": -0.15
             },
             {
               "feature": "unemployment_surprise_rank",
@@ -148,17 +148,17 @@
           ],
           "conviction": {
             "band": "low",
-            "net_lean": 0.1818,
-            "top_driver_share": 0.3788,
-            "top_driver": "growth_surprise",
+            "net_lean": 0.0357,
+            "top_driver_share": 0.3571,
+            "top_driver": "policy_surprise",
             "narrative": "no_view"
           }
         },
         "equity": {
-          "deterministic": 1.0,
+          "deterministic": 0.6,
           "rag": 0.5,
-          "final": 0.9125,
-          "driver": "Positive equity signal led by growth surprise, combining growth, PMI, momentum, and valuation ranks.",
+          "final": 0.5825,
+          "driver": "Positive equity signal led by equity forward pe, combining growth, PMI, momentum, and valuation ranks.",
           "rag_summary": "Bullish 3m narrative from 1 cited evidence item(s).",
           "rag_confidence": 0.7,
           "rag_effective_weight": 0.175,
@@ -170,7 +170,7 @@
             "signal": 0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [
               "resilient"
@@ -192,16 +192,16 @@
           },
           "top_positive_drivers": [
             {
-              "feature": "growth_surprise_rank",
-              "value": 1.0,
-              "weight": 0.3,
-              "contribution": 0.3
-            },
-            {
               "feature": "equity_forward_pe_rank",
               "value": -1.0,
               "weight": -0.2,
               "contribution": 0.2
+            },
+            {
+              "feature": "growth_surprise_rank",
+              "value": 0.6,
+              "weight": 0.3,
+              "contribution": 0.18
             },
             {
               "feature": "equity_3m_return_rank",
@@ -220,9 +220,9 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.589,
-            "top_driver_share": 0.411,
-            "top_driver": "growth_surprise",
+            "net_lean": 0.5082,
+            "top_driver_share": 0.3279,
+            "top_driver": "equity_forward_pe",
             "narrative": "agrees"
           }
         },
@@ -240,7 +240,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -290,9 +290,9 @@
         }
       },
       "composite": {
-        "deterministic": 0.6,
+        "deterministic": 0.2,
         "rag": 0.125,
-        "final": 0.5781
+        "final": 0.1956
       }
     },
     "Canada": {
@@ -304,8 +304,8 @@
         "equity_forward_pe": "mock",
         "fx_3m_return": "yahoo:2026-11",
         "fx_carry": "derived:policy_rate_diff",
-        "gdp_consensus": "imf_weo:2026",
-        "gdp_growth": "world_bank:2025",
+        "gdp_consensus": "mock",
+        "gdp_growth": "mock",
         "house_price_yoy": "mock",
         "inflation_consensus": "imf_weo:2026",
         "inflation_yoy": "world_bank:2025",
@@ -321,10 +321,10 @@
       },
       "signals": {
         "fx": {
-          "deterministic": 0.2,
+          "deterministic": 1.0,
           "rag": 0.0,
-          "final": 0.2,
-          "driver": "Positive FX signal led by growth surprise and cross-sectional currency momentum/carry inputs.",
+          "final": 1.0,
+          "driver": "Positive FX signal led by policy surprise and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -334,7 +334,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -354,25 +354,18 @@
               "contribution": 0.1
             },
             {
-              "feature": "unemployment_surprise_rank",
-              "value": -1.0,
-              "weight": -0.05,
-              "contribution": 0.05
-            }
-          ],
-          "top_negative_drivers": [
-            {
               "feature": "growth_surprise_rank",
-              "value": -1.0,
+              "value": 0.2,
               "weight": 0.3,
-              "contribution": -0.3
+              "contribution": 0.06
             }
           ],
+          "top_negative_drivers": [],
           "conviction": {
-            "band": "medium",
-            "net_lean": 0.2308,
-            "top_driver_share": 0.3846,
-            "top_driver": "growth_surprise",
+            "band": "high",
+            "net_lean": 1.0,
+            "top_driver_share": 0.463,
+            "top_driver": "policy_surprise",
             "narrative": "no_view"
           }
         },
@@ -380,7 +373,7 @@
           "deterministic": -1.0,
           "rag": 0.0,
           "final": -1.0,
-          "driver": "Negative bond signal led by growth surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
+          "driver": "Negative bond signal led by inflation surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -390,20 +383,13 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
             "citations": []
           },
-          "top_positive_drivers": [
-            {
-              "feature": "growth_surprise_rank",
-              "value": -1.0,
-              "weight": -0.25,
-              "contribution": 0.25
-            }
-          ],
+          "top_positive_drivers": [],
           "top_negative_drivers": [
             {
               "feature": "inflation_surprise_rank",
@@ -425,18 +411,18 @@
             }
           ],
           "conviction": {
-            "band": "medium",
-            "net_lean": 0.4792,
-            "top_driver_share": 0.2604,
-            "top_driver": "growth_surprise",
+            "band": "high",
+            "net_lean": 1.0,
+            "top_driver_share": 0.2763,
+            "top_driver": "inflation_surprise",
             "narrative": "no_view"
           }
         },
         "equity": {
-          "deterministic": 0.6,
+          "deterministic": 1.0,
           "rag": 0.0,
-          "final": 0.6,
-          "driver": "Positive equity signal led by growth surprise, combining growth, PMI, momentum, and valuation ranks.",
+          "final": 1.0,
+          "driver": "Positive equity signal led by equity 3m return, combining growth, PMI, momentum, and valuation ranks.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -446,7 +432,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -472,19 +458,12 @@
               "contribution": 0.15
             }
           ],
-          "top_negative_drivers": [
-            {
-              "feature": "growth_surprise_rank",
-              "value": -1.0,
-              "weight": 0.3,
-              "contribution": -0.3
-            }
-          ],
+          "top_negative_drivers": [],
           "conviction": {
-            "band": "medium",
-            "net_lean": 0.3814,
-            "top_driver_share": 0.3093,
-            "top_driver": "growth_surprise",
+            "band": "high",
+            "net_lean": 1.0,
+            "top_driver_share": 0.3425,
+            "top_driver": "equity_3m_return",
             "narrative": "no_view"
           }
         },
@@ -504,7 +483,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -568,9 +547,9 @@
         }
       },
       "composite": {
-        "deterministic": -0.1,
+        "deterministic": 0.2,
         "rag": -0.125,
-        "final": -0.1131
+        "final": 0.1869
       }
     },
     "China": {
@@ -582,8 +561,8 @@
         "equity_forward_pe": "mock",
         "fx_3m_return": "yahoo:2026-11",
         "fx_carry": "derived:policy_rate_diff",
-        "gdp_consensus": "imf_weo:2026",
-        "gdp_growth": "world_bank:2025",
+        "gdp_consensus": "mock",
+        "gdp_growth": "mock",
         "house_price_yoy": "mock",
         "inflation_consensus": "imf_weo:2026",
         "inflation_yoy": "world_bank:2025",
@@ -599,9 +578,9 @@
       },
       "signals": {
         "fx": {
-          "deterministic": -0.6,
+          "deterministic": -0.2,
           "rag": 0.0,
-          "final": -0.6,
+          "final": -0.2,
           "driver": "Negative FX signal led by fx 3m return and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
@@ -612,7 +591,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -668,7 +647,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -726,7 +705,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -796,7 +775,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -846,9 +825,9 @@
         }
       },
       "composite": {
-        "deterministic": -0.5,
+        "deterministic": -0.4,
         "rag": -0.125,
-        "final": -0.4781
+        "final": -0.3781
       }
     },
     "Japan": {
@@ -860,8 +839,8 @@
         "equity_forward_pe": "mock",
         "fx_3m_return": "yahoo:2026-11",
         "fx_carry": "derived:policy_rate_diff",
-        "gdp_consensus": "imf_weo:2026",
-        "gdp_growth": "world_bank:2025",
+        "gdp_consensus": "mock",
+        "gdp_growth": "mock",
         "house_price_yoy": "mock",
         "inflation_consensus": "imf_weo:2026",
         "inflation_yoy": "world_bank:2025",
@@ -880,7 +859,7 @@
           "deterministic": -1.0,
           "rag": -0.5,
           "final": -0.9125,
-          "driver": "Negative FX signal led by fx carry and cross-sectional currency momentum/carry inputs.",
+          "driver": "Negative FX signal led by growth surprise and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "Bearish 3m narrative from 1 cited evidence item(s).",
           "rag_confidence": 0.7,
           "rag_effective_weight": 0.175,
@@ -892,7 +871,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -922,16 +901,16 @@
           ],
           "top_negative_drivers": [
             {
+              "feature": "growth_surprise_rank",
+              "value": -1.0,
+              "weight": 0.3,
+              "contribution": -0.3
+            },
+            {
               "feature": "fx_carry_rank",
               "value": -1.0,
               "weight": 0.2,
               "contribution": -0.2
-            },
-            {
-              "feature": "growth_surprise_rank",
-              "value": -0.6,
-              "weight": 0.3,
-              "contribution": -0.18
             },
             {
               "feature": "policy_surprise_rank",
@@ -942,9 +921,9 @@
           ],
           "conviction": {
             "band": "high",
-            "net_lean": 0.7778,
-            "top_driver_share": 0.3704,
-            "top_driver": "fx_carry",
+            "net_lean": 0.8182,
+            "top_driver_share": 0.4545,
+            "top_driver": "growth_surprise",
             "narrative": "agrees"
           }
         },
@@ -962,7 +941,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -977,9 +956,9 @@
             },
             {
               "feature": "growth_surprise_rank",
-              "value": -0.6,
+              "value": -1.0,
               "weight": -0.25,
-              "contribution": 0.15
+              "contribution": 0.25
             },
             {
               "feature": "policy_surprise_rank",
@@ -997,18 +976,18 @@
             }
           ],
           "conviction": {
-            "band": "medium",
-            "net_lean": 0.8125,
-            "top_driver_share": 0.5469,
+            "band": "high",
+            "net_lean": 0.8378,
+            "top_driver_share": 0.473,
             "top_driver": "inflation_surprise",
             "narrative": "no_view"
           }
         },
         "equity": {
-          "deterministic": -0.2,
+          "deterministic": 0.2,
           "rag": 0.0,
-          "final": -0.2,
-          "driver": "Negative equity signal led by pmi surprise, combining growth, PMI, momentum, and valuation ranks.",
+          "final": 0.2,
+          "driver": "Positive equity signal led by growth surprise, combining growth, PMI, momentum, and valuation ranks.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -1018,7 +997,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1041,9 +1020,9 @@
           "top_negative_drivers": [
             {
               "feature": "growth_surprise_rank",
-              "value": -0.6,
+              "value": -1.0,
               "weight": 0.3,
-              "contribution": -0.18
+              "contribution": -0.3
             },
             {
               "feature": "equity_3m_return_rank",
@@ -1060,9 +1039,9 @@
           ],
           "conviction": {
             "band": "low",
-            "net_lean": 0.0423,
-            "top_driver_share": 0.3521,
-            "top_driver": "pmi_surprise",
+            "net_lean": -0.1807,
+            "top_driver_share": 0.3614,
+            "top_driver": "growth_surprise",
             "narrative": "no_view"
           }
         },
@@ -1080,7 +1059,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1136,9 +1115,9 @@
         }
       },
       "composite": {
-        "deterministic": -0.2,
+        "deterministic": -0.1,
         "rag": -0.125,
-        "final": -0.1781
+        "final": -0.0781
       }
     },
     "Brazil": {
@@ -1150,8 +1129,8 @@
         "equity_forward_pe": "mock",
         "fx_3m_return": "yahoo:2026-11",
         "fx_carry": "derived:policy_rate_diff",
-        "gdp_consensus": "imf_weo:2026",
-        "gdp_growth": "world_bank:2025",
+        "gdp_consensus": "mock",
+        "gdp_growth": "mock",
         "house_price_yoy": "mock",
         "inflation_consensus": "imf_weo:2026",
         "inflation_yoy": "world_bank:2025",
@@ -1170,7 +1149,7 @@
           "deterministic": 0.6,
           "rag": 0.5,
           "final": 0.5825,
-          "driver": "Positive FX signal led by fx carry and cross-sectional currency momentum/carry inputs.",
+          "driver": "Positive FX signal led by growth surprise and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "Bullish 3m narrative from 1 cited evidence item(s).",
           "rag_confidence": 0.7,
           "rag_effective_weight": 0.175,
@@ -1182,7 +1161,7 @@
             "signal": 0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [
               "investor demand"
@@ -1204,16 +1183,16 @@
           },
           "top_positive_drivers": [
             {
+              "feature": "growth_surprise_rank",
+              "value": 1.0,
+              "weight": 0.3,
+              "contribution": 0.3
+            },
+            {
               "feature": "fx_carry_rank",
               "value": 1.0,
               "weight": 0.2,
               "contribution": 0.2
-            },
-            {
-              "feature": "growth_surprise_rank",
-              "value": 0.6,
-              "weight": 0.3,
-              "contribution": 0.18
             },
             {
               "feature": "policy_surprise_rank",
@@ -1244,17 +1223,17 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.2927,
-            "top_driver_share": 0.2439,
-            "top_driver": "fx_carry",
+            "net_lean": 0.383,
+            "top_driver_share": 0.3191,
+            "top_driver": "growth_surprise",
             "narrative": "agrees"
           }
         },
         "rates": {
-          "deterministic": 0.2,
+          "deterministic": -0.2,
           "rag": 0.0,
-          "final": 0.2,
-          "driver": "Positive bond signal led by inflation surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
+          "final": -0.2,
+          "driver": "Negative bond signal led by growth surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -1264,7 +1243,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1293,9 +1272,9 @@
           "top_negative_drivers": [
             {
               "feature": "growth_surprise_rank",
-              "value": 0.6,
+              "value": 1.0,
               "weight": -0.25,
-              "contribution": -0.15
+              "contribution": -0.25
             },
             {
               "feature": "policy_surprise_rank",
@@ -1306,17 +1285,17 @@
           ],
           "conviction": {
             "band": "low",
-            "net_lean": 0.1818,
-            "top_driver_share": 0.3182,
-            "top_driver": "inflation_surprise",
+            "net_lean": -0.0263,
+            "top_driver_share": 0.3289,
+            "top_driver": "growth_surprise",
             "narrative": "no_view"
           }
         },
         "equity": {
-          "deterministic": -0.6,
+          "deterministic": -0.2,
           "rag": 0.0,
-          "final": -0.6,
-          "driver": "Negative equity signal led by equity 3m return, combining growth, PMI, momentum, and valuation ranks.",
+          "final": -0.2,
+          "driver": "Negative equity signal led by growth surprise, combining growth, PMI, momentum, and valuation ranks.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -1326,7 +1305,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1335,9 +1314,9 @@
           "top_positive_drivers": [
             {
               "feature": "growth_surprise_rank",
-              "value": 0.6,
+              "value": 1.0,
               "weight": 0.3,
-              "contribution": 0.18
+              "contribution": 0.3
             }
           ],
           "top_negative_drivers": [
@@ -1362,9 +1341,9 @@
           ],
           "conviction": {
             "band": "medium",
-            "net_lean": 0.4783,
-            "top_driver_share": 0.3623,
-            "top_driver": "equity_3m_return",
+            "net_lean": 0.2593,
+            "top_driver_share": 0.3704,
+            "top_driver": "growth_surprise",
             "narrative": "no_view"
           }
         },
@@ -1382,7 +1361,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1452,8 +1431,8 @@
         "equity_forward_pe": "mock",
         "fx_3m_return": "yahoo:2026-11",
         "fx_carry": "derived:policy_rate_diff",
-        "gdp_consensus": "imf_weo:2026",
-        "gdp_growth": "world_bank:2025",
+        "gdp_consensus": "mock",
+        "gdp_growth": "mock",
         "house_price_yoy": "mock",
         "inflation_consensus": "imf_weo:2026",
         "inflation_yoy": "world_bank:2025",
@@ -1469,10 +1448,10 @@
       },
       "signals": {
         "fx": {
-          "deterministic": -0.2,
+          "deterministic": -0.6,
           "rag": 0.0,
-          "final": -0.2,
-          "driver": "Negative FX signal led by fx 3m return and cross-sectional currency momentum/carry inputs.",
+          "final": -0.6,
+          "driver": "Negative FX signal led by growth surprise and cross-sectional currency momentum/carry inputs.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -1482,19 +1461,13 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
             "citations": []
           },
           "top_positive_drivers": [
-            {
-              "feature": "growth_surprise_rank",
-              "value": 0.2,
-              "weight": 0.3,
-              "contribution": 0.06
-            },
             {
               "feature": "policy_surprise_rank",
               "value": 0.2,
@@ -1510,6 +1483,12 @@
           ],
           "top_negative_drivers": [
             {
+              "feature": "growth_surprise_rank",
+              "value": -0.6,
+              "weight": 0.3,
+              "contribution": -0.18
+            },
+            {
               "feature": "fx_3m_return_rank",
               "value": -0.6,
               "weight": 0.2,
@@ -1520,27 +1499,21 @@
               "value": -0.2,
               "weight": 0.2,
               "contribution": -0.04
-            },
-            {
-              "feature": "news_pressure_rank",
-              "value": 0.2,
-              "weight": -0.1,
-              "contribution": -0.02
             }
           ],
           "conviction": {
-            "band": "medium",
-            "net_lean": 0.2,
-            "top_driver_share": 0.4,
-            "top_driver": "fx_3m_return",
+            "band": "high",
+            "net_lean": 0.7143,
+            "top_driver_share": 0.4286,
+            "top_driver": "growth_surprise",
             "narrative": "no_view"
           }
         },
         "rates": {
-          "deterministic": -0.6,
+          "deterministic": 0.2,
           "rag": 0.0,
-          "final": -0.6,
-          "driver": "Balanced rates inputs leave Euro Area near the middle of the six-economy cross-section.",
+          "final": 0.2,
+          "driver": "Positive bond signal led by growth surprise, with inflation, growth, policy, and labor surprises ranked across economies.",
           "rag_summary": "No point-in-time evidence is available for this country, asset, and horizon.",
           "rag_confidence": 0.0,
           "rag_effective_weight": 0.0,
@@ -1550,13 +1523,19 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
             "citations": []
           },
           "top_positive_drivers": [
+            {
+              "feature": "growth_surprise_rank",
+              "value": -0.6,
+              "weight": -0.25,
+              "contribution": 0.15
+            },
             {
               "feature": "news_pressure_rank",
               "value": 0.2,
@@ -1572,31 +1551,31 @@
               "contribution": -0.07
             },
             {
-              "feature": "growth_surprise_rank",
-              "value": 0.2,
-              "weight": -0.25,
-              "contribution": -0.05
-            },
-            {
               "feature": "policy_surprise_rank",
               "value": 0.2,
               "weight": -0.2,
               "contribution": -0.04
+            },
+            {
+              "feature": "unemployment_surprise_rank",
+              "value": -0.2,
+              "weight": 0.2,
+              "contribution": -0.04
             }
           ],
           "conviction": {
-            "band": "high",
-            "net_lean": 0.8182,
-            "top_driver_share": 0.3182,
-            "top_driver": "inflation_surprise",
+            "band": "low",
+            "net_lean": 0.0625,
+            "top_driver_share": 0.4688,
+            "top_driver": "growth_surprise",
             "narrative": "no_view"
           }
         },
         "equity": {
-          "deterministic": 0.2,
+          "deterministic": -0.6,
           "rag": -0.5,
-          "final": 0.0775,
-          "driver": "Positive equity signal led by pmi surprise, combining growth, PMI, momentum, and valuation ranks.",
+          "final": -0.5825,
+          "driver": "Negative equity signal led by pmi surprise, combining growth, PMI, momentum, and valuation ranks.",
           "rag_summary": "Bearish 3m narrative from 1 cited evidence item(s).",
           "rag_confidence": 0.7,
           "rag_effective_weight": 0.175,
@@ -1608,7 +1587,7 @@
             "signal": -0.5,
             "confidence": 0.7,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 1,
             "positive_factors": [],
             "negative_factors": [
@@ -1638,12 +1617,6 @@
               "contribution": 0.15
             },
             {
-              "feature": "growth_surprise_rank",
-              "value": 0.2,
-              "weight": 0.3,
-              "contribution": 0.06
-            },
-            {
               "feature": "equity_forward_pe_rank",
               "value": -0.2,
               "weight": -0.2,
@@ -1658,6 +1631,12 @@
               "contribution": -0.25
             },
             {
+              "feature": "growth_surprise_rank",
+              "value": -0.6,
+              "weight": 0.3,
+              "contribution": -0.18
+            },
+            {
               "feature": "news_pressure_rank",
               "value": 0.2,
               "weight": -0.15,
@@ -1665,11 +1644,11 @@
             }
           ],
           "conviction": {
-            "band": "na",
-            "net_lean": 0.0,
-            "top_driver_share": 0.0,
-            "top_driver": null,
-            "narrative": "disagrees"
+            "band": "medium",
+            "net_lean": 0.4154,
+            "top_driver_share": 0.3846,
+            "top_driver": "pmi_surprise",
+            "narrative": "agrees"
           }
         },
         "real_estate": {
@@ -1686,7 +1665,7 @@
             "signal": 0.0,
             "confidence": 0.0,
             "horizon": "3m",
-            "as_of": "2026-11-10T23:59:59Z",
+            "as_of": "2026-11-11T23:59:59Z",
             "evidence_count": 0,
             "positive_factors": [],
             "negative_factors": [],
@@ -1736,9 +1715,9 @@
         }
       },
       "composite": {
-        "deterministic": -0.1,
+        "deterministic": -0.2,
         "rag": -0.125,
-        "final": -0.1306
+        "final": -0.1956
       }
     }
   }
